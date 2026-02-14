@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bench"
+version = "0.1.0"
+description = "Research benchmarking scaffold for KalmanNet-family models (Step 0–)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+dependencies = [
+  # Bench-common deps (MVP)
+  "numpy>=1.23",
+  "scipy>=1.9",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+  "pyyaml>=6.0",
+  "tqdm>=4.66",
+  "torch>=2.5.1",
+]
+
+# NOTE:
+# - Model/repo-specific deps should be added later as optional extras
+#   after third_party repos are actually attached (Step 4+).
+# - Torch is intentionally kept minimal here because CUDA wheels vary by environment.
+#   Install torch separately (see README), or pin it via requirements.lock.
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.5",
+  "pytest>=7.4",
+]
+
+# placeholders for later separation (Step 4+)
+kalmannet_tsp = []
+adaptive_knet = []
+maml_knet = []
+split_knet = []
+my_model = []
+
+[tool.setuptools]
+packages = ["bench"]
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
+torchaudio = { index = "pytorch-cu121" }

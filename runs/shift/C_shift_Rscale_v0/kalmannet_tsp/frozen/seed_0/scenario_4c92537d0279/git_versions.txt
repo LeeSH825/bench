@@ -1,0 +1,5 @@
+bench: (no git or not a repo)
+
+[submodules]
+acff2a65f6627139f53331ac4c5ce6741fae4c90 third_party/Adaptive-KNet-ICASSP24 (heads/main)
+ 828a2cf529bc84f43b37d543d916fe5858054457 third_party/KalmanNet_TSP (heads/main)

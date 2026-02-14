@@ -1,0 +1,237 @@
+[WARN] write_env_snapshot/write_git_snapshot failed: 'str' object has no attribute 'mkdir'
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 360, in _try_forward
+    out = model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 371, in _try_forward
+    out = model.forward(y=y_repo)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 600, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 224, in predict
+    out = self._try_forward(self.model, y_repo)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 380, in _try_forward
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+[WARN] write_env_snapshot/write_git_snapshot failed: 'str' object has no attribute 'mkdir'
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 360, in _try_forward
+    out = model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 371, in _try_forward
+    out = model.forward(y=y_repo)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 600, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 224, in predict
+    out = self._try_forward(self.model, y_repo)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 380, in _try_forward
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+[WARN] write_env_snapshot/write_git_snapshot failed: 'str' object has no attribute 'mkdir'
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 360, in _try_forward
+    out = model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 371, in _try_forward
+    out = model.forward(y=y_repo)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 600, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 224, in predict
+    out = self._try_forward(self.model, y_repo)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 380, in _try_forward
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+[WARN] write_env_snapshot/write_git_snapshot failed: 'str' object has no attribute 'mkdir'
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 360, in _try_forward
+    out = model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 371, in _try_forward
+    out = model.forward(y=y_repo)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 273, in forward
+    y = y.to(self.device)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'device'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 615, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 224, in predict
+    out = self._try_forward(self.model, y_repo)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 380, in _try_forward
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'device'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'device'")
+[WARN] write_env_snapshot/write_git_snapshot failed: 'str' object has no attribute 'mkdir'
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'f'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'f'")
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 368, in _try_forward
+    out = model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 274, in forward
+    return self.KNet_step(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 178, in KNet_step
+    self.step_prior()
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 145, in step_prior
+    self.m1x_prior = self.f(self.m1x_posterior)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'f'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 379, in _try_forward
+    out = model.forward(y=y_repo)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 274, in forward
+    return self.KNet_step(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 178, in KNet_step
+    self.step_prior()
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 145, in step_prior
+    self.m1x_prior = self.f(self.m1x_posterior)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'KalmanNetNN' object has no attribute 'f'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 615, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 232, in predict
+    out = self._try_forward(self.model, y_repo)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 388, in _try_forward
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. HOW TO VERIFY: expected input layout [B,y_dim,T] in Pipeline_EKF. Errors: primary=AttributeError("'KalmanNetNN' object has no attribute 'f'") secondary=AttributeError("'KalmanNetNN' object has no attribute 'f'")
+RuntimeError: KalmanNet_TSP forward failed. Repo expects a SystemModel-like init (device/f/h/InitSequence). Errors: primary=RuntimeError('The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2') secondary=RuntimeError('The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2')
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 272, in predict
+    out = self.model(y_repo)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 274, in forward
+    return self.KNet_step(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 181, in KNet_step
+    self.step_KGain_est(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 155, in step_KGain_est
+    obs_diff = torch.squeeze(y,2) - torch.squeeze(self.y_previous,2)
+RuntimeError: The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 276, in predict
+    out = self.model.forward(y=y_repo)  # type: ignore
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 274, in forward
+    return self.KNet_step(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 181, in KNet_step
+    self.step_KGain_est(y)
+  File "/home/xynus/bench/third_party/KalmanNet_TSP/KNet/KalmanNet_nn.py", line 155, in step_KGain_est
+    obs_diff = torch.squeeze(y,2) - torch.squeeze(self.y_previous,2)
+RuntimeError: The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 615, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/kalmannet_tsp.py", line 278, in predict
+    raise RuntimeError(
+RuntimeError: KalmanNet_TSP forward failed. Repo expects a SystemModel-like init (device/f/h/InitSequence). Errors: primary=RuntimeError('The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2') secondary=RuntimeError('The size of tensor a (200) must match the size of tensor b (5) at non-singleton dimension 2')

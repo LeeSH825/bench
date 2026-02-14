@@ -1,0 +1,6 @@
+{
+  "status": "missing_data",
+  "missing_path": "/home/xynus/bench_data_cache/shift/C_shift_Rscale_v0/scenario_3211e34db732/seed_1/test.npz",
+  "hint": "Run Step4 smoke_data to generate cache for this suite/task/scenario/seed.",
+  "cache_root": "/home/xynus/bench_data_cache"
+}

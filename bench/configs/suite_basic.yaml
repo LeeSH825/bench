@@ -1,0 +1,202 @@
+suite:
+  name: basic
+  version: "0.1.0"
+  description: >
+    v0 기본 성능 비교: Linear canonical + Lorenz(DT).
+   (MVP) Lorenz(B_lorenz_dt_v0)는 enabled:false로 비활성화됨.
+   (옵션) NCLT는 Split-KalmanNet 연동이 준비되면 활성화.
+
+seeds: [0, 1, 2]
+
+tasks:
+  - task_id: A_linear_canonical_v0
+    task_name: "Linear Canonical (v0 fixed)"
+    system_type: linear
+    x_dim: 5          # ASSUMPTION
+    y_dim: 5          # ASSUMPTION
+    sequence_length_T: 200   # ASSUMPTION
+    dataset_sizes:
+      N_train: 2000   # ASSUMPTION
+      N_val: 500
+      N_test: 500
+    noise:
+      form: "diag"
+      Q:
+        type: "scaled_identity"
+        q2: 1.0e-3     # ASSUMPTION
+      R:
+        type: "scaled_identity"
+        r2: 1.0e-3     # ASSUMPTION (nu = 0dB)
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"  # ASSUMPTION: 구현에서 정의/생성
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}          # v0는 고정값만 공식 결과
+
+  - task_id: B_lorenz_dt_v0
+    task_name: "Lorenz Attractor (DT, partial obs)"
+    system_type: nonlinear
+    enabled: false            # MVP 범위 외(첫 주), D8 참고
+    x_dim: 3           # ASSUMPTION
+    y_dim: 2           # ASSUMPTION (부분 관측)
+    sequence_length_T: 400    # ASSUMPTION
+    dataset_sizes:
+      N_train: 2000    # ASSUMPTION
+      N_val: 500
+      N_test: 500
+    noise:
+      form: "diag"
+      Q:
+        type: "scaled_identity"
+        q2: 1.0e-4      # ASSUMPTION
+      R:
+        type: "scaled_identity"
+        r2: 1.0e-3      # ASSUMPTION
+    observation:
+      type: "partial"
+      h_type: "linear"        # v0
+      H: "select_first_two_dims"
+      # option: nonlinear obs는 suite_shift 또는 확장에서 별도 task로 분리
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: D_nclt_v0
+    task_name: "NCLT (optional)"
+    system_type: real
+    enabled: false            # v0에서는 기본 비활성(연동 준비 시 true)
+    x_dim: null
+    y_dim: null
+    sequence_length_T: null
+    dataset_sizes:
+      N_train: null
+      N_val: null
+      N_test: null
+    noise: {}
+    observation:
+      type: "real"
+      h_type: "unknown"
+    control_input_u: null
+    ground_truth:
+      has_gt: null
+    sweep: {}
+
+models:
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        A_linear_canonical_v0: "main_linear_canonical.py"
+        B_lorenz_dt_v0: "main_lor_DT.py"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: adaptive_knet
+    display_name: "Adaptive-KNet-ICASSP24"
+    adapter: "bench.models.adaptive_knet:AdaptiveKNetAdapter"
+    repo:
+      path: "third_party/Adaptive-KNet-ICASSP24"
+      entrypoints:
+        A_linear_canonical_v0: "main_linear_canonical.py"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: maml_knet
+    display_name: "MAML-KalmanNet"
+    adapter: "bench.models.maml_knet:MAMLKNetAdapter"
+    enabled: false            # v0 기본 비활성(2주차 확장)
+    repo:
+      path: "third_party/MAML-KalmanNet"
+      entrypoints:
+        A_linear_canonical_v0: "main_linear.py"
+        B_lorenz_dt_v0: "main_nonlinear.py"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: true
+    notes:
+      data_generation_use_cuda: false
+
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    enabled: false            # v0 기본 비활성(2주차 확장)
+    repo:
+      path: "third_party/Split-KalmanNet"
+      entrypoints:
+        D_nclt_v0: "(NCLT)/main.py"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: false
+
+  - model_id: my_model
+    display_name: "<내_모델_이름>"
+    adapter: "bench.models.my_model:MyModelAdapter"
+    repo: { path: null, entrypoints: {} }
+    capabilities:
+      supports_adaptation: true        # ASSUMPTION
+      outputs_covariance: false        # ASSUMPTION
+      needs_system_model: false        # ASSUMPTION
+    io_spec:
+      input: "y_seq -> x_hat (+ optional cov)"
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"     # 공식 결과는 bench가 생성한 공통 데이터
+  budget:
+    train_max_updates: 20000
+    eval_batch_size: 32
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 10
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+    - track_id: budgeted
+      adaptation_enabled: true
+      adaptation_budget:
+        max_updates: 200
+        max_updates_per_step: 1
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    enabled: false
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+    - "env.txt"
+    - "git_versions.txt"
+  tables:
+    summary_csv: "reports/summary_basic.csv"
+  plots:
+    - "mse_vs_time.png"
+

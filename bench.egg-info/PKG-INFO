@@ -1,0 +1,101 @@
+Metadata-Version: 2.4
+Name: bench
+Version: 0.1.0
+Summary: Research benchmarking scaffold for KalmanNet-family models (Step 0–).
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.23
+Requires-Dist: scipy>=1.9
+Requires-Dist: pandas>=2.0
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tqdm>=4.66
+Requires-Dist: torch>=2.5.1
+Provides-Extra: dev
+Requires-Dist: ruff>=0.5; extra == "dev"
+Requires-Dist: pytest>=7.4; extra == "dev"
+Provides-Extra: kalmannet-tsp
+Provides-Extra: adaptive-knet
+Provides-Extra: maml-knet
+Provides-Extra: split-knet
+Provides-Extra: my-model
+
+# Bench — Step 2–3 Scaffold
+
+이 디렉토리는 **벤치마킹 프레임워크의 scaffold** 입니다.  
+Step 0–1에서 잠긴 스펙(suite + FAIRNESS/METRICS/DECISIONS)을 깨지 않도록,
+Step 2에서는 인터페이스/스키마/문서/유틸(스텁)을, Step 3에서는 실행 환경/재현성 스냅샷을 고정합니다.
+
+---
+
+## Source of Truth (SoT)
+
+SoT 파일은 **/mnt/data 루트**에 있습니다.
+
+- `/mnt/data/벤치마킹 프레임워크 설계.txt`
+- `/mnt/data/suite_basic.yaml`
+- `/mnt/data/suite_shift.yaml`
+- `/mnt/data/FAIRNESS.md`
+- `/mnt/data/METRICS.md`
+- `/mnt/data/DECISIONS.md`
+
+configs 미러링:
+- `bench/bench/configs/`에는 suite YAML **복사본(미러)** 를 둘 수 있으나,
+- **SoT는 항상 `/mnt/data/suite_*.yaml`** 입니다.
+
+---
+
+## Step 3: Environment strategy (D14 예정)
+
+기본 전략(MVP):
+- **단일 env**: `pyproject.toml` + `requirements.lock`(pip freeze snapshot)
+
+fallback:
+- 의존성 충돌이 발생하면 **모델별 Docker 이미지로 실행**하고 결과(run_dir)만 수집합니다.
+- Docker 템플릿: `bench/docker/*`
+
+---
+
+## Install (single env)
+
+권장:
+```bash
+cd /mnt/data/bench
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+Torch 설치:
+
+CUDA/CPU 환경에 맞는 torch wheel은 사용자 환경마다 다르므로,
+torch는 별도 설치를 권장합니다(또는 requirements.lock에 핀).
+
+requirements.lock 생성/갱신:
+```bash
+cd /mnt/data/bench
+bash scripts/export_env_snapshot.sh
+```
+
+## Reproducibility snapshots (per-run)
+
+RUN_DIR 표준에 따라, 각 run_dir에는 최소 아래가 저장되어야 합니다:
+
+env.json + pip_freeze.txt (+ 가능하면 requirements.lock 복사)
+
+git_versions.txt
+
+config_snapshot.yaml
+
+stdout/stderr 로그
+
+이 규칙은 Step 3에서 bench/bench/utils/io.py의
+write_env_snapshot() / write_git_snapshot() 훅으로 “기계적으로” 강제될 예정입니다.
+
+## Notes (Step 2 scope)
+
+third_party 레포는 수정하지 않습니다.
+(추후 git submodule/subtree로 third_party/*에 붙이고, adapter/orchestrator로만 통제)
+
+Step 3에서는 학습/평가 루프를 구현하지 않습니다.
+(실제 실행/수집/리포트는 Step 4~)
