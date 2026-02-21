@@ -1,7 +1,7 @@
-# bench/models/kalmannet_tsp.py
 from __future__ import annotations
 
 import importlib.util
+import json
 import logging
 import sys
 from dataclasses import dataclass
@@ -13,21 +13,20 @@ import torch
 logger = logging.getLogger(__name__)
 
 
-# --- Optional base-class import (keeps this file drop-in safe) ---
 try:
     from .base import ModelAdapter  # type: ignore
 except Exception:  # pragma: no cover
-    class ModelAdapter:  # minimal fallback
+    class ModelAdapter:  # pragma: no cover
         pass
 
 
-def _import_module_from_file(module_name: str, file_path: Path):
+def _import_module_from_file(module_name: str, file_path: Path) -> Any:
     spec = importlib.util.spec_from_file_location(module_name, str(file_path))
     if spec is None or spec.loader is None:
-        raise ImportError(f"Failed to create spec for {module_name} from {file_path}")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)  # type: ignore[attr-defined]
-    return mod
+        raise ImportError(f"Failed to import {module_name} from {file_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[attr-defined]
+    return module
 
 
 def _as_torch_device(device: Union[str, torch.device, None]) -> torch.device:
@@ -41,15 +40,71 @@ def _as_torch_device(device: Union[str, torch.device, None]) -> torch.device:
 def _to_tensor(x: Any, *, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
     if isinstance(x, torch.Tensor):
         return x.to(device=device, dtype=dtype)
-    return torch.as_tensor(x, device=device, dtype=dtype)
+    return torch.as_tensor(x, dtype=dtype, device=device)
+
+
+def _coerce_meta_dict(system_info: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not system_info:
+        return {}
+
+    if isinstance(system_info.get("meta"), dict):
+        return dict(system_info["meta"])
+
+    meta_json = system_info.get("meta_json")
+    if isinstance(meta_json, dict):
+        return dict(meta_json)
+    if isinstance(meta_json, str):
+        try:
+            decoded = json.loads(meta_json)
+            if isinstance(decoded, dict):
+                return decoded
+        except Exception:
+            return {}
+    return {}
+
+
+def _lookup_nested(d: Dict[str, Any], keys: Tuple[str, ...]) -> Any:
+    cur: Any = d
+    for key in keys:
+        if not isinstance(cur, dict) or key not in cur:
+            return None
+        cur = cur[key]
+    return cur
+
+
+def _extract_q2_r2(meta: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
+    candidates = (
+        ("noise", "pre_shift", "Q", "q2"),
+        ("scenario_cfg", "noise", "pre_shift", "Q", "q2"),
+    )
+    q2 = None
+    for path in candidates:
+        v = _lookup_nested(meta, path)
+        if v is not None:
+            try:
+                q2 = float(v)
+                break
+            except Exception:
+                pass
+
+    candidates_r = (
+        ("noise", "pre_shift", "R", "r2"),
+        ("scenario_cfg", "noise", "pre_shift", "R", "r2"),
+    )
+    r2 = None
+    for path in candidates_r:
+        v = _lookup_nested(meta, path)
+        if v is not None:
+            try:
+                r2 = float(v)
+                break
+            except Exception:
+                pass
+
+    return q2, r2
 
 
 def _resolve_repo_spec(model_cfg: Dict[str, Any]) -> Tuple[Path, Dict[str, Any]]:
-    """
-    Accepts:
-      repo: "third_party/KalmanNet_TSP"
-      repo: {path: "third_party/KalmanNet_TSP", entrypoints: {...}}
-    """
     repo_spec = (
         model_cfg.get("repo")
         or model_cfg.get("repo_root")
@@ -65,21 +120,17 @@ def _resolve_repo_spec(model_cfg: Dict[str, Any]) -> Tuple[Path, Dict[str, Any]]
         entrypoints = dict(repo_spec.get("entrypoints") or {})
     elif isinstance(repo_spec, (str, Path)):
         repo_path = str(repo_spec)
-    elif repo_spec is None:
-        repo_path = None
-    else:
-        raise TypeError(f"Unsupported repo spec type: {type(repo_spec)} (value={repo_spec!r})")
+    elif repo_spec is not None:
+        raise TypeError(f"Unsupported repo spec type: {type(repo_spec)}")
 
     if not repo_path:
         raise ValueError(
-            "KalmanNet_TSP adapter requires model_cfg['repo'] (str or {path:..., entrypoints:{...}})."
+            "KalmanNet_TSP adapter requires model_cfg['repo'] as string or dict with 'path'."
         )
 
-    # Interpret relative paths as relative to bench repo root (…/bench)
     bench_root = Path(__file__).resolve().parents[2]
-    p = Path(repo_path).expanduser()
-    repo_root = (bench_root / p).resolve() if not p.is_absolute() else p.resolve()
-
+    repo_candidate = Path(repo_path).expanduser()
+    repo_root = (bench_root / repo_candidate).resolve() if not repo_candidate.is_absolute() else repo_candidate.resolve()
     return repo_root, entrypoints
 
 
@@ -87,19 +138,13 @@ def _resolve_repo_spec(model_cfg: Dict[str, Any]) -> Tuple[Path, Dict[str, Any]]
 class _KNetImports:
     KalmanNetNN: Any
     SystemModel: Any
-    config_general_settings: Any  # function
+    config_general_settings: Any
 
 
 def _load_kalmannet_tsp(repo_root: Path) -> _KNetImports:
-    """
-    Import strategy:
-      1) add repo_root to sys.path and try normal imports (preferred)
-      2) fall back to direct file import (robust if packages lack __init__.py)
-    """
     if not repo_root.exists():
-        raise FileNotFoundError(f"KalmanNet_TSP repo_root not found: {repo_root}")
+        raise FileNotFoundError(f"KalmanNet_TSP repo root not found: {repo_root}")
 
-    # Try normal import path first
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
@@ -113,20 +158,19 @@ def _load_kalmannet_tsp(repo_root: Path) -> _KNetImports:
             SystemModel=SystemModel,
             config_general_settings=kn_config.general_settings,
         )
-    except Exception as e1:
-        logger.warning("Normal import failed, falling back to file import: %r", e1)
+    except Exception as e:
+        logger.warning("Normal KalmanNet_TSP import failed, trying file import fallback: %r", e)
 
-    # File import fallback
     kn_file = repo_root / "KNet" / "KalmanNet_nn.py"
     sysmdl_file = repo_root / "Simulations" / "Linear_sysmdl.py"
     cfg_file = repo_root / "Simulations" / "config.py"
 
     if not kn_file.exists():
-        raise FileNotFoundError(f"Missing: {kn_file}")
+        raise FileNotFoundError(f"Missing file: {kn_file}")
     if not sysmdl_file.exists():
-        raise FileNotFoundError(f"Missing: {sysmdl_file}")
+        raise FileNotFoundError(f"Missing file: {sysmdl_file}")
     if not cfg_file.exists():
-        raise FileNotFoundError(f"Missing: {cfg_file}")
+        raise FileNotFoundError(f"Missing file: {cfg_file}")
 
     kn_mod = _import_module_from_file("kalmannet_tsp_KalmanNet_nn", kn_file)
     sys_mod = _import_module_from_file("kalmannet_tsp_Linear_sysmdl", sysmdl_file)
@@ -139,17 +183,43 @@ def _load_kalmannet_tsp(repo_root: Path) -> _KNetImports:
     )
 
 
+def _call_general_settings_safely(general_settings: Any) -> Any:
+    # third_party/Simulations/config.py uses argparse.parse_args();
+    # isolate benchmark CLI flags so this call is deterministic.
+    old_argv = list(sys.argv)
+    argv0 = old_argv[0] if old_argv else "bench"
+    try:
+        sys.argv = [argv0]
+        return general_settings()
+    finally:
+        sys.argv = old_argv
+
+
+def _resolve_x0(x0: Any, *, batch_size: int, x_dim: int, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
+    x = _to_tensor(x0, device=device, dtype=dtype)
+    if x.ndim == 1:
+        if x.shape[0] != x_dim:
+            raise ValueError(f"x0 1D shape mismatch: expected [{x_dim}], got {tuple(x.shape)}")
+        return x.view(1, x_dim, 1).repeat(batch_size, 1, 1)
+    if x.ndim == 2:
+        if x.shape == (x_dim, 1):
+            return x.view(1, x_dim, 1).repeat(batch_size, 1, 1)
+        if x.shape == (batch_size, x_dim):
+            return x.unsqueeze(2)
+        raise ValueError(
+            f"x0 2D shape mismatch: expected [{x_dim},1] or [{batch_size},{x_dim}], got {tuple(x.shape)}"
+        )
+    if x.ndim == 3:
+        if x.shape == (batch_size, x_dim, 1):
+            return x
+        raise ValueError(
+            f"x0 3D shape mismatch: expected [{batch_size},{x_dim},1], got {tuple(x.shape)}"
+        )
+    raise ValueError(f"Unsupported x0 rank {x.ndim}; expected 1D/2D/3D.")
+
+
 class KalmanNetTSPAdapter(ModelAdapter):
-    """
-    Import-mode adapter for KalmanNet_TSP.
-
-    Key points (fixes your failures):
-      - model_cfg['repo'] may be dict → we extract repo['path']
-      - KalmanNet_TSP forward expects per-step y:[B,n,1]; we loop over T
-      - 'device/f/h' missing → always build SystemModel and call NNBuild()
-    """
-
-    def __init__(self):
+    def __init__(self) -> None:
         self.model: Optional[torch.nn.Module] = None
         self.repo_root: Optional[Path] = None
         self.entrypoints: Dict[str, Any] = {}
@@ -159,208 +229,189 @@ class KalmanNetTSPAdapter(ModelAdapter):
         self._imports: Optional[_KNetImports] = None
         self._sys_model: Any = None
 
-        self._m: Optional[int] = None  # x_dim
-        self._n: Optional[int] = None  # y_dim
+        self._x_dim: Optional[int] = None
+        self._y_dim: Optional[int] = None
+        self._T_setup: Optional[int] = None
+
         self._F: Optional[torch.Tensor] = None
         self._H: Optional[torch.Tensor] = None
         self._Q: Optional[torch.Tensor] = None
         self._R: Optional[torch.Tensor] = None
 
-    # ----------------------------
-    # Setup
-    # ----------------------------
+        self.last_layout: Optional[str] = None
+        self.last_class: Optional[str] = None
+
     def setup(self, model_cfg: Dict[str, Any], system_info: Optional[Dict[str, Any]] = None) -> None:
+        system_info = system_info or {}
         self.repo_root, self.entrypoints = _resolve_repo_spec(model_cfg)
-
-        # bench runners pass --device separately; prefer model_cfg first, then system_info, then cpu
-        cfg_device = model_cfg.get("device", None)
-        sys_device = (system_info or {}).get("device", None)
-        self.device = _as_torch_device(cfg_device or sys_device or "cpu")
-
-        # be tolerant: if user asked cuda but cuda isn't available, don't hard-crash here
-        if self.device.type == "cuda" and not torch.cuda.is_available():
-            logger.warning("CUDA requested but not available; falling back to CPU.")
-            self.device = torch.device("cpu")
-
-        # imports from third_party repo
         self._imports = _load_kalmannet_tsp(self.repo_root)
 
-        # extract system matrices/dims
-        self._configure_system(model_cfg=model_cfg, system_info=system_info)
+        requested_device = model_cfg.get("device", None) or system_info.get("device", None) or "cpu"
+        self.device = _as_torch_device(requested_device)
+        if self.device.type == "cuda" and not torch.cuda.is_available():
+            logger.warning("CUDA requested but unavailable. Falling back to CPU.")
+            self.device = torch.device("cpu")
 
-        # build args from repo defaults, then override minimal fields
-        args = self._imports.config_general_settings()
+        meta = _coerce_meta_dict(system_info)
+
+        x_dim = system_info.get("x_dim", model_cfg.get("x_dim", meta.get("x_dim")))
+        y_dim = system_info.get("y_dim", model_cfg.get("y_dim", meta.get("y_dim")))
+        if x_dim is None or y_dim is None:
+            raise ValueError("system_info must provide x_dim and y_dim for KalmanNet_TSP setup.")
+        self._x_dim = int(x_dim)
+        self._y_dim = int(y_dim)
+
+        T = system_info.get("T", model_cfg.get("T", meta.get("T", model_cfg.get("sequence_length", 1))))
+        self._T_setup = int(T)
+
+        F = system_info.get("F", system_info.get("A", None))
+        H = system_info.get("H", system_info.get("C", None))
+        if F is None:
+            F = torch.eye(self._x_dim)
+        if H is None:
+            H = torch.eye(self._y_dim, self._x_dim)
+        self._F = _to_tensor(F, device=self.device, dtype=self.dtype)
+        self._H = _to_tensor(H, device=self.device, dtype=self.dtype)
+
+        Q = system_info.get("Q", None)
+        R = system_info.get("R", None)
+
+        q2_meta, r2_meta = _extract_q2_r2(meta)
+        q2 = system_info.get("q2", model_cfg.get("q2", q2_meta if q2_meta is not None else 1e-3))
+        r2 = system_info.get("r2", model_cfg.get("r2", r2_meta if r2_meta is not None else 1e-3))
+
+        if Q is None:
+            self._Q = torch.eye(self._x_dim, device=self.device, dtype=self.dtype) * float(q2)
+        else:
+            self._Q = _to_tensor(Q, device=self.device, dtype=self.dtype)
+
+        if R is None:
+            self._R = torch.eye(self._y_dim, device=self.device, dtype=self.dtype) * float(r2)
+        else:
+            self._R = _to_tensor(R, device=self.device, dtype=self.dtype)
+
+        args = _call_general_settings_safely(self._imports.config_general_settings)
         args.use_cuda = (self.device.type == "cuda")
-        # args.n_batch is used as initial batch_size in repo; we overwrite model.batch_size at runtime anyway
+        args.T = int(self._T_setup)
+        args.T_test = int(self._T_setup)
         args.n_batch = int(model_cfg.get("eval_batch_size", model_cfg.get("batch_size", 1)) or 1)
 
-        # allow optional overrides (keeps adapter controllable without editing third_party)
         if "in_mult_KNet" in model_cfg:
             args.in_mult_KNet = int(model_cfg["in_mult_KNet"])
         if "out_mult_KNet" in model_cfg:
             args.out_mult_KNet = int(model_cfg["out_mult_KNet"])
 
-        # set T/T_test if available
-        T_guess = int((system_info or {}).get("T", model_cfg.get("sequence_length", 0)) or 0)
-        if T_guess > 0:
-            args.T = T_guess
-            args.T_test = T_guess
-
-        # build SystemModel and KNet
         SystemModel = self._imports.SystemModel
-        self._sys_model = SystemModel(self._F, self._Q, self._H, self._R, args.T, args.T_test)  # type: ignore[arg-type]
+        self._sys_model = SystemModel(self._F, self._Q, self._H, self._R, args.T, args.T_test)
 
-        # init x0/cov (repo expects these fields to exist)
-        m = int(self._m or self._F.shape[0])
-        m1x_0 = torch.zeros(m, 1, device=self.device, dtype=self.dtype)
-        m2x_0 = torch.zeros(m, m, device=self.device, dtype=self.dtype)
+        m1x_0 = torch.zeros(self._x_dim, 1, device=self.device, dtype=self.dtype)
+        m2x_0 = torch.zeros(self._x_dim, self._x_dim, device=self.device, dtype=self.dtype)
         self._sys_model.InitSequence(m1x_0, m2x_0)
 
         KalmanNetNN = self._imports.KalmanNetNN
         self.model = KalmanNetNN()
-        # NNBuild sets internal f/h and device handling in repo
-        self.model.NNBuild(self._sys_model, args)  # type: ignore[call-arg]
+        self.model.NNBuild(self._sys_model, args)
         self.model.eval()
 
-        logger.info(
-            "KalmanNet_TSP adapter setup OK. device=%s repo=%s",
-            str(self.device),
-            str(self.repo_root),
-        )
+        self.last_class = type(self.model).__name__
+        self.last_layout = "stepwise_BTD_to_BnT"
 
-    def _configure_system(self, model_cfg: Dict[str, Any], system_info: Optional[Dict[str, Any]]) -> None:
-        sysi = system_info or {}
+    def train(self, train_loader: Any, val_loader: Any) -> None:
+        raise NotImplementedError("KalmanNet_TSP adapter MVP supports inference only.")
 
-        # dims
-        x_dim = sysi.get("x_dim", sysi.get("m", model_cfg.get("x_dim")))
-        y_dim = sysi.get("y_dim", sysi.get("n", model_cfg.get("y_dim")))
-        if x_dim is None or y_dim is None:
-            # last-resort defaults (suite_shift is 5/5; but we prefer explicit)
-            x_dim = x_dim or 5
-            y_dim = y_dim or 5
+    def load(self, ckpt_path: str) -> None:
+        if self.model is None:
+            raise RuntimeError("setup() must be called before load().")
+        state = torch.load(ckpt_path, map_location=self.device)
+        if isinstance(state, dict) and "state_dict" in state:
+            state = state["state_dict"]
+        self.model.load_state_dict(state, strict=False)
 
-        self._m = int(x_dim)
-        self._n = int(y_dim)
-
-        # matrices: accept multiple key aliases
-        F = sysi.get("F", sysi.get("A", sysi.get("Phi", None)))
-        H = sysi.get("H", sysi.get("C", sysi.get("Obs", None)))
-
-        if F is None:
-            # fallback: identity
-            F = torch.eye(self._m)
-        if H is None:
-            # fallback: identity (square case)
-            H = torch.eye(self._n, self._m)
-
-        self._F = _to_tensor(F, device=self.device, dtype=self.dtype)
-        self._H = _to_tensor(H, device=self.device, dtype=self.dtype)
-
-        # Q/R: accept either full matrix or scalar scales
-        Q = sysi.get("Q", None)
-        R = sysi.get("R", None)
-
-        if Q is None:
-            q2 = sysi.get("q2", model_cfg.get("q2", 1e-3))
-            self._Q = torch.eye(self._m, device=self.device, dtype=self.dtype) * float(q2)
-        else:
-            self._Q = _to_tensor(Q, device=self.device, dtype=self.dtype)
-
-        if R is None:
-            r2 = sysi.get("r2", model_cfg.get("r2", 1e-3))
-            self._R = torch.eye(self._n, device=self.device, dtype=self.dtype) * float(r2)
-        else:
-            self._R = _to_tensor(R, device=self.device, dtype=self.dtype)
-
-    # ----------------------------
-    # Predict (forward-only)
-    # ----------------------------
     @torch.no_grad()
     def predict(
         self,
-        y_seq: torch.Tensor,
-        u_seq: Optional[torch.Tensor] = None,
+        y_seq: Any,
+        u_seq: Optional[Any] = None,
         context: Optional[Dict[str, Any]] = None,
         return_cov: bool = False,
     ) -> Any:
-        if self.model is None or self._imports is None:
-            raise RuntimeError("Model is not initialized. Call setup() first.")
+        if self.model is None:
+            raise RuntimeError("setup() must be called before predict().")
+        if self._x_dim is None or self._y_dim is None:
+            raise RuntimeError("Adapter dimensions are not initialized.")
 
-        # Bench canonical layout: [B, T, y_dim]
-        if not isinstance(y_seq, torch.Tensor):
-            y_seq = torch.as_tensor(y_seq)
+        y = _to_tensor(y_seq, device=self.device, dtype=self.dtype)
+        if y.ndim != 3:
+            raise ValueError(f"Expected y_seq [B,T,y_dim], got shape {tuple(y.shape)}")
 
-        if y_seq.dim() != 3:
-            raise ValueError(f"Expected y_seq with shape [B,T,n], got {tuple(y_seq.shape)}")
+        B, T, y_dim = y.shape
+        if int(y_dim) != int(self._y_dim):
+            raise RuntimeError(f"y_dim mismatch: got {y_dim}, expected {self._y_dim}")
 
-        B, T, n = y_seq.shape
-        if self._n is not None and int(n) != int(self._n):
-            raise RuntimeError(f"y_dim mismatch: got {n}, expected {self._n}")
+        y_repo = y.permute(0, 2, 1).contiguous()
 
-        # repo internal: [B, n, T]
-        y_repo = y_seq.to(device=self.device, dtype=self.dtype).permute(0, 2, 1).contiguous()
+        self.model.batch_size = int(B)  # type: ignore[attr-defined]
+        if not hasattr(self.model, "init_hidden_KNet"):
+            raise RuntimeError("KalmanNet_TSP model missing init_hidden_KNet().")
+        self.model.init_hidden_KNet()  # type: ignore[attr-defined]
 
-        # init per-batch state
-        # model.batch_size is used inside repo reshape paths
-        try:
-            setattr(self.model, "batch_size", int(B))
-        except Exception:
-            pass
-
-        # init hidden state (repo defines this; if missing, let it fail loudly)
-        if hasattr(self.model, "init_hidden_KNet"):
-            self.model.init_hidden_KNet()
-
-        # initial x0: accept from context if provided, else zeros
-        m = int(self._m or 0)
         x0 = None
         ctx = context or {}
-        for k in ("x0", "x_init", "x_init_mean", "m1x_0"):
-            if k in ctx:
-                x0 = ctx[k]
+        for key in ("x0", "x_init", "x_init_mean", "m1x_0"):
+            if key in ctx:
+                x0 = ctx[key]
                 break
-
         if x0 is None:
-            x0_t = torch.zeros(B, m, 1, device=self.device, dtype=self.dtype)
+            m1_0_batch = torch.zeros(B, self._x_dim, 1, device=self.device, dtype=self.dtype)
         else:
-            x0_t = _to_tensor(x0, device=self.device, dtype=self.dtype)
-            if x0_t.dim() == 2:  # [B,m] or [m,1]
-                if x0_t.shape[0] == m and x0_t.shape[1] == 1:
-                    x0_t = x0_t.unsqueeze(0).repeat(B, 1, 1)  # [B,m,1]
-                else:
-                    x0_t = x0_t.view(B, m, 1)
-            elif x0_t.dim() == 1:
-                x0_t = x0_t.view(1, m, 1).repeat(B, 1, 1)
-            elif x0_t.dim() == 3:
-                pass
-            else:
-                raise ValueError(f"Unsupported x0 shape: {tuple(x0_t.shape)}")
+            m1_0_batch = _resolve_x0(
+                x0,
+                batch_size=B,
+                x_dim=self._x_dim,
+                device=self.device,
+                dtype=self.dtype,
+            )
 
-        if hasattr(self.model, "InitSequence"):
-            self.model.InitSequence(x0_t, T)
+        if not hasattr(self.model, "InitSequence"):
+            raise RuntimeError("KalmanNet_TSP model missing InitSequence().")
+        self.model.InitSequence(m1_0_batch, int(T))  # type: ignore[attr-defined]
 
-        # run per-time-step (repo expects y:[B,n,1])
-        x_repo = torch.empty((B, m, T), device=self.device, dtype=self.dtype)
+        x_repo = torch.empty((B, self._x_dim, T), device=self.device, dtype=self.dtype)
         for t in range(T):
             y_t = y_repo[:, :, t].unsqueeze(2)  # [B,n,1]
-            x_t = self.model(y_t)  # expected [B,m,1]
+            x_t = self.model(y_t)
             if isinstance(x_t, (tuple, list)):
                 x_t = x_t[0]
-            if x_t.dim() == 2:
+            if not isinstance(x_t, torch.Tensor):
+                raise TypeError(f"Model output must be Tensor, got {type(x_t)}")
+            if x_t.ndim == 2:
                 x_t = x_t.unsqueeze(2)
-            x_repo[:, :, t] = x_t.squeeze(2)
+            if x_t.shape != (B, self._x_dim, 1):
+                raise RuntimeError(
+                    f"Unexpected model output shape at t={t}: {tuple(x_t.shape)} "
+                    f"(expected {(B, self._x_dim, 1)})"
+                )
+            x_repo[:, :, t] = x_t[:, :, 0]
 
-        # back to bench canonical: [B, T, m]
-        x_hat = x_repo.permute(0, 2, 1).contiguous()
-
+        x_hat = x_repo.permute(0, 2, 1).contiguous()  # [B,T,x_dim]
         if return_cov:
-            # KalmanNet_TSP repo doesn't expose covariance here; NA by policy
             return x_hat, None
         return x_hat
 
-    # ----------------------------
-    # Train / Adapt (not in Step3)
-    # ----------------------------
-    def train(self, train_loader=None, val_loader=None) -> None:
-        raise NotImplementedError("train() is not implemented yet for KalmanNet_TSP (forward-only adapter).")
+    def adapt(
+        self,
+        y_seq: Any,
+        u_seq: Optional[Any] = None,
+        context: Optional[Dict[str, Any]] = None,
+        budget: Optional[Any] = None,
+    ) -> None:
+        # Frozen-track MVP: no online adaptation.
+        return None
+
+    def save(self, out_dir: str) -> None:
+        if self.model is None:
+            raise RuntimeError("setup() must be called before save().")
+        out = Path(out_dir)
+        out.mkdir(parents=True, exist_ok=True)
+        torch.save(self.model.state_dict(), out / "model_state.pt")
 

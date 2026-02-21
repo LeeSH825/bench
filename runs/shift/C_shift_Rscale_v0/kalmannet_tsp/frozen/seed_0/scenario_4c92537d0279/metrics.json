@@ -1,0 +1,72 @@
+{
+  "status": "ok",
+  "suite_name": "shift",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "4c92537d0279",
+  "scenario_id_resolved_from_cache": true,
+  "seed": 0,
+  "model_id": "kalmannet_tsp",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 5,
+    "y_dim": 5,
+    "T": 200
+  },
+  "accuracy": {
+    "mse": 1280920334687047.8,
+    "rmse": 35789947.39709808,
+    "mse_db": 151.07522120157108
+  },
+  "timing": {
+    "timing_ms_per_step": 0.028830690959985077,
+    "timing_std_ms_per_step": 0.0036897851721909183,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": {
+    "t0": 100,
+    "W": 20,
+    "eps": 0.05,
+    "E_pre": 12374025.7903,
+    "recovery_k": 100,
+    "recovered": false,
+    "failure_policy": "cap"
+  },
+  "t0_used": 100,
+  "scenario_settings": {
+    "shift.post_shift.R_scale": 3.0
+  },
+  "scenario_cfg_basis": {
+    "pre_shift": {
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 0.001
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 0.001
+      },
+      "obs_distribution": {
+        "name": "gaussian"
+      }
+    },
+    "shift": {
+      "t0": 100,
+      "post_shift": {
+        "obs_distribution": {
+          "name": "gaussian"
+        },
+        "R_scale": 3.0
+      }
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "stepwise_BTD_to_BnT",
+    "selected_class": "KalmanNetNN"
+  },
+  "run_dir": "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/kalmannet_tsp/frozen/seed_0/scenario_4c92537d0279"
+}

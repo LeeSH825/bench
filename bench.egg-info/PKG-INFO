@@ -99,3 +99,33 @@ third_party 레포는 수정하지 않습니다.
 
 Step 3에서는 학습/평가 루프를 구현하지 않습니다.
 (실제 실행/수집/리포트는 Step 4~)
+
+
+## Step 5: smoke_model (adapter forward test)
+
+### third_party 경로 규칙
+- 벤치 루트 기준: `third_party/`
+  - `third_party/KalmanNet_TSP`
+  - `third_party/Adaptive-KNet-ICASSP24`
+- third_party 코드는 벤치에서 절대 수정하지 않는다.
+
+### 실행 (bench_generated NPZ -> adapter -> forward 1회)
+```bash
+export BENCH_DATA_CACHE=/home/xynus/bench_data_cache  # (필요 시) 본인 캐시 경로
+python -m bench.models.smoke_model \
+  --suite-yaml /mnt/data/suite_shift.yaml \
+  --task C_shift_Rscale_v0 \
+  --model-id kalmannet_tsp \
+  --seed 0 \
+  --split test \
+  --batch-size 8
+```
+
+Adaptive-KNet:
+```bash
+python -m bench.models.smoke_model \
+  --suite-yaml /mnt/data/suite_shift.yaml \
+  --task C_shift_Rscale_v0 \
+  --model-id adaptive_knet \
+  --seed 0 --split test --batch-size 8
+```

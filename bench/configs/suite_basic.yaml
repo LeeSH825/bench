@@ -3,8 +3,8 @@ suite:
   version: "0.1.0"
   description: >
     v0 기본 성능 비교: Linear canonical + Lorenz(DT).
-   (MVP) Lorenz(B_lorenz_dt_v0)는 enabled:false로 비활성화됨.
-   (옵션) NCLT는 Split-KalmanNet 연동이 준비되면 활성화.
+    (MVP) Lorenz(B_lorenz_dt_v0)는 enabled:false로 비활성화됨.
+    (옵션) NCLT는 Split-KalmanNet 연동이 준비되면 활성화.
 
 seeds: [0, 1, 2]
 
@@ -199,4 +199,3 @@ reporting:
     summary_csv: "reports/summary_basic.csv"
   plots:
     - "mse_vs_time.png"
-
