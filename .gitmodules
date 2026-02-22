@@ -1,0 +1,12 @@
+[submodule "third_party/KalmanNet_TSP"]
+	path = third_party/KalmanNet_TSP
+	url = https://github.com/KalmanNet/KalmanNet_TSP
+[submodule "third_party/Adaptive-KNet-ICASSP24"]
+	path = third_party/Adaptive-KNet-ICASSP24
+	url = https://github.com/KalmanNet/Adaptive-KNet-ICASSP24
+[submodule "third_party/MAML_KalmanNet"]
+	path = third_party/MAML_KalmanNet
+	url = https://github.com/ShanLi-2000/MAML-KalmanNet
+[submodule "third_party/Split_KalmanNet"]
+	path = third_party/Split_KalmanNet
+	url = https://github.com/geonchoi/Split-KalmanNet
