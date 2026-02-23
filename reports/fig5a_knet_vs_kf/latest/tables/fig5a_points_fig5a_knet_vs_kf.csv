@@ -1,0 +1,2 @@
+model_id,baseline_mode,is_oracle_kf,init_id,track_id,task_id,scenario_id,seed,x_dim,y_dim,T,q2,r2,inv_r2_db,mse_db,mse,rmse,run_dir
+oracle_kf,oracle,True,pretrained,frozen,F5a_m2n2_T50_invR2db_0,625903575958,0,2,2,50,1.0,1.0,-0.0,-1.9438747076426253,0.6391643285751343,0.7994775347532501,/home/xynus/bench/runs/fig5a_knet_vs_kf/F5a_m2n2_T50_invR2db_0/oracle_kf/frozen/seed_0/scenario_625903575958

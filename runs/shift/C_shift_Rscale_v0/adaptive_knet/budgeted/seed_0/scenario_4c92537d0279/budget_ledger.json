@@ -1,0 +1,7 @@
+{
+  "train_updates_used": 0,
+  "adapt_updates_used": 0,
+  "train_max_updates": 20000,
+  "track_id": "budgeted",
+  "init_id": "trained"
+}

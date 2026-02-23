@@ -1,0 +1,6 @@
+suite,task_id,model_id,init_id,track_id,n_total,n_success,train_time_s_mean,train_time_s_median,eval_time_s_mean,eval_time_s_median,adapt_time_s_mean,adapt_time_s_median,total_time_s_mean,total_time_s_median,train_updates_used_mean,train_updates_used_median,adapt_updates_used_mean,adapt_updates_used_median,adapt_updates_per_step_max_mean,adapt_updates_per_step_max_median,cache_enabled_rate,cache_hit_rate,train_skipped_rate
+shift_light,C_shift_Rscale_light_v0,adaptive_knet,trained,budgeted,2,0,,,,,,,,,,,,,,,0.0,,
+shift_light,C_shift_Rscale_light_v0,adaptive_knet,trained,frozen,2,0,,,,,,,,,,,,,,,0.0,,
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,trained,budgeted,2,0,,,,,,,,,,,,,,,0.0,,
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,trained,frozen,2,0,,,,,,,,,,,,,,,0.0,,
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,untrained,frozen,2,2,,,0.261016019499948,0.261016019499948,,,0.261016019499948,0.261016019499948,0.0,0.0,0.0,0.0,0.0,0.0,0.0,,

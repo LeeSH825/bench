@@ -1,0 +1,44 @@
+{
+  "plan_id": "trained__budgeted",
+  "init_id": "trained",
+  "track_id": "budgeted",
+  "official_benchmark_eligible": true,
+  "suite_name": "plan_matrix_smoke",
+  "task_id": "C_shift_plan_matrix_smoke_v0",
+  "scenario_id": "3f778e0b9924",
+  "seed": 0,
+  "model_id": "adaptive_knet",
+  "deterministic": true,
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 6,
+    "adapt_max_updates": 8,
+    "adapt_max_updates_per_step": 1,
+    "t0_gate_enabled": true,
+    "adaptation_budget": {
+      "allowed_after_t0_only": true,
+      "max_updates": 8,
+      "max_updates_per_step": 1,
+      "overflow_policy": "fail"
+    }
+  },
+  "shift": {
+    "t0": 8
+  },
+  "adaptation": {
+    "enabled": true,
+    "allowed_after_t0_only": true,
+    "max_updates": 8,
+    "max_updates_per_step": 1,
+    "will_run": true
+  },
+  "cache": {
+    "enabled": false,
+    "model_cache_dir": null,
+    "cache_key": null,
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}

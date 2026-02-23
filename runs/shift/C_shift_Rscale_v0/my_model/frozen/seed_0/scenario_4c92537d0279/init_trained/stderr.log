@@ -1,0 +1,11 @@
+KeyError: "Unknown model_id=my_model. Available: ['adaptive_knet', 'kalmannet_tsp', 'maml_knet', 'split_knet']"
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 1220, in run_one
+    AdapterCls = _load_adapter(model_id)
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 254, in _load_adapter
+    cls = get_model_adapter_class(model_id)
+  File "/home/xynus/bench/bench/models/registry.py", line 38, in get_model_adapter_class
+    return get_adapter_class(model_id)
+  File "/home/xynus/bench/bench/models/registry.py", line 32, in get_adapter_class
+    raise KeyError(f"Unknown model_id={model_id}. Available: {sorted(_REGISTRY.keys())}")
+KeyError: "Unknown model_id=my_model. Available: ['adaptive_knet', 'kalmannet_tsp', 'maml_knet', 'split_knet']"

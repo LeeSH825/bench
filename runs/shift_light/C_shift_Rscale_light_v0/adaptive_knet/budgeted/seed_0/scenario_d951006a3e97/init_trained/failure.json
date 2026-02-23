@@ -1,0 +1,46 @@
+{
+  "status": "failed",
+  "failure_type": "runtime_error",
+  "phase": "train",
+  "failure_stage": "train",
+  "message": "RuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1338, in run_one\n    ckpt_path = _execute_train_once()\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1265, in _execute_train_once\n    train_res = _try_call_train(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 861, in _try_call_train\n    return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 545, in train\n    pred = self._forward_sequence(y, context=None)\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 910, in _forward_sequence\n    self.model.InitSequence(x0_batch, int(T))  # type: ignore[attr-defined]\n  File \"/home/xynus/bench/third_party/Adaptive-KNet-ICASSP24/mnets/KNet_mnet.py\", line 352, in InitSequence\n    self.y_previous = self.h(self.m1x_posterior)\n  File \"/home/xynus/bench/third_party/Adaptive-KNet-ICASSP24/simulations/Linear_sysmdl.py\", line 70, in h\n    return torch.bmm(batched_H, x)\nRuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility\n",
+  "context": {
+    "suite_name": "shift_light",
+    "task_id": "C_shift_Rscale_light_v0",
+    "scenario_id": "d951006a3e97",
+    "scenario_id_resolved_from_cache": true,
+    "seed": 0,
+    "model_id": "adaptive_knet",
+    "track_id": "budgeted",
+    "init_id": "trained",
+    "scenario_settings": {
+      "shift.post_shift.R_scale": 10.0
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 0.001
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 60,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 10.0
+        }
+      }
+    }
+  },
+  "error": "RuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility"
+}

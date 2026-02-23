@@ -1,0 +1,399 @@
+suite:
+  name: fig5a_kalmannet_tsp
+  version: "0.1.0"
+  description: >
+    Fig.5(a)-style reproduction suite for KalmanNet_TSP.
+    Objective: MSE[dB] vs inv_r2_db under linear full-information canonical conditions.
+    Rule: nu=0dB -> q2=r2 for each task point.
+    NOTE: Full-information canonical requires y_dim==x_dim with H=canonical_inverse.
+
+seeds: [0]
+
+tasks:
+  # ---- (m,n,T) = (2,2,50) ----
+  - task_id: F5a_m2n2_T50_invR2db_m5
+    task_name: "Fig5a 2x2 T50 inv_r2_db=-5"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 3.1622776601683795 }
+      R: { type: "scaled_identity", r2: 3.1622776601683795 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T50_invR2db_0
+    task_name: "Fig5a 2x2 T50 inv_r2_db=0"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T50_invR2db_20
+    task_name: "Fig5a 2x2 T50 inv_r2_db=20"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.01 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T50_invR2db_40
+    task_name: "Fig5a 2x2 T50 inv_r2_db=40"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.0001 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  # ---- (m,n,T) = (2,2,100) ----
+  - task_id: F5a_m2n2_T100_invR2db_m5
+    task_name: "Fig5a 2x2 T100 inv_r2_db=-5"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 3.1622776601683795 }
+      R: { type: "scaled_identity", r2: 3.1622776601683795 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T100_invR2db_0
+    task_name: "Fig5a 2x2 T100 inv_r2_db=0"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T100_invR2db_20
+    task_name: "Fig5a 2x2 T100 inv_r2_db=20"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.01 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T100_invR2db_40
+    task_name: "Fig5a 2x2 T100 inv_r2_db=40"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.0001 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  # ---- (m,n,T) = (2,2,200) ----
+  - task_id: F5a_m2n2_T200_invR2db_m5
+    task_name: "Fig5a 2x2 T200 inv_r2_db=-5"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 200
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 3.1622776601683795 }
+      R: { type: "scaled_identity", r2: 3.1622776601683795 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T200_invR2db_0
+    task_name: "Fig5a 2x2 T200 inv_r2_db=0"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 200
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T200_invR2db_20
+    task_name: "Fig5a 2x2 T200 inv_r2_db=20"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 200
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.01 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m2n2_T200_invR2db_40
+    task_name: "Fig5a 2x2 T200 inv_r2_db=40"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 200
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.0001 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  # ---- (m,n,T) = (5,5,150) ----
+  - task_id: F5a_m5n5_T150_invR2db_m5
+    task_name: "Fig5a 5x5 T150 inv_r2_db=-5"
+    system_type: linear
+    x_dim: 5
+    y_dim: 5
+    sequence_length_T: 150
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 3.1622776601683795 }
+      R: { type: "scaled_identity", r2: 3.1622776601683795 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m5n5_T150_invR2db_0
+    task_name: "Fig5a 5x5 T150 inv_r2_db=0"
+    system_type: linear
+    x_dim: 5
+    y_dim: 5
+    sequence_length_T: 150
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m5n5_T150_invR2db_20
+    task_name: "Fig5a 5x5 T150 inv_r2_db=20"
+    system_type: linear
+    x_dim: 5
+    y_dim: 5
+    sequence_length_T: 150
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.01 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m5n5_T150_invR2db_40
+    task_name: "Fig5a 5x5 T150 inv_r2_db=40"
+    system_type: linear
+    x_dim: 5
+    y_dim: 5
+    sequence_length_T: 150
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.0001 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  # ---- (m,n,T) = (10,10,100) ----
+  - task_id: F5a_m10n10_T100_invR2db_m5
+    task_name: "Fig5a 10x10 T100 inv_r2_db=-5"
+    system_type: linear
+    x_dim: 10
+    y_dim: 10
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 3.1622776601683795 }
+      R: { type: "scaled_identity", r2: 3.1622776601683795 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m10n10_T100_invR2db_0
+    task_name: "Fig5a 10x10 T100 inv_r2_db=0"
+    system_type: linear
+    x_dim: 10
+    y_dim: 10
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m10n10_T100_invR2db_20
+    task_name: "Fig5a 10x10 T100 inv_r2_db=20"
+    system_type: linear
+    x_dim: 10
+    y_dim: 10
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.01 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_m10n10_T100_invR2db_40
+    task_name: "Fig5a 10x10 T100 inv_r2_db=40"
+    system_type: linear
+    x_dim: 10
+    y_dim: 10
+    sequence_length_T: 100
+    dataset_sizes: { N_train: 800, N_val: 200, N_test: 200 }
+    noise:
+      Q: { type: "scaled_identity", q2: 0.0001 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+models:
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    enabled: true
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        F5a_m2n2_T50_invR2db_m5: "main_linear_canonical.py"
+        F5a_m2n2_T50_invR2db_0: "main_linear_canonical.py"
+        F5a_m2n2_T50_invR2db_20: "main_linear_canonical.py"
+        F5a_m2n2_T50_invR2db_40: "main_linear_canonical.py"
+        F5a_m2n2_T100_invR2db_m5: "main_linear_canonical.py"
+        F5a_m2n2_T100_invR2db_0: "main_linear_canonical.py"
+        F5a_m2n2_T100_invR2db_20: "main_linear_canonical.py"
+        F5a_m2n2_T100_invR2db_40: "main_linear_canonical.py"
+        F5a_m2n2_T200_invR2db_m5: "main_linear_canonical.py"
+        F5a_m2n2_T200_invR2db_0: "main_linear_canonical.py"
+        F5a_m2n2_T200_invR2db_20: "main_linear_canonical.py"
+        F5a_m2n2_T200_invR2db_40: "main_linear_canonical.py"
+        F5a_m5n5_T150_invR2db_m5: "main_linear_canonical.py"
+        F5a_m5n5_T150_invR2db_0: "main_linear_canonical.py"
+        F5a_m5n5_T150_invR2db_20: "main_linear_canonical.py"
+        F5a_m5n5_T150_invR2db_40: "main_linear_canonical.py"
+        F5a_m10n10_T100_invR2db_m5: "main_linear_canonical.py"
+        F5a_m10n10_T100_invR2db_0: "main_linear_canonical.py"
+        F5a_m10n10_T100_invR2db_20: "main_linear_canonical.py"
+        F5a_m10n10_T100_invR2db_40: "main_linear_canonical.py"
+    batch_size: 32
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 50
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/fig5a_kalmannet_tsp"
+  budget:
+    train_max_updates: 3000
+    train_batch_size: 32
+    eval_batch_size: 64
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 6
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+    - "env.txt"
+    - "git_versions.txt"
+  tables:
+    summary_csv: "reports/summary_fig5a_kalmannet_tsp.csv"

@@ -1,0 +1,48 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_b82eac38c3a2/seed_1/test.npz",
+  "context": {
+    "suite_name": "shift",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "b82eac38c3a2",
+    "seed": 1,
+    "model_id": "my_model",
+    "track_id": "budgeted",
+    "init_id": "trained",
+    "cache_root": "/home/xynus/bench/bench_data_cache",
+    "scenario_settings": {
+      "shift.post_shift.R_scale": 30.0
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 0.001
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 100,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 30.0
+        }
+      }
+    },
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_b82eac38c3a2/seed_1/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}

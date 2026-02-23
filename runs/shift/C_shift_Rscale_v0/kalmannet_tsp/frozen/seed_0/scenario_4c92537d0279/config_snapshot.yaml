@@ -84,10 +84,13 @@ track_id: frozen
 track_cfg:
   track_id: frozen
   adaptation_enabled: false
+init_id: untrained
 runner_overrides:
-  device: cuda
+  device: cpu
   precision: fp32
 data:
-  cache_root: /home/xynus/bench_data_cache
-  test_npz: /home/xynus/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/test.npz
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/test.npz
   canonical_layout: NTD

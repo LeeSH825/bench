@@ -1,0 +1,70 @@
+suite:
+  name: basic
+  version: 0.1.0
+  description: 'v0 기본 성능 비교: Linear canonical + Lorenz(DT). (MVP) Lorenz(B_lorenz_dt_v0)는
+    enabled:false로 비활성화됨. (옵션) NCLT는 Split-KalmanNet 연동이 준비되면 활성화.
+
+    '
+task:
+  task_id: A_linear_canonical_v0
+  task_name: Linear Canonical (v0 fixed)
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 200
+  dataset_sizes:
+    N_train: 2000
+    N_val: 500
+    N_test: 500
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: split_knet
+  display_name: Split-KalmanNet
+  adapter: bench.models.split_knet:SplitKNetAdapter
+  enabled: false
+  repo:
+    path: third_party/Split-KalmanNet
+    entrypoints:
+      D_nclt_v0: (NCLT)/main.py
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: false
+scenario_settings: {}
+scenario_cfg_basis:
+  form: diag
+  Q:
+    type: scaled_identity
+    q2: 0.001
+  R:
+    type: scaled_identity
+    r2: 0.001
+scenario_id: 0388b22d0885
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  test_npz: /home/xynus/bench/bench_data_cache/basic/A_linear_canonical_v0/scenario_0388b22d0885/seed_0/test.npz
+  canonical_layout: NTD

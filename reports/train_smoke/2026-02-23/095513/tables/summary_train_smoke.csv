@@ -1,0 +1,3 @@
+status,suite,task_id,scenario_id,seed,model_id,track_id,init_id,mse,rmse,mse_db,timing_ms_per_step,recovery_k,run_dir,error
+ok,train_smoke,A_linear_train_smoke_v0,f7ffdb6c9123,0,kalmannet_tsp,frozen,trained,3.439260482788086,1.8545243279040817,5.364650696729614,0.2122724948397566,,/home/xynus/bench/runs/train_smoke/A_linear_train_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_f7ffdb6c9123,
+ok,train_smoke,A_linear_train_smoke_v0,f7ffdb6c9123,0,kalmannet_tsp,frozen,trained,3.439260482788086,1.8545243279040817,5.364650696729614,0.18185382289933236,,/home/xynus/bench/runs/train_smoke/A_linear_train_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_f7ffdb6c9123,

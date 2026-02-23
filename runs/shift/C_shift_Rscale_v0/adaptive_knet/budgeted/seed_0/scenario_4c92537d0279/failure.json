@@ -1,0 +1,41 @@
+{
+  "status": "failed",
+  "category": "train_nan",
+  "error": "FloatingPointError: train_nan: non-finite training loss at update=0",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 991, in run_one\n    train_res = _try_call_train(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 620, in _try_call_train\n    return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 548, in train\n    raise FloatingPointError(f\"train_nan: non-finite training loss at update={updates_used}\")\nFloatingPointError: train_nan: non-finite training loss at update=0\n",
+  "suite_name": "shift",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "4c92537d0279",
+  "scenario_id_resolved_from_cache": true,
+  "seed": 0,
+  "model_id": "adaptive_knet",
+  "track_id": "budgeted",
+  "init_id": "trained",
+  "scenario_settings": {
+    "shift.post_shift.R_scale": 3.0
+  },
+  "scenario_cfg_basis": {
+    "pre_shift": {
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 0.001
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 0.001
+      },
+      "obs_distribution": {
+        "name": "gaussian"
+      }
+    },
+    "shift": {
+      "t0": 100,
+      "post_shift": {
+        "obs_distribution": {
+          "name": "gaussian"
+        },
+        "R_scale": 3.0
+      }
+    }
+  }
+}

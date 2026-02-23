@@ -1,0 +1,7 @@
+suite,task_id,scenario_id,seed,model_id,status__pretrained__frozen,failure_type__pretrained__frozen,failure_stage__pretrained__frozen,mse_db__pretrained__frozen,recovery_k__pretrained__frozen,train_updates_used__pretrained__frozen,adapt_updates_used__pretrained__frozen,total_time_s__pretrained__frozen,cache_hit__pretrained__frozen,delta_mse_db_trained_budgeted_minus_frozen,delta_recovery_k_trained_budgeted_minus_frozen
+kf_baseline_smoke,A_linear_kf_baseline_smoke_v0,edd729931b0e,0,nominal_kf,ok,,,-31.720774219420015,,0,0,0.005174923004233278,False,,
+kf_baseline_smoke,A_linear_kf_baseline_smoke_v0,edd729931b0e,0,oracle_kf,ok,,,-31.720774219420015,,0,0,0.006337184997391887,False,,
+kf_baseline_smoke,A_linear_kf_baseline_smoke_v0,edd729931b0e,0,oracle_shift_kf,ok,,,-31.720774219420015,,0,0,0.005025674996431917,False,,
+kf_baseline_smoke,C_shift_kf_baseline_smoke_v0,500e60702ca6,0,nominal_kf,ok,,,-25.1833570161444,12.0,0,0,0.006110007001552731,False,,
+kf_baseline_smoke,C_shift_kf_baseline_smoke_v0,500e60702ca6,0,oracle_kf,ok,,,-26.721714941858625,12.0,0,0,0.0063706239889143035,False,,
+kf_baseline_smoke,C_shift_kf_baseline_smoke_v0,500e60702ca6,0,oracle_shift_kf,ok,,,-26.721714941858625,12.0,0,0,0.007175221006036736,False,,

@@ -1,0 +1,41 @@
+{
+  "status": "missing_data",
+  "missing_path": "/home/xynus/bench_data_cache/basic/A_linear_canonical_v0/scenario_fd75d1016844/seed_0/test.npz",
+  "hint": "Run Step4 smoke_data to generate cache for this suite/task/scenario/seed.",
+  "cache_root": "/home/xynus/bench_data_cache",
+  "scenario_settings": {},
+  "scenario_cfg_basis": {
+    "form": "diag",
+    "Q": {
+      "type": "scaled_identity",
+      "q2": 0.001
+    },
+    "R": {
+      "type": "scaled_identity",
+      "r2": 0.001
+    }
+  },
+  "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+  "resolved_from_cache": false
+}
+SplitKNetNotSupportedError: Split-KalmanNet adapter: benchmark task is not supported in MVP import mode.
+task_id=A_linear_canonical_v0
+repo_root=/home/xynus/bench/third_party/Split_KalmanNet
+selected_entrypoint=None
+Reason: this repo is script/config driven for dataset-specific flows ((SyntheticNL) main.py / (NCLT) main.py with config.ini), while benchmark uses bench_generated canonical sequences [B,T,D].
+This adapter intentionally does not run third_party training/generation scripts in Frozen track.
+HOW TO VERIFY: third_party/Split_KalmanNet/(SyntheticNL) main.py, third_party/Split_KalmanNet/(NCLT) main.py, third_party/Split_KalmanNet/config.ini.
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 615, in run_one
+    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore
+  File "/home/xynus/bench/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/xynus/bench/bench/models/split_knet.py", line 179, in predict
+    raise SplitKNetNotSupportedError(msg)
+bench.models.split_knet.SplitKNetNotSupportedError: Split-KalmanNet adapter: benchmark task is not supported in MVP import mode.
+task_id=A_linear_canonical_v0
+repo_root=/home/xynus/bench/third_party/Split_KalmanNet
+selected_entrypoint=None
+Reason: this repo is script/config driven for dataset-specific flows ((SyntheticNL) main.py / (NCLT) main.py with config.ini), while benchmark uses bench_generated canonical sequences [B,T,D].
+This adapter intentionally does not run third_party training/generation scripts in Frozen track.
+HOW TO VERIFY: third_party/Split_KalmanNet/(SyntheticNL) main.py, third_party/Split_KalmanNet/(NCLT) main.py, third_party/Split_KalmanNet/config.ini.

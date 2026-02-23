@@ -1,0 +1,72 @@
+suite:
+  name: fig5a_knet_vs_kf
+  version: 0.1.0
+  description: 'Fig.5(a)-style reproduction suite for KalmanNet_TSP vs oracle_kf.
+    Objective: MSE[dB] vs inv_r2_db under linear full-information canonical conditions.
+    Rule: nu=0dB -> q2=r2 for each task point. NOTE: Full-information canonical requires
+    y_dim==x_dim with H=canonical_inverse. NOTE: Current bench linear canonical generator
+    enforces square canonical_inverse H, so this suite uses (2x2), (5x5), and (10x10)
+    settings.
+
+    '
+task:
+  task_id: F5a_m2n2_T100_invR2db_40
+  task_name: Fig5a 2x2 T100 inv_r2_db=40
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 100
+  dataset_sizes:
+    N_train: 800
+    N_val: 200
+    N_test: 200
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 0.0001
+    R:
+      type: scaled_identity
+      r2: 0.0001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: oracle_kf
+  display_name: Oracle KF
+  adapter: bench.models.mb_kf:ModelBasedKFAdapter
+  baseline_mode: oracle
+  outputs_covariance: false
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis:
+  Q:
+    type: scaled_identity
+    q2: 0.0001
+  R:
+    type: scaled_identity
+    r2: 0.0001
+scenario_id: '611063532503'
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: pretrained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/fig5a_knet_vs_kf/F5a_m2n2_T100_invR2db_40/scenario_611063532503/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/fig5a_knet_vs_kf/F5a_m2n2_T100_invR2db_40/scenario_611063532503/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/fig5a_knet_vs_kf/F5a_m2n2_T100_invR2db_40/scenario_611063532503/seed_0/test.npz
+  canonical_layout: NTD

@@ -1,0 +1,68 @@
+suite:
+  name: fig5a_overlay_smoke
+  version: 0.1.0
+  description: 'Tiny Fig.5(a)-style overlay smoke suite for KalmanNet_TSP vs oracle_kf.
+    nu=0dB (q2=r2), linear full-information canonical setting.
+
+    '
+task:
+  task_id: F5aS_m2n2_T50_invR2db_20
+  task_name: Fig5a SMOKE 2x2 T50 inv_r2_db=20
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 50
+  dataset_sizes:
+    N_train: 64
+    N_val: 16
+    N_test: 16
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 0.01
+    R:
+      type: scaled_identity
+      r2: 0.01
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: oracle_kf
+  display_name: Oracle KF
+  adapter: bench.models.mb_kf:ModelBasedKFAdapter
+  baseline_mode: oracle
+  outputs_covariance: false
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis:
+  Q:
+    type: scaled_identity
+    q2: 0.01
+  R:
+    type: scaled_identity
+    r2: 0.01
+scenario_id: 60e3d83b967c
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: pretrained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/fig5a_overlay_smoke/F5aS_m2n2_T50_invR2db_20/scenario_60e3d83b967c/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/fig5a_overlay_smoke/F5aS_m2n2_T50_invR2db_20/scenario_60e3d83b967c/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/fig5a_overlay_smoke/F5aS_m2n2_T50_invR2db_20/scenario_60e3d83b967c/seed_0/test.npz
+  canonical_layout: NTD

@@ -1,0 +1,2 @@
+[WARN] requested device=cuda but cuda not available -> using cpu
+[OK] wrote metrics to /home/xynus/bench/runs/linear_multimodel_compare/B_linear_shift_compare_v0/oracle_kf/frozen/seed_0/scenario_e00e681616a7

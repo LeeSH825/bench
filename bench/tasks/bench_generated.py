@@ -27,8 +27,8 @@ from ..utils.io import ensure_dir
 
 
 def _repo_root_from_here() -> Path:
-    # .../bench/bench/tasks/bench_generated.py -> parents[3] == repo root (.../bench)
-    return Path(__file__).resolve().parents[3]
+    # .../bench/bench/tasks/bench_generated.py -> parents[2] == repo root (.../bench)
+    return Path(__file__).resolve().parents[2]
 
 
 def default_cache_root() -> Path:
@@ -402,4 +402,3 @@ def prepare_bench_generated_v0(
         )
         out.append(art)
     return out
-

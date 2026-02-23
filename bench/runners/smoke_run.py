@@ -51,6 +51,7 @@ def main() -> None:
     ap.add_argument("--model-id", type=str, required=True)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--track", type=str, default="frozen")
+    ap.add_argument("--init-id", type=str, default="untrained")
     ap.add_argument("--device", type=str, default="cpu")
     ap.add_argument("--precision", type=str, default="fp32")
     args = ap.parse_args()
@@ -86,6 +87,7 @@ def main() -> None:
         track_id=str(args.track),
         device_str=str(args.device),
         precision=str(args.precision),
+        init_id=str(args.init_id),
     )
 
     print("[smoke_run] result:")
@@ -109,4 +111,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

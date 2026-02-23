@@ -1,0 +1,46 @@
+{
+  "status": "failed",
+  "failure_type": "runtime_error",
+  "phase": "runner",
+  "failure_stage": "runner",
+  "message": "KeyError: \"Unknown model_id=my_model. Available: ['adaptive_knet', 'kalmannet_tsp', 'maml_knet', 'split_knet']\"",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1220, in run_one\n    AdapterCls = _load_adapter(model_id)\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 254, in _load_adapter\n    cls = get_model_adapter_class(model_id)\n  File \"/home/xynus/bench/bench/models/registry.py\", line 38, in get_model_adapter_class\n    return get_adapter_class(model_id)\n  File \"/home/xynus/bench/bench/models/registry.py\", line 32, in get_adapter_class\n    raise KeyError(f\"Unknown model_id={model_id}. Available: {sorted(_REGISTRY.keys())}\")\nKeyError: \"Unknown model_id=my_model. Available: ['adaptive_knet', 'kalmannet_tsp', 'maml_knet', 'split_knet']\"\n",
+  "context": {
+    "suite_name": "shift",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "080cb40977a4",
+    "scenario_id_resolved_from_cache": true,
+    "seed": 0,
+    "model_id": "my_model",
+    "track_id": "frozen",
+    "init_id": "trained",
+    "scenario_settings": {
+      "shift.post_shift.R_scale": 30.0
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 0.001
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 100,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 30.0
+        }
+      }
+    }
+  },
+  "error": "KeyError: \"Unknown model_id=my_model. Available: ['adaptive_knet', 'kalmannet_tsp', 'maml_knet', 'split_knet']\""
+}

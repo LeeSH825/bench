@@ -1,0 +1,101 @@
+suite:
+  name: split_train_smoke
+  version: "0.1.0"
+  description: >
+    Tiny Route-B smoke suite for Split-KalmanNet trained+frozen plan.
+
+seeds: [0]
+
+tasks:
+  - task_id: A_linear_split_train_smoke_v0
+    task_name: "Linear Canonical Tiny (Split-KNet)"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 16
+    dataset_sizes:
+      N_train: 12
+      N_val: 4
+      N_test: 4
+    noise:
+      form: "diag"
+      Q:
+        type: "scaled_identity"
+        q2: 1.0e-3
+      R:
+        type: "scaled_identity"
+        r2: 1.0e-3
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+models:
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    repo:
+      path: "third_party/Split_KalmanNet"
+      entrypoints:
+        A_linear_split_train_smoke_v0: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 2
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 2
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cpu"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  budget:
+    train_max_updates: 6
+    train_batch_size: 2
+    eval_batch_size: 2
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 0
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    enabled: false
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+  tables:
+    summary_csv: "reports/summary_split_train_smoke.csv"

@@ -1,0 +1,24 @@
+{
+  "status": "failed",
+  "error": "SplitKNetNotSupportedError: Split-KalmanNet adapter: benchmark task is not supported in MVP import mode.\ntask_id=A_linear_canonical_v0\nrepo_root=/home/xynus/bench/third_party/Split_KalmanNet\nselected_entrypoint=None\nReason: this repo is script/config driven for dataset-specific flows ((SyntheticNL) main.py / (NCLT) main.py with config.ini), while benchmark uses bench_generated canonical sequences [B,T,D].\nThis adapter intentionally does not run third_party training/generation scripts in Frozen track.\nHOW TO VERIFY: third_party/Split_KalmanNet/(SyntheticNL) main.py, third_party/Split_KalmanNet/(NCLT) main.py, third_party/Split_KalmanNet/config.ini.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 615, in run_one\n    pred = adapter.predict(y_b, context=system_info, return_cov=False)  # type: ignore\n  File \"/home/xynus/bench/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n  File \"/home/xynus/bench/bench/models/split_knet.py\", line 179, in predict\n    raise SplitKNetNotSupportedError(msg)\nbench.models.split_knet.SplitKNetNotSupportedError: Split-KalmanNet adapter: benchmark task is not supported in MVP import mode.\ntask_id=A_linear_canonical_v0\nrepo_root=/home/xynus/bench/third_party/Split_KalmanNet\nselected_entrypoint=None\nReason: this repo is script/config driven for dataset-specific flows ((SyntheticNL) main.py / (NCLT) main.py with config.ini), while benchmark uses bench_generated canonical sequences [B,T,D].\nThis adapter intentionally does not run third_party training/generation scripts in Frozen track.\nHOW TO VERIFY: third_party/Split_KalmanNet/(SyntheticNL) main.py, third_party/Split_KalmanNet/(NCLT) main.py, third_party/Split_KalmanNet/config.ini.\n",
+  "suite_name": "basic",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "0388b22d0885",
+  "scenario_id_resolved_from_cache": true,
+  "seed": 0,
+  "model_id": "split_knet",
+  "track_id": "frozen",
+  "scenario_settings": {},
+  "scenario_cfg_basis": {
+    "form": "diag",
+    "Q": {
+      "type": "scaled_identity",
+      "q2": 0.001
+    },
+    "R": {
+      "type": "scaled_identity",
+      "r2": 0.001
+    }
+  }
+}

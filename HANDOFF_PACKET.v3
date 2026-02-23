@@ -1,0 +1,108 @@
+# HANDOFF_PACKET.v3
+
+## S3 Scope Completed
+
+- Target: Route-B upgrade for `adaptive_knet` with trained/frozen and trained/budgeted support.
+- Core result:
+  - `adaptive_knet` adapter now implements full Route-B train/eval/predict/adapt/save/load behavior.
+  - `run_suite` now executes budgeted track adaptation and audits fairness constraints from ledger.
+  - Tiny adapt smoke tests added, including forced overflow path verification.
+
+## Confirmed Adaptive-KNet Entry Points
+
+- Config:
+  - `third_party/Adaptive-KNet-ICASSP24/simulations/config.py::general_settings`
+- System model:
+  - `third_party/Adaptive-KNet-ICASSP24/simulations/Linear_sysmdl.py::SystemModel`
+- Estimator class (pinned in config):
+  - `third_party/Adaptive-KNet-ICASSP24/mnets/KNet_mnet.py::KalmanNetNN`
+- Third-party reference pipelines:
+  - `third_party/Adaptive-KNet-ICASSP24/pipelines/Pipeline_EKF.py::NNTrain/NNTest`
+  - `third_party/Adaptive-KNet-ICASSP24/noise_estimator/search.py::Pipeline_NE`
+
+## Data Transform (Bench <-> Adapter)
+
+- Bench canonical splits remain unchanged (`train/val/test` from D15 NPZ):
+  - bench data: `x=[N,T,Dx]`, `y=[N,T,Dy]`.
+- Adapter batch interface:
+  - input: `y_batch=[B,T,Dy]`
+  - target (train only): `x_gt=[B,T,Dx]`
+- Internal model feed:
+  - staging: `[B,Dy,T]`
+  - step input: `[B,Dy,1]`
+- Adapter output:
+  - `x_hat=[B,T,Dx]` (returned to bench metrics layer).
+
+## Implemented Files
+
+- `bench/models/adaptive_knet.py`
+  - Added/extended Route-B methods:
+    - `setup`, `train`, `eval`, `predict`, `adapt`, `save`, `load`, `get_adapter_meta`
+  - Train budget enforcement via `optimizer.step()` counting (`train_max_updates`).
+  - Adapt fairness enforcement:
+    - `max_updates <= 200`
+    - `max_updates_per_step <= 1`
+    - `allowed_after_t0_only` support with `t0` gate
+    - overflow policy default fail-fast (`budget_overflow`).
+  - Ledger writes:
+    - `train_updates_used`, `adapt_updates_used`, `adapt_updates_per_step`, `adapt_t0`, flags.
+
+- `bench/runners/run_suite.py`
+  - Removed budgeted-track block in CLI main path.
+  - Added adapter adaptation call path:
+    - `setup -> train/load -> adapt (if budgeted) -> eval`
+  - Prevented post-adapt checkpoint reload (`eval_ckpt_path=None` after adapt).
+  - Added adaptation helper/audit logic:
+    - `_try_call_adapt`
+    - `_normalize_adapt_updates_per_step`
+    - frozen audit (`adapt_updates_used == 0`)
+    - budgeted audits:
+      - total updates <= max_updates
+      - per-step updates <= max_updates_per_step
+      - no updates before `t0` when `allowed_after_t0_only=true`.
+  - `run_plan.json` now includes shift/adaptation metadata (`t0`, adaptation settings).
+
+- Added configs:
+  - `bench/configs/suite_adapt_smoke.yaml`
+  - `bench/configs/suite_adapt_smoke_overflow.yaml`
+
+- Added tests:
+  - `bench/tests/test_adapt_smoke_plan.py`
+  - `bench/tests/run_all.py` updated to run `test_adapt_smoke_plan`.
+
+- Added audit doc:
+  - `AUDIT_Adaptive_KNet.md`
+
+## Tiny Adapt Smoke PASS Commands
+
+- Targeted S3 adapt smoke:
+  - `BENCH_DATA_CACHE=/home/xynus/bench/bench_data_cache .venv/bin/python -c "from pathlib import Path; from bench.tests.test_adapt_smoke_plan import run_adapt_smoke_route_b; r=run_adapt_smoke_route_b(Path('bench/configs/suite_adapt_smoke.yaml'), Path('bench/configs/suite_adapt_smoke_overflow.yaml')); print(r); import sys; sys.exit(0 if r.ok else 1)"`
+
+- Full local manual suite:
+  - `BENCH_DATA_CACHE=/home/xynus/bench/bench_data_cache .venv/bin/python -m bench.tests.run_all --device cpu`
+
+## Verified Assertions (S3)
+
+- Frozen track:
+  - `adapt_updates_used == 0`.
+- Budgeted track:
+  - `adapt_updates_used > 0`
+  - `adapt_updates_used <= 200`
+  - `max(adapt_updates_per_step) <= 1`
+  - updates only at `t >= t0` when `allowed_after_t0_only=true`.
+- Overflow path:
+  - `failure.json` produced
+  - `failure_type == budget_overflow`.
+
+## D18 Fail-Fast Overflow Verification
+
+- Status: verified in practice.
+- Evidence:
+  - `suite_adapt_smoke_overflow.yaml` uses `track=budgeted`, `max_updates=0`.
+  - Run produces `failure.json` with `failure_type=budget_overflow` (adapter fail-fast path).
+
+## Known Issues / TODO
+
+- Current adapter adaptation objective is unsupervised observation reconstruction MSE (bench-side design choice), not a direct invocation of third-party `Pipeline_NE` end-to-end workflow.
+- If future experiments require strict third-party SoW search behavior, add a separate adapter mode with explicitly pinned class/function path and deterministic budget accounting.
+- Existing repository contains unrelated dirty/untracked files from earlier work; this handoff only covers S3-targeted files listed above.

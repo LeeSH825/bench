@@ -1,0 +1,33 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /home/xynus/bench/bench_data_cache/linear_multimodel_compare/A_linear_stationary_compare_v0/scenario_f9b05a54f68a/seed_1/test.npz",
+  "context": {
+    "suite_name": "linear_multimodel_compare",
+    "task_id": "A_linear_stationary_compare_v0",
+    "scenario_id": "f9b05a54f68a",
+    "seed": 1,
+    "model_id": "oracle_kf",
+    "track_id": "frozen",
+    "init_id": "pretrained",
+    "cache_root": "/home/xynus/bench/bench_data_cache",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {
+      "form": "diag",
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 0.001
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 0.001
+      }
+    },
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/home/xynus/bench/bench_data_cache/linear_multimodel_compare/A_linear_stationary_compare_v0/scenario_f9b05a54f68a/seed_1/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}

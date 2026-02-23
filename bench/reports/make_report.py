@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -8,14 +10,26 @@ from .aggregate import (
     RunRecord,
     aggregate_by_seed,
     aggregate_to_latex_tabular,
+    build_plan_comparison_rows,
     expected_plan_from_suite,
     load_yaml,
     merge_records_with_expected,
     scan_runs,
+    summarize_failures_by_plan,
+    summarize_ops_by_plan,
     write_aggregate_csv,
+    write_rows_csv,
     write_summary_csv,
 )
-from .plots import plot_shift_recovery_curves, plot_severity_sweep
+from .plots import (
+    plot_fig5a_mse_vs_inv_r2,
+    plot_budget_curve,
+    plot_mse_db_by_model,
+    plot_ops_tradeoff,
+    plot_severity_sweep,
+    plot_shift_recovery_curves,
+    plot_track_comparison,
+)
 
 
 def _bench_root() -> Path:
@@ -48,6 +62,181 @@ def _filter_records(records: List[RunRecord], suite_name: str, task_id: Optional
     return out
 
 
+def _suite_task_ids(suite: Dict[str, Any], records: List[RunRecord]) -> List[str]:
+    ids: List[str] = []
+    for t in (suite.get("tasks", []) or []):
+        if not _enabled(t, True):
+            continue
+        tid = t.get("task_id")
+        if tid:
+            ids.append(str(tid))
+    if ids:
+        return ids
+    return sorted({r.task_id for r in records})
+
+
+def _infer_baseline_mode(model_id: str) -> str:
+    mid = str(model_id).strip().lower()
+    if mid == "oracle_kf":
+        return "oracle"
+    if mid == "nominal_kf":
+        return "nominal"
+    if mid == "oracle_shift_kf":
+        return "oracle_shift"
+    return ""
+
+
+def _build_fig5a_point_rows(records: List[RunRecord]) -> tuple[List[Dict[str, Any]], List[str]]:
+    fields = [
+        "model_id",
+        "baseline_mode",
+        "is_oracle_kf",
+        "init_id",
+        "track_id",
+        "task_id",
+        "scenario_id",
+        "seed",
+        "x_dim",
+        "y_dim",
+        "T",
+        "q2",
+        "r2",
+        "inv_r2_db",
+        "mse_db",
+        "mse",
+        "rmse",
+        "run_dir",
+    ]
+    rows: List[Dict[str, Any]] = []
+    for r in records:
+        if r.status != "ok":
+            continue
+        if r.mse_db is None:
+            continue
+        row = {
+            "model_id": str(r.model_id),
+            "baseline_mode": _infer_baseline_mode(r.model_id),
+            "is_oracle_kf": bool(str(r.model_id).strip().lower() == "oracle_kf"),
+            "init_id": str(r.init_id),
+            "track_id": str(r.track_id),
+            "task_id": str(r.task_id),
+            "scenario_id": str(r.scenario_id),
+            "seed": int(r.seed),
+            "x_dim": ("" if r.x_dim is None else int(r.x_dim)),
+            "y_dim": ("" if r.y_dim is None else int(r.y_dim)),
+            "T": ("" if r.T is None else int(r.T)),
+            "q2": ("" if r.q2 is None else float(r.q2)),
+            "r2": ("" if r.r2 is None else float(r.r2)),
+            "inv_r2_db": ("" if r.inv_r2_db is None else float(r.inv_r2_db)),
+            "mse_db": float(r.mse_db),
+            "mse": ("" if r.mse is None else float(r.mse)),
+            "rmse": ("" if r.rmse is None else float(r.rmse)),
+            "run_dir": ("" if str(r.run_dir) == "." else str(r.run_dir)),
+        }
+        rows.append(row)
+    rows.sort(
+        key=lambda rr: (
+            str(rr["model_id"]),
+            str(rr["task_id"]),
+            str(rr["scenario_id"]),
+            int(rr["seed"]),
+        )
+    )
+    return rows, fields
+
+
+def _copy_if_exists(src: Path, dst: Path) -> bool:
+    if not src.exists():
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    return True
+
+
+def _resolve_report_stamp(stamp: Optional[str]) -> tuple[str, str]:
+    if stamp is None or str(stamp).strip() == "":
+        now = datetime.now().astimezone()
+        return now.strftime("%Y-%m-%d"), now.strftime("%H%M%S")
+
+    s = str(stamp).strip()
+    fmts = (
+        "%Y%m%d-%H%M%S",
+        "%Y-%m-%d_%H%M%S",
+        "%Y-%m-%dT%H%M%S",
+        "%Y-%m-%d %H%M%S",
+    )
+    for fmt in fmts:
+        try:
+            dt = datetime.strptime(s, fmt)
+            return dt.strftime("%Y-%m-%d"), dt.strftime("%H%M%S")
+        except Exception:
+            continue
+    raise ValueError(
+        "Invalid --report-stamp format. Use one of: "
+        "YYYYMMDD-HHMMSS, YYYY-MM-DD_HHMMSS, YYYY-MM-DDTHHMMSS, YYYY-MM-DD HHMMSS"
+    )
+
+
+def _organize_outputs_by_suite(
+    *,
+    out_dir: Path,
+    suite_name: str,
+    day_stamp: str,
+    time_stamp: str,
+    table_files: List[Path],
+    plot_files: List[Path],
+    misc_files: Optional[List[Path]] = None,
+) -> Dict[str, List[Path]]:
+    suite_dir = out_dir / str(suite_name)
+    stamp_dir = suite_dir / str(day_stamp) / str(time_stamp)
+    latest_dir = suite_dir / "latest"
+    tables_dir = stamp_dir / "tables"
+    plots_dir = stamp_dir / "plots"
+    misc_dir = stamp_dir / "misc"
+    latest_tables_dir = latest_dir / "tables"
+    latest_plots_dir = latest_dir / "plots"
+    latest_misc_dir = latest_dir / "misc"
+
+    copied: Dict[str, List[Path]] = {"tables": [], "plots": [], "misc": []}
+    if latest_dir.exists():
+        shutil.rmtree(latest_dir)
+
+    seen_tables = set()
+    for src in table_files:
+        src_res = src.resolve()
+        if src_res in seen_tables:
+            continue
+        seen_tables.add(src_res)
+        dst = tables_dir / src.name
+        if _copy_if_exists(src, dst):
+            copied["tables"].append(dst)
+            _copy_if_exists(src, latest_tables_dir / src.name)
+
+    seen_plots = set()
+    for src in plot_files:
+        src_res = src.resolve()
+        if src_res in seen_plots:
+            continue
+        seen_plots.add(src_res)
+        dst = plots_dir / src.name
+        if _copy_if_exists(src, dst):
+            copied["plots"].append(dst)
+            _copy_if_exists(src, latest_plots_dir / src.name)
+
+    seen_misc = set()
+    for src in (misc_files or []):
+        src_res = src.resolve()
+        if src_res in seen_misc:
+            continue
+        seen_misc.add(src_res)
+        dst = misc_dir / src.name
+        if _copy_if_exists(src, dst):
+            copied["misc"].append(dst)
+            _copy_if_exists(src, latest_misc_dir / src.name)
+
+    return copied
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite-yaml", type=str, required=True)
@@ -55,6 +244,52 @@ def main() -> None:
     ap.add_argument("--out-dir", type=str, default=None, help="default: <bench_root>/reports")
     ap.add_argument("--dry-run", action="store_true", help="print plan only; do not write files")
     ap.add_argument("--latex", action="store_true", help="also write summary_<suite>.tex (aggregate table)")
+    # S6 additive report views
+    ap.add_argument(
+        "--group-by",
+        type=str,
+        default="init_id,track_id",
+        help="group keys for failure/ops views (comma-separated). default: init_id,track_id",
+    )
+    ap.add_argument(
+        "--include-ops",
+        action="store_true",
+        help="write ops summary table and ops tradeoff plot",
+    )
+    ap.add_argument(
+        "--budget-curves",
+        action="store_true",
+        help="write per-task budget curve plot (adapt_updates_used vs metric)",
+    )
+    ap.add_argument(
+        "--plan-views",
+        action="store_true",
+        help="write plan comparison and failure-by-plan tables, plus track comparison plots",
+    )
+    ap.add_argument(
+        "--fig5a-plot",
+        action="store_true",
+        help="write Fig5(a)-style plot: mse_db vs inv_r2_db grouped by (model_id,x_dim,y_dim,T)",
+    )
+    ap.add_argument(
+        "--organize-by-suite",
+        dest="organize_by_suite",
+        action="store_true",
+        default=True,
+        help="also mirror outputs under reports/<suite>/tables and reports/<suite>/plots (default: on)",
+    )
+    ap.add_argument(
+        "--no-organize-by-suite",
+        dest="organize_by_suite",
+        action="store_false",
+        help="disable suite-folder mirror and keep only flat reports/<files>",
+    )
+    ap.add_argument(
+        "--report-stamp",
+        type=str,
+        default=None,
+        help="optional fixed stamp for organized folders (e.g., 20260223-091500).",
+    )
     args = ap.parse_args()
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
@@ -64,23 +299,26 @@ def main() -> None:
     bench_root = _bench_root()
     runs_root = Path(args.runs_root).expanduser().resolve() if args.runs_root else (bench_root / "runs")
     out_dir = Path(args.out_dir).expanduser().resolve() if args.out_dir else (bench_root / "reports")
+    day_stamp, time_stamp = _resolve_report_stamp(args.report_stamp)
 
-    # output filenames (consistent)
+    # baseline outputs (backward compatible)
     summary_csv = out_dir / f"summary_{suite_name}.csv"
     aggregate_csv = out_dir / f"aggregate_{suite_name}.csv"
     latex_tex = out_dir / f"summary_{suite_name}.tex"
 
-    # scan existing run dirs
-    scanned = scan_runs(runs_root=runs_root, suite_name=suite_name)
+    # S6 additive outputs
+    plan_compare_csv = out_dir / f"plan_compare_{suite_name}.csv"
+    failure_by_plan_csv = out_dir / f"failure_by_plan_{suite_name}.csv"
+    ops_by_plan_csv = out_dir / f"ops_by_plan_{suite_name}.csv"
+    fig5a_points_csv = out_dir / f"fig5a_points_{suite_name}.csv"
+    fig5a_overlay_path = out_dir / f"fig5a_overlay_mse_db_vs_inv_r2_db_{suite_name}.png"
+    fig5a_legacy_path = out_dir / f"fig5a_mse_db_vs_inv_r2_db_{suite_name}.png"
 
-    # include expected missing combos based on suite enabled_policy (D11)
+    scanned = scan_runs(runs_root=runs_root, suite_name=suite_name)
     expected = expected_plan_from_suite(suite)
     records = merge_records_with_expected(scanned, expected)
-
-    # aggregation
     agg_rows = aggregate_by_seed(records)
 
-    # dry run print
     if args.dry_run:
         print("[dry-run] suite:", suite_name)
         print("[dry-run] runs_root:", runs_root)
@@ -90,25 +328,39 @@ def main() -> None:
         print("[dry-run] will write:", summary_csv.name, aggregate_csv.name)
         if args.latex:
             print("[dry-run] will write:", latex_tex.name)
+        if args.plan_views:
+            print("[dry-run] will write:", plan_compare_csv.name, failure_by_plan_csv.name)
+        if args.include_ops:
+            print("[dry-run] will write:", ops_by_plan_csv.name)
+        if args.fig5a_plot:
+            print("[dry-run] will write:", f"fig5a_points_{suite_name}.csv")
+            print("[dry-run] will plot:", f"fig5a_overlay_mse_db_vs_inv_r2_db_{suite_name}.png")
+            print("[dry-run] will plot:", f"fig5a_mse_db_vs_inv_r2_db_{suite_name}.png")
+        if args.organize_by_suite:
+            print("[dry-run] will mirror to:", out_dir / suite_name / day_stamp / time_stamp / "tables")
+            print("[dry-run] will mirror to:", out_dir / suite_name / day_stamp / time_stamp / "plots")
+            print("[dry-run] will mirror latest to:", out_dir / suite_name / "latest")
 
-        # plots plan (shift suite)
-        if suite_name == "shift":
-            tasks = suite.get("tasks", []) or []
-            for t in tasks:
-                if not _enabled(t, True):
-                    continue
-                tid = t.get("task_id")
-                if not tid:
-                    continue
-                print("[dry-run] will plot:", f"shift_recovery_{tid}.png")
-                print("[dry-run] will plot:", f"severity_sweep_{tid}_R_scale.png")
+        for task_id in _suite_task_ids(suite, records):
+            if suite_name == "shift":
+                print("[dry-run] will plot:", f"shift_recovery_{task_id}.png")
+                print("[dry-run] will plot:", f"severity_sweep_{task_id}_R_scale.png")
+            if args.plan_views:
+                print("[dry-run] will plot:", f"track_compare_{task_id}_<metric>.png")
+                print("[dry-run] will plot:", f"mse_db_by_model_{task_id}.png")
+            if args.budget_curves:
+                print("[dry-run] will plot:", f"budget_curve_{task_id}_<metric>.png")
+        if args.include_ops:
+            print("[dry-run] will plot:", f"ops_tradeoff_{suite_name}.png")
         return
 
-    # write tables
+    # baseline tables
     write_summary_csv(records, summary_csv)
     write_aggregate_csv(agg_rows, aggregate_csv)
+    written_tables: List[Path] = [summary_csv, aggregate_csv]
+    written_plots: List[Path] = []
+    written_misc: List[Path] = []
 
-    # optional latex export (aggregate table)
     if args.latex:
         tex = aggregate_to_latex_tabular(
             agg_rows,
@@ -117,22 +369,19 @@ def main() -> None:
         )
         out_dir.mkdir(parents=True, exist_ok=True)
         latex_tex.write_text(tex, encoding="utf-8")
+        written_misc.append(latex_tex)
 
-    # plots (shift suite 핵심)
+    # baseline shift plots (preserved)
     if suite_name == "shift":
-        tasks = suite.get("tasks", []) or []
-        for t in tasks:
+        for t in (suite.get("tasks", []) or []):
             if not _enabled(t, True):
                 continue
             task_id = t.get("task_id")
             if not task_id:
                 continue
-
             t0 = _task_shift_t0(t)
-
             task_records = _filter_records(records, suite_name=suite_name, task_id=str(task_id))
 
-            # 1) shift recovery curve (mse_t)
             out_png = out_dir / f"shift_recovery_{task_id}.png"
             plot_shift_recovery_curves(
                 task_id=str(task_id),
@@ -141,8 +390,8 @@ def main() -> None:
                 t0=t0,
                 metric="mse_t",
             )
+            written_plots.append(out_png)
 
-            # 2) mismatch severity sweep (R_scale if present)
             out_png2 = out_dir / f"severity_sweep_{task_id}_R_scale.png"
             plot_severity_sweep(
                 task_id=str(task_id),
@@ -150,8 +399,94 @@ def main() -> None:
                 out_path=out_png2,
                 severity_key="shift.post_shift.R_scale",
             )
+            written_plots.append(out_png2)
+
+    # S6 views (additive; flag-gated)
+    if args.plan_views:
+        plan_rows, plan_fields = build_plan_comparison_rows(records)
+        write_rows_csv(plan_rows, plan_compare_csv, plan_fields)
+        written_tables.append(plan_compare_csv)
+
+        fail_rows, fail_fields = summarize_failures_by_plan(records, group_by=args.group_by)
+        write_rows_csv(fail_rows, failure_by_plan_csv, fail_fields)
+        written_tables.append(failure_by_plan_csv)
+
+        for task_id in _suite_task_ids(suite, records):
+            task_records = _filter_records(records, suite_name=suite_name, task_id=str(task_id))
+            tmp_path = out_dir / f"track_compare_{task_id}_metric.png"
+            metric_key = plot_track_comparison(task_id=str(task_id), records=task_records, out_path=tmp_path)
+            if metric_key and tmp_path.exists():
+                final_path = out_dir / f"track_compare_{task_id}_{metric_key}.png"
+                tmp_path.rename(final_path)
+                written_plots.append(final_path)
+
+            mse_model_plot = out_dir / f"mse_db_by_model_{task_id}.png"
+            if plot_mse_db_by_model(task_id=str(task_id), records=task_records, out_path=mse_model_plot):
+                written_plots.append(mse_model_plot)
+
+    if args.budget_curves:
+        for task_id in _suite_task_ids(suite, records):
+            task_records = _filter_records(records, suite_name=suite_name, task_id=str(task_id))
+            tmp_path = out_dir / f"budget_curve_{task_id}_metric.png"
+            metric_key = plot_budget_curve(task_id=str(task_id), records=task_records, out_path=tmp_path)
+            if metric_key and tmp_path.exists():
+                final_path = out_dir / f"budget_curve_{task_id}_{metric_key}.png"
+                tmp_path.rename(final_path)
+                written_plots.append(final_path)
+
+    if args.include_ops:
+        ops_rows, ops_fields = summarize_ops_by_plan(records, group_by=args.group_by)
+        write_rows_csv(ops_rows, ops_by_plan_csv, ops_fields)
+        written_tables.append(ops_by_plan_csv)
+        ops_plot = out_dir / f"ops_tradeoff_{suite_name}.png"
+        plot_ops_tradeoff(
+            suite_name=suite_name,
+            records=records,
+            out_path=ops_plot,
+        )
+        written_plots.append(ops_plot)
+
+    if args.fig5a_plot or str(suite_name).lower().startswith("fig5a"):
+        fig5a_rows, fig5a_fields = _build_fig5a_point_rows(records)
+        write_rows_csv(fig5a_rows, fig5a_points_csv, fig5a_fields)
+        written_tables.append(fig5a_points_csv)
+        print(f"[make_report] wrote: {fig5a_points_csv}")
+
+        wrote_overlay = plot_fig5a_mse_vs_inv_r2(records=records, out_path=fig5a_overlay_path)
+        wrote_legacy = plot_fig5a_mse_vs_inv_r2(records=records, out_path=fig5a_legacy_path)
+
+        if wrote_overlay:
+            written_plots.append(fig5a_overlay_path)
+            print(f"[make_report] wrote: {fig5a_overlay_path}")
+        else:
+            print(f"[make_report] note: fig5a overlay skipped (insufficient inv_r2_db/mse_db data)")
+
+        if wrote_legacy:
+            written_plots.append(fig5a_legacy_path)
+            print(f"[make_report] wrote: {fig5a_legacy_path}")
+
+    if args.organize_by_suite:
+        mirrored = _organize_outputs_by_suite(
+            out_dir=out_dir,
+            suite_name=suite_name,
+            day_stamp=day_stamp,
+            time_stamp=time_stamp,
+            table_files=written_tables,
+            plot_files=written_plots,
+            misc_files=written_misc,
+        )
+        print(
+            "[make_report] organized outputs:",
+            f"{out_dir / suite_name / day_stamp / time_stamp} "
+            f"(tables={len(mirrored['tables'])}, plots={len(mirrored['plots'])}, misc={len(mirrored['misc'])})",
+        )
 
     print(f"[make_report] done. wrote: {summary_csv} and {aggregate_csv}")
+    if args.plan_views:
+        print(f"[make_report] wrote: {plan_compare_csv} and {failure_by_plan_csv}")
+    if args.include_ops:
+        print(f"[make_report] wrote: {ops_by_plan_csv}")
+        print(f"[make_report] wrote: {out_dir / f'ops_tradeoff_{suite_name}.png'}")
     if args.latex:
         print(f"[make_report] wrote: {latex_tex}")
 

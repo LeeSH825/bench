@@ -1,0 +1,6 @@
+suite,task_id,model_id,init_id,track_id,failure_type,fail_count,n_total,fail_rate
+shift_light,C_shift_Rscale_light_v0,adaptive_knet,trained,budgeted,runtime_error,2,2,1.0
+shift_light,C_shift_Rscale_light_v0,adaptive_knet,trained,frozen,runtime_error,2,2,1.0
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,trained,budgeted,runtime_error,2,2,1.0
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,trained,frozen,runtime_error,2,2,1.0
+shift_light,C_shift_Rscale_light_v0,kalmannet_tsp,untrained,frozen,,0,2,0.0

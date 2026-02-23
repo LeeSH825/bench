@@ -1,0 +1,2 @@
+suite,task_id,model_id,init_id,track_id,failure_type,fail_count,n_total,fail_rate
+fig5a_knet_vs_kf,F5a_m2n2_T50_invR2db_0,oracle_kf,pretrained,frozen,,0,1,0.0

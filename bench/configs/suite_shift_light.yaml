@@ -1,0 +1,135 @@
+suite:
+  name: shift_light
+  version: "0.1.0"
+  description: >
+    Lightweight shift benchmark for quick model comparison (KalmanNet_TSP vs Adaptive-KNet).
+    Uses smaller data/budgets than suite_shift, but keeps Route-B plan semantics.
+
+seeds: [0]
+
+tasks:
+  - task_id: C_shift_Rscale_light_v0
+    task_name: "Noise Shift Light: R scale (Gaussian)"
+    system_type: linear
+    x_dim: 5
+    y_dim: 5
+    sequence_length_T: 120
+    dataset_sizes:
+      N_train: 512
+      N_val: 128
+      N_test: 128
+    noise:
+      pre_shift:
+        Q: { type: "scaled_identity", q2: 1.0e-3 }
+        R: { type: "scaled_identity", r2: 1.0e-3 }
+        obs_distribution: { name: "gaussian" }
+      shift:
+        t0: 60
+        post_shift:
+          obs_distribution: { name: "gaussian" }
+          R_scale: 10.0
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep:
+      shift.post_shift.R_scale: [3.0, 10.0]
+
+models:
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    enabled: true
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        C_shift_Rscale_light_v0: "main_linear_canonical.py"
+    batch_size: 32
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 50
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: adaptive_knet
+    display_name: "Adaptive-KNet-ICASSP24"
+    adapter: "bench.models.adaptive_knet:AdaptiveKNetAdapter"
+    enabled: true
+    repo:
+      path: "third_party/Adaptive-KNet-ICASSP24"
+      entrypoints:
+        C_shift_Rscale_light_v0: "main_cm_linear_noise.py"
+    estimator_class_path: "mnets.KNet_mnet.KalmanNetNN"
+    input_layout: "BTD"
+    batch_size: 32
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 50
+    knet_trainable: true
+    adapt_lr: 1.0e-5
+    adapt_overflow_policy: "fail"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/shift_light"
+  budget:
+    train_max_updates: 800
+    train_batch_size: 32
+    eval_batch_size: 64
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 5
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+    - track_id: budgeted
+      adaptation_enabled: true
+      adaptation_budget:
+        max_updates: 80
+        max_updates_per_step: 1
+        allowed_after_t0_only: true
+        overflow_policy: "fail"
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    window_W: 20
+    tolerance_eps: 0.05
+    metric: "mse"
+    aggregation: "mean_over_window"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+  tables:
+    summary_csv: "reports/summary_shift_light.csv"

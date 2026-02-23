@@ -1,0 +1,82 @@
+suite:
+  name: fig5a_kalmannet_tsp_light
+  version: 0.1.0
+  description: 'Light Fig.5(a)-style suite for quick visual checks. Condition: nu=0dB
+    (q2=r2), canonical full-information (H=canonical_inverse, so y_dim==x_dim).
+
+    '
+task:
+  task_id: F5aL_m5n5_T150_invR2db_20
+  task_name: Fig5a LIGHT 5x5 T150 inv_r2_db=20
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 150
+  dataset_sizes:
+    N_train: 256
+    N_val: 64
+    N_test: 64
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 0.01
+    R:
+      type: scaled_identity
+      r2: 0.01
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: kalmannet_tsp
+  display_name: KalmanNet_TSP
+  adapter: bench.models.kalmannet_tsp:KalmanNetTSPAdapter
+  enabled: true
+  repo:
+    path: third_party/KalmanNet_TSP
+    entrypoints:
+      F5aL_m2n2_T100_invR2db_m5: main_linear_canonical.py
+      F5aL_m2n2_T100_invR2db_0: main_linear_canonical.py
+      F5aL_m2n2_T100_invR2db_20: main_linear_canonical.py
+      F5aL_m2n2_T100_invR2db_40: main_linear_canonical.py
+      F5aL_m5n5_T150_invR2db_m5: main_linear_canonical.py
+      F5aL_m5n5_T150_invR2db_0: main_linear_canonical.py
+      F5aL_m5n5_T150_invR2db_20: main_linear_canonical.py
+      F5aL_m5n5_T150_invR2db_40: main_linear_canonical.py
+  batch_size: 32
+  lr: 0.0001
+  weight_decay: 0.001
+  val_eval_interval_updates: 25
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis:
+  Q:
+    type: scaled_identity
+    q2: 0.01
+  R:
+    type: scaled_identity
+    r2: 0.01
+scenario_id: cac695bd2326
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: untrained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/fig5a_kalmannet_tsp_light/F5aL_m5n5_T150_invR2db_20/scenario_cac695bd2326/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/fig5a_kalmannet_tsp_light/F5aL_m5n5_T150_invR2db_20/scenario_cac695bd2326/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/fig5a_kalmannet_tsp_light/F5aL_m5n5_T150_invR2db_20/scenario_cac695bd2326/seed_0/test.npz
+  canonical_layout: NTD

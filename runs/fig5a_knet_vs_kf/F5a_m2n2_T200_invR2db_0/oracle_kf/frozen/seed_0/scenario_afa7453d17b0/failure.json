@@ -1,0 +1,30 @@
+{
+  "status": "failed",
+  "failure_type": "runtime_error",
+  "phase": "eval",
+  "failure_stage": "eval",
+  "message": "RuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1451, in run_one\n    eval_res = _try_call_eval(adapter, test_loader, eval_ckpt_path, track_cfg)\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 882, in _try_call_eval\n    return adapter.eval(test_loader, ckpt_path=None, track_cfg=track_cfg)  # type: ignore\n  File \"/home/xynus/bench/bench/models/mb_kf.py\", line 457, in eval\n    pred = self.predict(y, context=None, return_cov=self._outputs_covariance)\n  File \"/home/xynus/bench/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n  File \"/home/xynus/bench/bench/models/mb_kf.py\", line 437, in predict\n    x_hat, cov = self._rollout_kf(y_btd=y, x0_batch=x0_batch, return_cov=want_cov)\n  File \"/home/xynus/bench/bench/models/mb_kf.py\", line 661, in _rollout_kf\n    x_pred = torch.bmm(F_b, x_post)\nRuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility\n",
+  "context": {
+    "suite_name": "fig5a_knet_vs_kf",
+    "task_id": "F5a_m2n2_T200_invR2db_0",
+    "scenario_id": "afa7453d17b0",
+    "scenario_id_resolved_from_cache": true,
+    "seed": 0,
+    "model_id": "oracle_kf",
+    "track_id": "frozen",
+    "init_id": "pretrained",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 1.0
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 1.0
+      }
+    }
+  },
+  "error": "RuntimeError: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility"
+}

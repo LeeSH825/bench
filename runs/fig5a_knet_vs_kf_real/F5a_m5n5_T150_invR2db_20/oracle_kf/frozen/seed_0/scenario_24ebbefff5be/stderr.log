@@ -1,0 +1,23 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /home/xynus/bench/bench_data_cache/fig5a_knet_vs_kf_real/F5a_m5n5_T150_invR2db_20/scenario_24ebbefff5be/seed_0/test.npz",
+  "context": {
+    "suite_name": "fig5a_knet_vs_kf_real",
+    "task_id": "F5a_m5n5_T150_invR2db_20",
+    "scenario_id": "24ebbefff5be",
+    "seed": 0,
+    "model_id": "oracle_kf",
+    "track_id": "frozen",
+    "init_id": "pretrained",
+    "cache_root": "/home/xynus/bench/bench_data_cache",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {},
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/home/xynus/bench/bench_data_cache/fig5a_knet_vs_kf_real/F5a_m5n5_T150_invR2db_20/scenario_24ebbefff5be/seed_0/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}

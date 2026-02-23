@@ -1,0 +1,54 @@
+name: bench-nightly
+
+on:
+  schedule:
+    - cron: "15 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  nightly-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Run CPU regression
+        env:
+          BENCH_DATA_CACHE: ${{ github.workspace }}/bench_data_cache
+        run: |
+          python -m bench.tests.run_all --device cpu
+      - name: Run representative shift suite and report
+        env:
+          BENCH_DATA_CACHE: ${{ github.workspace }}/bench_data_cache
+        run: |
+          python -m bench.runners.run_suite --suite-yaml bench/configs/suite_shift.yaml --device cpu
+          python -m bench.reports.make_report --suite-yaml bench/configs/suite_shift.yaml --runs-root runs --out-dir reports --plan-views --include-ops --budget-curves
+
+  nightly-gpu:
+    if: ${{ vars.HAS_GPU_RUNNER == 'true' }}
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Run GPU determinism checks
+        env:
+          BENCH_DATA_CACHE: ${{ github.workspace }}/bench_data_cache
+        run: |
+          python -m bench.tests.run_gpu_checks

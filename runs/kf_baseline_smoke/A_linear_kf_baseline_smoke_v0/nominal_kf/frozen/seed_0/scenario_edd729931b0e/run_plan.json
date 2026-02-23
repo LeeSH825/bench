@@ -1,0 +1,36 @@
+{
+  "plan_id": "pretrained__frozen",
+  "init_id": "pretrained",
+  "track_id": "frozen",
+  "official_benchmark_eligible": true,
+  "suite_name": "kf_baseline_smoke",
+  "task_id": "A_linear_kf_baseline_smoke_v0",
+  "scenario_id": "edd729931b0e",
+  "seed": 0,
+  "model_id": "nominal_kf",
+  "deterministic": true,
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 1,
+    "adapt_max_updates": 0,
+    "adapt_max_updates_per_step": 0,
+    "t0_gate_enabled": false,
+    "adaptation_budget": {}
+  },
+  "shift": {
+    "t0": null
+  },
+  "adaptation": {
+    "enabled": false,
+    "allowed_after_t0_only": false,
+    "max_updates": 0,
+    "max_updates_per_step": 0
+  },
+  "cache": {
+    "enabled": false,
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}

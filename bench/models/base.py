@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 # NOTE (LOCKED RULES)
 # - NLL is computed only if the model outputs covariance/variance.
@@ -33,6 +33,20 @@ class Prediction:
     cov: Optional[Any] = None
 
 
+@dataclass(frozen=True)
+class TrainArtifacts:
+    ckpt_path: str
+    updates_used: int
+    train_state_path: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class EvalArtifacts:
+    x_hat: Any
+    cov: Optional[Any] = None
+    preds_path: Optional[str] = None
+
+
 class ModelAdapter(ABC):
     """
     Bench-facing adapter interface.
@@ -49,7 +63,7 @@ class ModelAdapter(ABC):
     """
 
     @abstractmethod
-    def setup(self, cfg: dict, system_info: Any) -> None:
+    def setup(self, cfg: dict, system_info: Any, run_ctx: Optional[Dict[str, Any]] = None) -> None:
         """
         Prepare the model according to model cfg and task-provided system_info.
 
@@ -59,12 +73,33 @@ class ModelAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def train(self, train_loader: Any, val_loader: Any) -> None:
+    def train(
+        self,
+        train_loader: Any,
+        val_loader: Any,
+        budget: Optional[Any] = None,
+        ckpt_dir: Optional[Any] = None,
+    ) -> Any:
         """
         Train the model if applicable.
 
         Step 2: No training loop implementation is provided by the bench core.
         Adapters will implement this in later steps (Step 4~).
+        """
+        raise NotImplementedError
+
+    def eval(
+        self,
+        test_loader: Any,
+        ckpt_path: Optional[str] = None,
+        track_cfg: Optional[dict] = None,
+    ) -> Any:
+        """
+        Evaluate model on a test loader and return predictions only.
+
+        NOTE:
+        - Official metrics are computed in bench.metrics, not in adapters.
+        - Adapters may return Tensor/ndarray/dict as long as runner can parse x_hat.
         """
         raise NotImplementedError
 
@@ -111,4 +146,3 @@ class ModelAdapter(ABC):
     def save(self, out_dir: str) -> None:
         """Save adapter/model state to out_dir (checkpoint + metadata)."""
         raise NotImplementedError
-
