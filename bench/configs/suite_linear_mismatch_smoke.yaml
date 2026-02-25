@@ -1,0 +1,70 @@
+suite:
+  name: linear_mismatch_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG2 smoke suite for linear mismatch generation (rotated F/H true vs assumed).
+
+seeds: [0]
+
+tasks:
+  - task_id: TG2_F_rotation_smoke_v0
+    task_name: "TG2 Linear Mismatch F Rotation Smoke"
+    task_family: linear_mismatch_v0
+    system_type: linear
+    x_dim: 4
+    y_dim: 4
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    base:
+      id: linear_gaussian_v0
+      H_spec: canonical_inverse
+    mismatch:
+      mode: F_rotation
+      alpha_true_deg: 10.0
+      alpha_assumed_deg: 0.0
+      rotation_dims: 2
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG2_H_rotation_smoke_v0
+    task_name: "TG2 Linear Mismatch H Rotation Smoke"
+    task_family: linear_mismatch_v0
+    system_type: linear
+    x_dim: 4
+    y_dim: 4
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    base:
+      id: linear_gaussian_v0
+      H_spec: canonical_inverse
+    mismatch:
+      mode: H_rotation
+      alpha_true_deg: 10.0
+      alpha_assumed_deg: 0.0
+      rotation_dims: 2
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}

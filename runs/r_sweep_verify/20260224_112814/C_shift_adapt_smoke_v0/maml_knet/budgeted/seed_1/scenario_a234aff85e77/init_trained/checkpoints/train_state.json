@@ -1,0 +1,28 @@
+{
+  "status": "ok",
+  "best_step": 40,
+  "best_val_mse": 0.0107710100710392,
+  "last_train_loss": 0.014413721859455109,
+  "updates_used": 40,
+  "max_updates": 40,
+  "val_history": [
+    {
+      "step": 20.0,
+      "val_mse": 0.012411930598318577
+    },
+    {
+      "step": 40.0,
+      "val_mse": 0.0107710100710392
+    }
+  ],
+  "meta_train": {
+    "meta_task_num": 4,
+    "support_size": 8,
+    "query_size": 8,
+    "inner_steps": 1,
+    "inner_lr": 0.05,
+    "outer_lr": 0.001,
+    "inner_steps_total": 160,
+    "meta_tasks_seen": 160
+  }
+}

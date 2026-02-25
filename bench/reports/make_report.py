@@ -77,9 +77,9 @@ def _suite_task_ids(suite: Dict[str, Any], records: List[RunRecord]) -> List[str
 
 def _infer_baseline_mode(model_id: str) -> str:
     mid = str(model_id).strip().lower()
-    if mid == "oracle_kf":
+    if mid in {"oracle_kf", "mb_kf_oracle"}:
         return "oracle"
-    if mid == "nominal_kf":
+    if mid in {"nominal_kf", "mb_kf_nominal"}:
         return "nominal"
     if mid == "oracle_shift_kf":
         return "oracle_shift"
@@ -116,7 +116,7 @@ def _build_fig5a_point_rows(records: List[RunRecord]) -> tuple[List[Dict[str, An
         row = {
             "model_id": str(r.model_id),
             "baseline_mode": _infer_baseline_mode(r.model_id),
-            "is_oracle_kf": bool(str(r.model_id).strip().lower() == "oracle_kf"),
+            "is_oracle_kf": bool(str(r.model_id).strip().lower() in {"oracle_kf", "mb_kf_oracle"}),
             "init_id": str(r.init_id),
             "track_id": str(r.track_id),
             "task_id": str(r.task_id),

@@ -15,6 +15,7 @@ from .bench_generated import (
     LoaderCfgV0,
 )
 from .data_format import load_npz_split_v0
+from .generator.datasets.common import DatasetMissingError
 from .generators.linear import (
     kalmannet_tsp_F_linear_canonical,
     kalmannet_tsp_H_reverse_canonical,
@@ -84,13 +85,17 @@ def main() -> int:
     else:
         scenario_overrides = {}
 
-    arts = prepare_bench_generated_v0(
-        suite_name=suite_name,
-        task_cfg=task_cfg,
-        seed=int(args.seed),
-        cache_root=cache_root,
-        scenario_overrides=scenario_overrides,
-    )
+    try:
+        arts = prepare_bench_generated_v0(
+            suite_name=suite_name,
+            task_cfg=task_cfg,
+            seed=int(args.seed),
+            cache_root=cache_root,
+            scenario_overrides=scenario_overrides,
+        )
+    except DatasetMissingError as exc:
+        print(f"[DATA MISSING] {exc}")
+        return 3
 
     print(f"[OK] prepared {len(arts)} scenario(s) at cache_root={cache_root}")
     for art in arts:
@@ -152,4 +157,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

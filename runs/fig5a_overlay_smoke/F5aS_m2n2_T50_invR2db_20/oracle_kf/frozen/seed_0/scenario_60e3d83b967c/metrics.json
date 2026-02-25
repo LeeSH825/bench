@@ -3,7 +3,7 @@
   "suite_name": "fig5a_overlay_smoke",
   "task_id": "F5aS_m2n2_T50_invR2db_20",
   "scenario_id": "60e3d83b967c",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "oracle_kf",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": -22.186327228829057
   },
   "timing": {
-    "timing_ms_per_step": 0.009492763747402932,
+    "timing_ms_per_step": 0.008260303766292054,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 16
@@ -30,16 +30,7 @@
   "shift_recovery": null,
   "t0_used": null,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "Q": {
-      "type": "scaled_identity",
-      "q2": 0.01
-    },
-    "R": {
-      "type": "scaled_identity",
-      "r2": 0.01
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_BTD",
     "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"

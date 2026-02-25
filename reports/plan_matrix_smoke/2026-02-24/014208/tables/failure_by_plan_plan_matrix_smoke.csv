@@ -1,0 +1,3 @@
+suite,task_id,model_id,init_id,track_id,failure_type,fail_count,n_total,fail_rate
+plan_matrix_smoke,C_shift_plan_matrix_smoke_v0,adaptive_knet,trained,budgeted,,0,1,0.0
+plan_matrix_smoke,C_shift_plan_matrix_smoke_v0,adaptive_knet,trained,frozen,,0,1,0.0

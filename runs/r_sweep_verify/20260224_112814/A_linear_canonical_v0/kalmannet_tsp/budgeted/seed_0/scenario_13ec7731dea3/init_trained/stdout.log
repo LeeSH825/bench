@@ -1,0 +1,2 @@
+[INFO] budgeted track requested but no shift t0 detected; adapt stage skipped by plan rule.
+[OK] wrote metrics to /home/xynus/bench/runs/r_sweep_verify/20260224_112814/A_linear_canonical_v0/kalmannet_tsp/budgeted/seed_0/scenario_13ec7731dea3/init_trained

@@ -1,0 +1,52 @@
+{
+  "status": "ok",
+  "best_step": 80,
+  "best_val_mse": 0.0826236866414547,
+  "last_train_loss": 0.0020866424310952425,
+  "updates_used": 160,
+  "max_updates": 200,
+  "val_history": [
+    {
+      "step": 20.0,
+      "val_mse": 0.0885387659072876
+    },
+    {
+      "step": 40.0,
+      "val_mse": 0.11292926967144012
+    },
+    {
+      "step": 60.0,
+      "val_mse": 0.09747384861111641
+    },
+    {
+      "step": 80.0,
+      "val_mse": 0.0826236866414547
+    },
+    {
+      "step": 100.0,
+      "val_mse": 0.09411639347672462
+    },
+    {
+      "step": 120.0,
+      "val_mse": 0.09121226891875267
+    },
+    {
+      "step": 140.0,
+      "val_mse": 0.09035008773207664
+    },
+    {
+      "step": 160.0,
+      "val_mse": 0.09487717971205711
+    }
+  ],
+  "meta_train": {
+    "meta_task_num": 4,
+    "support_size": 8,
+    "query_size": 8,
+    "inner_steps": 1,
+    "inner_lr": 0.05,
+    "outer_lr": 0.001,
+    "inner_steps_total": 640,
+    "meta_tasks_seen": 640
+  }
+}

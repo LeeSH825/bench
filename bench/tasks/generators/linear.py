@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -145,6 +145,8 @@ def generate_linear_gaussian_sequences_v0(
     r_scale_post: float,
     obs_dist_name: str,
     obs_dist_params: Dict[str, Any],
+    q2_t: Optional[Sequence[float]] = None,
+    r2_t: Optional[Sequence[float]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns:
@@ -158,19 +160,31 @@ def generate_linear_gaussian_sequences_v0(
 
     # initial state
     x_t = rng.standard_normal((n_seq, x_dim)).astype(np.float64)
+    q2_schedule = np.asarray(q2_t, dtype=np.float64) if q2_t is not None else None
+    r2_schedule = np.asarray(r2_t, dtype=np.float64) if r2_t is not None else None
+    if q2_schedule is not None and q2_schedule.shape != (int(T),):
+        raise ValueError(f"q2_t must have shape [T], got {q2_schedule.shape} for T={T}")
+    if r2_schedule is not None and r2_schedule.shape != (int(T),):
+        raise ValueError(f"r2_t must have shape [T], got {r2_schedule.shape} for T={T}")
 
     for t in range(T):
-        # observation noise variance (shifted or not)
-        if t0_shift is not None and t >= int(t0_shift):
-            r2_t = float(r2) * float(r_scale_post)
+        # observation/process variance (time-varying schedule or legacy shift rules)
+        if r2_schedule is not None:
+            r2_now = float(r2_schedule[t])
+        elif t0_shift is not None and t >= int(t0_shift):
+            r2_now = float(r2) * float(r_scale_post)
         else:
-            r2_t = float(r2)
+            r2_now = float(r2)
+        if q2_schedule is not None:
+            q2_now = float(q2_schedule[t])
+        else:
+            q2_now = float(q2)
 
         v_t = _sample_obs_noise(
             rng=rng,
             n_seq=n_seq,
             y_dim=y_dim,
-            r2=r2_t,
+            r2=r2_now,
             dist_name=obs_dist_name,
             dist_params=obs_dist_params,
         )
@@ -182,8 +196,7 @@ def generate_linear_gaussian_sequences_v0(
         y[:, t, :] = y_t
 
         # evolve: x_{t+1} = F x_t + w_t
-        w_t = (math.sqrt(float(q2)) * rng.standard_normal((n_seq, x_dim))).astype(np.float64)
+        w_t = (math.sqrt(q2_now) * rng.standard_normal((n_seq, x_dim))).astype(np.float64)
         x_t = (x_t @ F.T) + w_t
 
     return x, y
-

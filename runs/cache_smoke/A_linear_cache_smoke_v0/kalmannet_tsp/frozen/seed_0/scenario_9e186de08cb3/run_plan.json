@@ -31,8 +31,8 @@
   "cache": {
     "enabled": true,
     "model_cache_dir": "/home/xynus/bench/runs/_model_cache/cache_smoke",
-    "cache_key": "137a88f630dc094cfd6d7785",
-    "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/cache_smoke/kalmannet_tsp/137a88f630dc094cfd6d7785",
+    "cache_key": "43571b851169206a90c47090",
+    "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/cache_smoke/kalmannet_tsp/43571b851169206a90c47090",
     "cache_hit": true,
     "train_skipped": true
   }

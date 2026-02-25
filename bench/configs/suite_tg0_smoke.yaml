@@ -1,0 +1,38 @@
+suite:
+  name: tg0_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG0 smoke suite for generator contract v1 schema/determinism checks.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG0_linear_smoke_v0
+    task_name: "TG0 Linear Generator Smoke"
+    task_family: linear_gaussian_v0
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 12
+    dataset_sizes:
+      N_train: 16
+      N_val: 4
+      N_test: 4
+    noise:
+      pre_shift:
+        Q: { type: "scaled_identity", q2: 1.0e-3 }
+        R: { type: "scaled_identity", r2: 1.0e-3 }
+        obs_distribution: { name: "gaussian" }
+      shift:
+        t0: 6
+        post_shift:
+          obs_distribution: { name: "gaussian" }
+          R_scale: 4.0
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}

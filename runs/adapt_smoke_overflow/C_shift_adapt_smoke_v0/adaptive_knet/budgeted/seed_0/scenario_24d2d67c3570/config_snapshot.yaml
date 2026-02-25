@@ -62,24 +62,9 @@ model:
     outputs_covariance: false
     needs_system_model: true
 scenario_settings: {}
-scenario_cfg_basis:
-  pre_shift:
-    Q:
-      type: scaled_identity
-      q2: 0.001
-    R:
-      type: scaled_identity
-      r2: 0.001
-    obs_distribution:
-      name: gaussian
-  shift:
-    t0: 8
-    post_shift:
-      obs_distribution:
-        name: gaussian
-      R_scale: 10.0
+scenario_cfg_basis: {}
 scenario_id: 24d2d67c3570
-scenario_id_resolved_from_cache: true
+scenario_id_resolved_from_cache: false
 seed: 0
 track_id: budgeted
 track_cfg:

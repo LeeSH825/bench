@@ -1,0 +1,16 @@
+{
+  "cache_key": "3a5caac9c226668d34e721a6",
+  "model_id": "split_knet",
+  "adapter_version": "s8_gpu_device_v1",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "58c70101b657",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 320,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "e1e957c43386a3c64b7d2ad1e70d898b8c469b8c",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "6f026d6a28ba20351461ecd6cc7e446c56f73990"
+}

@@ -3,7 +3,7 @@
   "suite_name": "split_train_smoke",
   "task_id": "A_linear_split_train_smoke_v0",
   "scenario_id": "71e59e06e7d9",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "split_knet",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": 4.970032912011327
   },
   "timing": {
-    "timing_ms_per_step": 0.4007255156466272,
+    "timing_ms_per_step": 0.4798706872861658,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 2
@@ -30,17 +30,7 @@
   "shift_recovery": null,
   "t0_used": null,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "form": "diag",
-    "Q": {
-      "type": "scaled_identity",
-      "q2": 0.001
-    },
-    "R": {
-      "type": "scaled_identity",
-      "r2": 0.001
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_stepwise_colvec",
     "selected_class": "GSSFiltering.filtering.Split_KalmanNet_Filter"

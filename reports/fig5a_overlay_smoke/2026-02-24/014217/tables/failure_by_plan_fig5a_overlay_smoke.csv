@@ -1,0 +1,5 @@
+suite,task_id,model_id,init_id,track_id,failure_type,fail_count,n_total,fail_rate
+fig5a_overlay_smoke,F5aS_m2n2_T50_invR2db_0,kalmannet_tsp,trained,frozen,,0,1,0.0
+fig5a_overlay_smoke,F5aS_m2n2_T50_invR2db_0,oracle_kf,pretrained,frozen,,0,1,0.0
+fig5a_overlay_smoke,F5aS_m2n2_T50_invR2db_20,kalmannet_tsp,trained,frozen,,0,1,0.0
+fig5a_overlay_smoke,F5aS_m2n2_T50_invR2db_20,oracle_kf,pretrained,frozen,,0,1,0.0

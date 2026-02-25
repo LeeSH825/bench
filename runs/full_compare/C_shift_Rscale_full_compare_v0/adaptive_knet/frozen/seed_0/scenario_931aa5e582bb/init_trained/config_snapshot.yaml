@@ -1,0 +1,86 @@
+suite:
+  name: full_compare
+  version: 0.1.0
+  description: 'Route-B full comparison suite across stationary linear, shift linear,
+    and TG5 Lorenz tasks. Includes frozen and budgeted tracks with shared budget semantics
+    (optimizer.step counts).
+
+    '
+task:
+  task_id: C_shift_Rscale_full_compare_v0
+  task_name: Linear Shift R-scale (Full Compare)
+  system_type: linear
+  x_dim: 3
+  y_dim: 3
+  sequence_length_T: 80
+  dataset_sizes:
+    N_train: 192
+    N_val: 64
+    N_test: 64
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 40
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: adaptive_knet
+  display_name: Adaptive-KNet-ICASSP24
+  adapter: bench.models.adaptive_knet:AdaptiveKNetAdapter
+  repo:
+    path: third_party/Adaptive-KNet-ICASSP24
+    entrypoints:
+      A_linear_full_compare_v0: main_cm_linear.py
+      C_shift_Rscale_full_compare_v0: main_cm_linear.py
+      TG5_lorenz_fullinfo_full_compare_v0: main_cm_linear.py
+      TG5_lorenz_Jmismatch_full_compare_v0: main_cm_linear.py
+  estimator_class_path: mnets.KNet_mnet.KalmanNetNN
+  input_layout: BTD
+  batch_size: 16
+  lr: 0.0001
+  weight_decay: 0.001
+  val_eval_interval_updates: 20
+  knet_trainable: true
+  adapt_lr: 1.0e-05
+  adapt_overflow_policy: fail
+  capabilities:
+    supports_adaptation: true
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis: {}
+scenario_id: 931aa5e582bb
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/test.npz
+  canonical_layout: NTD

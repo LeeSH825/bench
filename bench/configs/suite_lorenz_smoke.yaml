@@ -1,0 +1,95 @@
+suite:
+  name: lorenz_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG5 smoke suite for Lorenz family generation with full-info and J-mismatch variants.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG5_lorenz_fullinfo_smoke_v0
+    task_name: "TG5 Lorenz Full-Info Smoke"
+    task_family: lorenz_v0
+    system_type: nonlinear
+    x_dim: 3
+    y_dim: 3
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    lorenz:
+      sigma: 10.0
+      rho: 28.0
+      beta: 2.6666666667
+      J_true: 5
+      J_assumed: 5
+      delta_tau_true: 0.02
+      delta_tau_assumed: 0.02
+      obs_mode: identity
+      state_clip: 100.0
+    splits:
+      train: { N: 8, T: 40 }
+      val:   { N: 4, T: 40 }
+      test:  { N: 4, T: 60 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-5 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "full"
+      h_type: "identity"
+      mode: "identity"
+    mismatch:
+      enabled: false
+      kind: "none"
+      params: {}
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG5_lorenz_Jmismatch_smoke_v0
+    task_name: "TG5 Lorenz J-Mismatch Smoke"
+    task_family: lorenz_v0
+    system_type: nonlinear
+    x_dim: 3
+    y_dim: 2
+    sequence_length_T: 30
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    lorenz:
+      sigma: 10.0
+      rho: 28.0
+      beta: 2.6666666667
+      J_true: 5
+      J_assumed: 2
+      delta_tau_true: 0.02
+      delta_tau_assumed: 0.02
+      obs_mode: partial
+      state_clip: 100.0
+    splits:
+      train: { N: 8, T: 30 }
+      val:   { N: 4, T: 30 }
+      test:  { N: 4, T: 80 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-5 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "partial"
+      h_type: "partial"
+      mode: "partial"
+    mismatch:
+      enabled: true
+      kind: "lorenz_J"
+      params:
+        obs_rotation_deg: 8.0
+        obs_rotation_assumed_deg: 0.0
+        sampling_decimation: 2
+        time_axis_shift_steps: 1
+        time_axis_resample_stride: 1
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}

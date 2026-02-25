@@ -275,9 +275,9 @@ class ModelBasedKFAdapter(ModelAdapter):
         mode = str(cfg.get("baseline_mode", "")).strip().lower()
         if not mode:
             model_id = str(run_ctx.get("model_id", "")).strip().lower()
-            if model_id in ("oracle_kf",):
+            if model_id in ("oracle_kf", "mb_kf_oracle"):
                 mode = "oracle"
-            elif model_id in ("nominal_kf",):
+            elif model_id in ("nominal_kf", "mb_kf_nominal"):
                 mode = "nominal"
             elif model_id in ("oracle_shift_kf",):
                 mode = "oracle_shift"
@@ -733,4 +733,3 @@ class ModelBasedKFAdapter(ModelAdapter):
         current["track_id"] = self._run_ctx.get("track_id")
         current["init_id"] = self._run_ctx.get("init_id")
         _write_json(self._ledger_path, current)
-

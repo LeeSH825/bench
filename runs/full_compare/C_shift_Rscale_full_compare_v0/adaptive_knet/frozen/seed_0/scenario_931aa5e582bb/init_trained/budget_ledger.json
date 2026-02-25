@@ -1,0 +1,12 @@
+{
+  "train_updates_used": 200,
+  "adapt_updates_used": 0,
+  "train_max_updates": 200,
+  "train_skipped": false,
+  "cache_enabled": true,
+  "cache_hit": false,
+  "cache_key": "be191c7d5617249a59f8a1cf",
+  "track_id": "frozen",
+  "init_id": "trained",
+  "adapt_updates_per_step": {}
+}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional, Dict, Literal
+from typing import Any, Optional, Dict, Literal, Mapping
 from pathlib import Path
 
 import numpy as np
@@ -127,6 +127,7 @@ class LoadedSplitV0:
     F: Optional[np.ndarray]
     H: Optional[np.ndarray]
     meta: Dict[str, Any]
+    extras: Dict[str, np.ndarray]
 
 def dump_meta_json_v0(meta: Dict[str, Any]) -> np.ndarray:
     """
@@ -149,6 +150,7 @@ def save_npz_split_v0(
     F: Optional[np.ndarray],
     H: Optional[np.ndarray],
     meta: Dict[str, Any],
+    extras: Optional[Mapping[str, np.ndarray]] = None,
 ) -> None:
     """
     v0 포맷: npz keys
@@ -174,6 +176,13 @@ def save_npz_split_v0(
         kwargs["F"] = F.astype(np.float32, copy=False)
     if H is not None:
         kwargs["H"] = H.astype(np.float32, copy=False)
+    if extras:
+        reserved = {"x", "y", "u", "F", "H", "meta_json"}
+        for k, v in extras.items():
+            key = str(k)
+            if key in reserved:
+                raise ValueError(f"extra npz key conflicts with reserved key: {key}")
+            kwargs[key] = np.asarray(v, dtype=np.float32)
 
     np.savez_compressed(tmp, **kwargs)
     tmp.replace(path)
@@ -186,4 +195,10 @@ def load_npz_split_v0(path: Path) -> LoadedSplitV0:
         F = z["F"].astype(np.float32, copy=False) if "F" in z.files else None
         H = z["H"].astype(np.float32, copy=False) if "H" in z.files else None
         meta = load_meta_json_v0(z["meta_json"])
-    return LoadedSplitV0(x=x, y=y, u=u, F=F, H=H, meta=meta)
+        extras: Dict[str, np.ndarray] = {}
+        reserved = {"x", "y", "u", "F", "H", "meta_json"}
+        for key in z.files:
+            if key in reserved:
+                continue
+            extras[key] = z[key].astype(np.float32, copy=False)
+    return LoadedSplitV0(x=x, y=y, u=u, F=F, H=H, meta=meta, extras=extras)

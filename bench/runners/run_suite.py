@@ -12,7 +12,6 @@ import subprocess
 import sys
 import time
 import traceback
-from itertools import product
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -37,6 +36,7 @@ from bench.metrics.core import (
     mse_per_step,
     compute_shift_recovery_k,
 )
+from bench.utils.sweep import expand_sweep_grid
 
 
 # Optional: use existing bench utils if available
@@ -128,19 +128,7 @@ def load_suite_yaml(path: Path) -> Dict[str, Any]:
 
 
 def _expand_sweep(sweep: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    if not sweep:
-        return [{}]
-    keys = sorted(sweep.keys())
-    values_list: List[List[Any]] = []
-    for k in keys:
-        v = sweep[k]
-        values_list.append(v if isinstance(v, list) else [v])
-
-    out: List[Dict[str, Any]] = []
-    for combo in product(*values_list):
-        d = {k: combo[i] for i, k in enumerate(keys)}
-        out.append(d)
-    return out
+    return expand_sweep_grid(sweep, sort_keys=True)
 
 
 def _resolve_device(device_str: str) -> torch.device:
@@ -1714,6 +1702,11 @@ def main() -> None:
         nargs="*",
         default=None,
         help="explicit plan list using '<init_id>:<track_id>' (e.g. trained:frozen trained:budgeted)",
+    )
+    ap.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="compatibility flag (run_suite already continues across run combinations).",
     )
     ap.add_argument("--tasks", nargs="*", default=None, help="task_id allowlist (optional)")
     args = ap.parse_args()

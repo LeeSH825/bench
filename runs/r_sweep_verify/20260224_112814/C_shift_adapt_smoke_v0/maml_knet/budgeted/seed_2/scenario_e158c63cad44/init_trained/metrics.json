@@ -1,0 +1,157 @@
+{
+  "status": "ok",
+  "suite_name": "r_sweep_verify_20260224_112814",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "e158c63cad44",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 2,
+  "model_id": "maml_knet",
+  "track_id": "budgeted",
+  "dims": {
+    "x_dim": 2,
+    "y_dim": 2,
+    "T": 16
+  },
+  "accuracy": {
+    "mse": 0.027793103829026222,
+    "rmse": 0.16671263848018908,
+    "mse_db": -15.56062950144268
+  },
+  "timing": {
+    "timing_ms_per_step": 0.24383405457228946,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": {
+    "t0": 8,
+    "W": 20,
+    "eps": 0.05,
+    "E_pre": 0.016986437141895294,
+    "recovery_k": 8,
+    "recovered": false,
+    "failure_policy": "cap"
+  },
+  "t0_used": 8,
+  "scenario_settings": {
+    "noise.pre_shift.R.r2": 0.01778279410038923
+  },
+  "scenario_cfg_basis": {
+    "noise": {
+      "pre_shift": {
+        "R": {
+          "r2": 0.01778279410038923
+        }
+      }
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "BTD->BYT(stepwise_filter)",
+    "selected_class": "filter.Filter + state_dict_learner.Learner"
+  },
+  "adapter_meta": {
+    "adapter_id": "maml_knet",
+    "adapter_version": "s9_route_b_train_v1",
+    "runtime_device": "cuda",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BYT_stepwise_filter",
+    "class_path": "filter.Filter + state_dict_learner.Learner",
+    "integration_mode": "import_model_only",
+    "meta_train": {
+      "meta_task_num": 4,
+      "support_size": 8,
+      "query_size": 8,
+      "inner_steps": 1,
+      "inner_lr": 0.05,
+      "outer_lr": 0.001,
+      "first_order": true
+    },
+    "entrypoints": {
+      "filter": "filter.py::Filter",
+      "learner": "state_dict_learner.py::Learner",
+      "meta_ref": "meta.py::Meta",
+      "cli_ref": "main_linear.py::main"
+    },
+    "capabilities": {
+      "train_supported": true,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_input_layout": "Filter routines consume state/obs as [B,D,T]; adapter converts bench BTD internally.",
+      "B_task_semantics": "v0 shift t0 per-step adaptation semantics are not mapped to MAML episode adaptation in this adapter.",
+      "C_metrics_ownership": "third_party metrics are ignored; bench computes official metrics from adapter x_hat only."
+    },
+    "how_to_verify": {
+      "A_input_layout": "third_party/MAML_KalmanNet/MAML-KalmanNet/filter.py::compute_x_post/compute_x_post_qry",
+      "B_task_semantics": "third_party/MAML_KalmanNet/MAML-KalmanNet/meta.py::forward",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and this adapter eval()/predict()."
+    },
+    "selected_layout": "BTD->BYT(stepwise_filter)",
+    "selected_class": "filter.Filter + state_dict_learner.Learner"
+  },
+  "run_plan": {
+    "plan_id": "trained__budgeted",
+    "init_id": "trained",
+    "track_id": "budgeted",
+    "official_benchmark_eligible": true,
+    "suite_name": "r_sweep_verify_20260224_112814",
+    "task_id": "C_shift_adapt_smoke_v0",
+    "scenario_id": "e158c63cad44",
+    "seed": 2,
+    "model_id": "maml_knet",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 40,
+      "adapt_max_updates": 200,
+      "adapt_max_updates_per_step": 1,
+      "t0_gate_enabled": true,
+      "adaptation_budget": {
+        "allowed_after_t0_only": true,
+        "max_updates": 200,
+        "max_updates_per_step": 1,
+        "overflow_policy": "fail"
+      }
+    },
+    "shift": {
+      "t0": 8
+    },
+    "adaptation": {
+      "enabled": true,
+      "allowed_after_t0_only": true,
+      "max_updates": 200,
+      "max_updates_per_step": 1,
+      "will_run": true
+    },
+    "cache": {
+      "enabled": true,
+      "model_cache_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814",
+      "cache_key": "9f688eb1877dcea97d28d734",
+      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814/maml_knet/9f688eb1877dcea97d28d734",
+      "cache_hit": true,
+      "train_skipped": true
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 40,
+    "train_skipped": true,
+    "cache_enabled": true,
+    "cache_hit": true,
+    "cache_key": "9f688eb1877dcea97d28d734",
+    "track_id": "budgeted",
+    "init_id": "trained",
+    "supports_budgeted": false
+  },
+  "run_dir": "/home/xynus/bench/runs/r_sweep_verify/20260224_112814/C_shift_adapt_smoke_v0/maml_knet/budgeted/seed_2/scenario_e158c63cad44/init_trained"
+}

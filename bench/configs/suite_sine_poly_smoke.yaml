@@ -1,0 +1,82 @@
+suite:
+  name: sine_poly_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG4 smoke suite for synthetic nonlinear sine/poly generator.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG4_sine_poly_fullinfo_smoke_v0
+    task_name: "TG4 SinePoly Full-Info Smoke"
+    task_family: sine_poly_v0
+    system_type: nonlinear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 36
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    params:
+      alpha: 0.90
+      beta: 1.20
+      phi: 0.15
+      delta: 0.05
+      a: 1.10
+      b: 0.80
+      c: 0.20
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    mismatch:
+      enabled: false
+      kind: "none"
+      params: {}
+    observation:
+      type: "full"
+      h_type: "nonlinear"
+      mode: "nonlinear_componentwise"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG4_sine_poly_partialinfo_smoke_v0
+    task_name: "TG4 SinePoly Partial-Info Smoke"
+    task_family: sine_poly_v0
+    system_type: nonlinear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 36
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    params:
+      alpha: 0.90
+      beta: 1.20
+      phi: 0.15
+      delta: 0.05
+      a: 1.10
+      b: 0.80
+      c: 0.20
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    mismatch:
+      enabled: true
+      kind: "param_perturb"
+      params:
+        which: ["alpha", "beta"]
+        perturb:
+          mode: "mul"
+          scale: 0.85
+    observation:
+      type: "full"
+      h_type: "nonlinear"
+      mode: "nonlinear_componentwise"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}

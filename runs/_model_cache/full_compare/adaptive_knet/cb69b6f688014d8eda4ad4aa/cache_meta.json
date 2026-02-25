@@ -1,0 +1,16 @@
+{
+  "cache_key": "cb69b6f688014d8eda4ad4aa",
+  "model_id": "adaptive_knet",
+  "adapter_version": "s3_route_b_v1",
+  "task_id": "TG5_lorenz_fullinfo_full_compare_v0",
+  "scenario_id": "9b73c2c34457",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 200,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "b662dab35b83cbb8e43d89515ac1dd5f4e007a60",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "389e619eeefcb76563415c277621a349ecf23b5d"
+}

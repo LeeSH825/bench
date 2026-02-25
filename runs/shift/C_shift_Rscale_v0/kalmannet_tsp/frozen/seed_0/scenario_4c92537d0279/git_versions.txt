@@ -1,4 +1,4 @@
-bench: fbcb9510a5f4d8779e3cf2d818b2a66ee3e51212
+bench: d71b7519753d93ddfda9d1e9db653e9ae922e421
 
 [submodules]
 acff2a65f6627139f53331ac4c5ce6741fae4c90 third_party/Adaptive-KNet-ICASSP24 (heads/main)

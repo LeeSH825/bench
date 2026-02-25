@@ -1,0 +1,94 @@
+suite:
+  name: full_compare
+  version: 0.1.0
+  description: 'Route-B full comparison suite across stationary linear, shift linear,
+    and TG5 Lorenz tasks. Includes frozen and budgeted tracks with shared budget semantics
+    (optimizer.step counts).
+
+    '
+task:
+  task_id: C_shift_Rscale_full_compare_v0
+  task_name: Linear Shift R-scale (Full Compare)
+  system_type: linear
+  x_dim: 3
+  y_dim: 3
+  sequence_length_T: 80
+  dataset_sizes:
+    N_train: 192
+    N_val: 64
+    N_test: 64
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 40
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: maml_knet
+  display_name: MAML-KalmanNet
+  adapter: bench.models.maml_knet:MAMLKNetAdapter
+  enabled: true
+  repo:
+    path: third_party/MAML_KalmanNet
+    entrypoints:
+      A_linear_full_compare_v0: main_linear.py
+      C_shift_Rscale_full_compare_v0: main_linear.py
+      TG5_lorenz_fullinfo_full_compare_v0: main_linear.py
+      TG5_lorenz_Jmismatch_full_compare_v0: main_linear.py
+  input_layout: BTD
+  batch_size: 16
+  eval_batch_size: 32
+  meta_task_num: 4
+  support_size: 8
+  query_size: 8
+  inner_steps: 1
+  inner_lr: 0.05
+  outer_lr: 0.001
+  update_step_test: 1
+  val_eval_interval_updates: 20
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis: {}
+scenario_id: 931aa5e582bb
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: budgeted
+track_cfg:
+  track_id: budgeted
+  adaptation_enabled: true
+  adaptation_budget:
+    max_updates: 40
+    max_updates_per_step: 1
+    allowed_after_t0_only: true
+    overflow_policy: fail
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/full_compare/C_shift_Rscale_full_compare_v0/scenario_931aa5e582bb/seed_0/test.npz
+  canonical_layout: NTD

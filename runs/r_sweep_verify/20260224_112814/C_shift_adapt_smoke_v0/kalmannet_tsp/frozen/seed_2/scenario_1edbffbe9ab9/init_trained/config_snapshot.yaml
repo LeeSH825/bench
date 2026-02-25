@@ -1,0 +1,78 @@
+suite:
+  name: r_sweep_verify_20260224_112814
+  version: '0.1'
+  description: r-sweep verification harness
+task:
+  task_id: C_shift_adapt_smoke_v0
+  task_name: Linear Shift Tiny
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 16
+  dataset_sizes:
+    N_train: 32
+    N_val: 8
+    N_test: 8
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 8
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: kalmannet_tsp
+  display_name: KalmanNet_TSP
+  adapter: bench.models.kalmannet_tsp:KalmanNetTSPAdapter
+  repo:
+    path: third_party/KalmanNet_TSP
+    entrypoints:
+      A_linear_canonical_v0: main_linear_canonical.py
+      B_lorenz_dt_v0: main_lor_DT.py
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+  enabled: true
+  train_max_updates: 20
+scenario_settings:
+  noise.pre_shift.R.r2: 0.001333521432163324
+scenario_cfg_basis:
+  noise:
+    pre_shift:
+      R:
+        r2: 0.001333521432163324
+scenario_id: 1edbffbe9ab9
+scenario_id_resolved_from_cache: false
+seed: 2
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_1edbffbe9ab9/seed_2/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_1edbffbe9ab9/seed_2/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_1edbffbe9ab9/seed_2/test.npz
+  canonical_layout: NTD

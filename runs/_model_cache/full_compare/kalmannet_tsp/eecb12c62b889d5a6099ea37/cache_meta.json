@@ -1,0 +1,16 @@
+{
+  "cache_key": "eecb12c62b889d5a6099ea37",
+  "model_id": "kalmannet_tsp",
+  "adapter_version": "s2_route_b_v1",
+  "task_id": "C_shift_Rscale_full_compare_v0",
+  "scenario_id": "931aa5e582bb",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 200,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "ccdcecebb30cd89c8a95c31d726aa43e5fed7f1b",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "389e619eeefcb76563415c277621a349ecf23b5d"
+}

@@ -3,7 +3,7 @@
   "suite_name": "shift",
   "task_id": "C_shift_Rscale_v0",
   "scenario_id": "4c92537d0279",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "kalmannet_tsp",
   "track_id": "frozen",
@@ -13,12 +13,12 @@
     "T": 200
   },
   "accuracy": {
-    "mse": 1280919906287616.0,
-    "rmse": 35789941.41218474,
-    "mse_db": 151.07521974908775
+    "mse": 1280919503634432.0,
+    "rmse": 35789935.786955975,
+    "mse_db": 151.07521838389636
   },
   "timing": {
-    "timing_ms_per_step": 0.02704045752005186,
+    "timing_ms_per_step": 0.03008442495000054,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 32
@@ -41,25 +41,8 @@
     "shift.post_shift.R_scale": 3.0
   },
   "scenario_cfg_basis": {
-    "pre_shift": {
-      "Q": {
-        "type": "scaled_identity",
-        "q2": 0.001
-      },
-      "R": {
-        "type": "scaled_identity",
-        "r2": 0.001
-      },
-      "obs_distribution": {
-        "name": "gaussian"
-      }
-    },
     "shift": {
-      "t0": 100,
       "post_shift": {
-        "obs_distribution": {
-          "name": "gaussian"
-        },
         "R_scale": 3.0
       }
     }

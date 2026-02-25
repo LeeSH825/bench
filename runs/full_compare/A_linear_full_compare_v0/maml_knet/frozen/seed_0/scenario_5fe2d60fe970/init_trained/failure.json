@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "failure_type": "train_nan",
+  "phase": "train",
+  "failure_stage": "train",
+  "message": "FloatingPointError: train_nan: all sampled meta-tasks produced non-finite losses.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1344, in run_one\n    ckpt_path = _execute_train_once()\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1271, in _execute_train_once\n    train_res = _try_call_train(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 862, in _try_call_train\n    return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore\n  File \"/home/xynus/bench/bench/models/maml_knet.py\", line 617, in train\n    raise FloatingPointError(\"train_nan: all sampled meta-tasks produced non-finite losses.\")\nFloatingPointError: train_nan: all sampled meta-tasks produced non-finite losses.\n",
+  "context": {
+    "suite_name": "full_compare",
+    "task_id": "A_linear_full_compare_v0",
+    "scenario_id": "5fe2d60fe970",
+    "scenario_id_resolved_from_cache": false,
+    "seed": 0,
+    "model_id": "maml_knet",
+    "track_id": "frozen",
+    "init_id": "trained",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {}
+  },
+  "error": "FloatingPointError: train_nan: all sampled meta-tasks produced non-finite losses."
+}

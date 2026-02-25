@@ -1,0 +1,5 @@
+# External datasets and download/prep outputs (must not be versioned).
+external_data/
+mock_external_data/
+bench_data_raw/
+

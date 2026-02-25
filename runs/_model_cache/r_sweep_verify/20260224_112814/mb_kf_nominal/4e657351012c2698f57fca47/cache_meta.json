@@ -1,0 +1,16 @@
+{
+  "cache_key": "4e657351012c2698f57fca47",
+  "model_id": "mb_kf_nominal",
+  "adapter_version": "s10_kf_baseline_v1",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "58c70101b657",
+  "seed": 1,
+  "train_budget": {
+    "train_max_updates": 20,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "c279fbcce8791a191a91b6dd9c46017540fb1406",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "6f026d6a28ba20351461ecd6cc7e446c56f73990"
+}

@@ -1,0 +1,105 @@
+{
+  "status": "ok",
+  "suite_name": "full_compare",
+  "task_id": "TG5_lorenz_fullinfo_full_compare_v0",
+  "scenario_id": "9b73c2c34457",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "kalmannet_tsp",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 3,
+    "y_dim": 3,
+    "T": 60
+  },
+  "accuracy": {
+    "mse": 27.947444915771484,
+    "rmse": 5.286534301011532,
+    "mse_db": 14.463421088340784
+  },
+  "timing": {
+    "timing_ms_per_step": 0.02539747577732972,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": null,
+  "t0_used": null,
+  "scenario_settings": {},
+  "scenario_cfg_basis": {},
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "KalmanNetNN"
+  },
+  "adapter_meta": {
+    "adapter_id": "kalmannet_tsp",
+    "adapter_version": "s2_route_b_v1",
+    "runtime_device": "cpu",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BDT_stepwise",
+    "entrypoints": {
+      "config": "Simulations/config.py::general_settings",
+      "system_model": "Simulations/Linear_sysmdl.py::SystemModel",
+      "model": "KNet/KalmanNet_nn.py::KalmanNetNN",
+      "pipeline_candidate": "Pipelines/Pipeline_EKF.py::Pipeline_EKF"
+    },
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "KalmanNetNN"
+  },
+  "run_plan": {
+    "plan_id": "trained__frozen",
+    "init_id": "trained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": true,
+    "suite_name": "full_compare",
+    "task_id": "TG5_lorenz_fullinfo_full_compare_v0",
+    "scenario_id": "9b73c2c34457",
+    "seed": 0,
+    "model_id": "kalmannet_tsp",
+    "deterministic": true,
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 200,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": null
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": true,
+      "model_cache_dir": "/home/xynus/bench/runs/_model_cache/full_compare",
+      "cache_key": "b4a11efa06e57a859eea11e7",
+      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/full_compare/kalmannet_tsp/b4a11efa06e57a859eea11e7",
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 200,
+    "adapt_updates_used": 0,
+    "train_max_updates": 200,
+    "train_skipped": false,
+    "cache_enabled": true,
+    "cache_hit": false,
+    "cache_key": "b4a11efa06e57a859eea11e7",
+    "track_id": "frozen",
+    "init_id": "trained"
+  },
+  "run_dir": "/home/xynus/bench/runs/full_compare/TG5_lorenz_fullinfo_full_compare_v0/kalmannet_tsp/frozen/seed_0/scenario_9b73c2c34457/init_trained"
+}

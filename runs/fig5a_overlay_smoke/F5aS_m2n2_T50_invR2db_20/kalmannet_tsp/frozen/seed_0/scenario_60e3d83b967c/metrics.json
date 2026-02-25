@@ -3,7 +3,7 @@
   "suite_name": "fig5a_overlay_smoke",
   "task_id": "F5aS_m2n2_T50_invR2db_20",
   "scenario_id": "60e3d83b967c",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "kalmannet_tsp",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": 4.733509878413745
   },
   "timing": {
-    "timing_ms_per_step": 0.0462180350041308,
+    "timing_ms_per_step": 0.05511635623406619,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 16
@@ -30,16 +30,7 @@
   "shift_recovery": null,
   "t0_used": null,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "Q": {
-      "type": "scaled_identity",
-      "q2": 0.01
-    },
-    "R": {
-      "type": "scaled_identity",
-      "r2": 0.01
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
     "selected_class": "KalmanNetNN"
@@ -93,20 +84,20 @@
     "cache": {
       "enabled": true,
       "model_cache_dir": "/home/xynus/bench/runs/_model_cache/fig5a_overlay_smoke",
-      "cache_key": "ba060e9ffa4a30aca02e7861",
-      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/fig5a_overlay_smoke/kalmannet_tsp/ba060e9ffa4a30aca02e7861",
-      "cache_hit": true,
-      "train_skipped": true
+      "cache_key": "46037d79e7f0b8d433baf595",
+      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/fig5a_overlay_smoke/kalmannet_tsp/46037d79e7f0b8d433baf595",
+      "cache_hit": false,
+      "train_skipped": false
     }
   },
   "budgets": {
-    "train_updates_used": 0,
+    "train_updates_used": 20,
     "adapt_updates_used": 0,
     "train_max_updates": 20,
-    "train_skipped": true,
+    "train_skipped": false,
     "cache_enabled": true,
-    "cache_hit": true,
-    "cache_key": "ba060e9ffa4a30aca02e7861",
+    "cache_hit": false,
+    "cache_key": "46037d79e7f0b8d433baf595",
     "track_id": "frozen",
     "init_id": "trained"
   },

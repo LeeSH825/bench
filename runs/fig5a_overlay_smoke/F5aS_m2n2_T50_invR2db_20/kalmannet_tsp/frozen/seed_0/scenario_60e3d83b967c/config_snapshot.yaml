@@ -50,15 +50,9 @@ model:
     outputs_covariance: false
     needs_system_model: true
 scenario_settings: {}
-scenario_cfg_basis:
-  Q:
-    type: scaled_identity
-    q2: 0.01
-  R:
-    type: scaled_identity
-    r2: 0.01
+scenario_cfg_basis: {}
 scenario_id: 60e3d83b967c
-scenario_id_resolved_from_cache: true
+scenario_id_resolved_from_cache: false
 seed: 0
 track_id: frozen
 track_cfg:

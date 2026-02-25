@@ -1,0 +1,16 @@
+{
+  "cache_key": "2f2bc48a913e1d6c922e2119",
+  "model_id": "adaptive_knet",
+  "adapter_version": "s3_route_b_v1",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "e158c63cad44",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 160,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "7aeb93d9484ef0640a7f2889d8e69dfc35949241",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "6f026d6a28ba20351461ecd6cc7e446c56f73990"
+}

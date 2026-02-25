@@ -1,0 +1,98 @@
+suite:
+  name: full_compare
+  version: 0.1.0
+  description: 'Route-B full comparison suite across stationary linear, shift linear,
+    and TG5 Lorenz tasks. Includes frozen and budgeted tracks with shared budget semantics
+    (optimizer.step counts).
+
+    '
+task:
+  task_id: TG5_lorenz_Jmismatch_full_compare_v0
+  task_name: Lorenz J-Mismatch (Full Compare)
+  task_family: lorenz_v0
+  system_type: nonlinear
+  x_dim: 3
+  y_dim: 3
+  sequence_length_T: 40
+  dataset_sizes:
+    N_train: 192
+    N_val: 64
+    N_test: 64
+  lorenz:
+    sigma: 10.0
+    rho: 28.0
+    beta: 2.6666666667
+    J_true: 5
+    J_assumed: 2
+    delta_tau_true: 0.02
+    delta_tau_assumed: 0.02
+    obs_mode: identity
+    state_clip: 100.0
+  splits:
+    train:
+      N: 192
+      T: 40
+    val:
+      N: 64
+      T: 40
+    test:
+      N: 64
+      T: 120
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 1.0e-05
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: identity
+    mode: identity
+  mismatch:
+    enabled: true
+    kind: lorenz_J
+    params:
+      obs_rotation_deg: 1.0
+      obs_rotation_assumed_deg: 0.0
+      sampling_decimation: 1
+      time_axis_shift_steps: 0
+      time_axis_resample_stride: 1
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: mb_kf_nominal
+  display_name: Model-Based KF (Nominal)
+  adapter: bench.models.mb_kf:ModelBasedKFAdapter
+  baseline_mode: nominal
+  outputs_covariance: false
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis: {}
+scenario_id: 5dfca19c7755
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: budgeted
+track_cfg:
+  track_id: budgeted
+  adaptation_enabled: true
+  adaptation_budget:
+    max_updates: 40
+    max_updates_per_step: 1
+    allowed_after_t0_only: true
+    overflow_policy: fail
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/full_compare/TG5_lorenz_Jmismatch_full_compare_v0/scenario_5dfca19c7755/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/full_compare/TG5_lorenz_Jmismatch_full_compare_v0/scenario_5dfca19c7755/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/full_compare/TG5_lorenz_Jmismatch_full_compare_v0/scenario_5dfca19c7755/seed_0/test.npz
+  canonical_layout: NTD

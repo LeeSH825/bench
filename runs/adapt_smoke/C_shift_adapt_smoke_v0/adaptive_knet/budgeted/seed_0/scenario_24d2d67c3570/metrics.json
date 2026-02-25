@@ -3,7 +3,7 @@
   "suite_name": "adapt_smoke",
   "task_id": "C_shift_adapt_smoke_v0",
   "scenario_id": "24d2d67c3570",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "adaptive_knet",
   "track_id": "budgeted",
@@ -18,7 +18,7 @@
     "mse_db": 56.24333381593068
   },
   "timing": {
-    "timing_ms_per_step": 0.20069450783921639,
+    "timing_ms_per_step": 0.21756894511781866,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 4
@@ -38,30 +38,7 @@
   },
   "t0_used": 8,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "pre_shift": {
-      "Q": {
-        "type": "scaled_identity",
-        "q2": 0.001
-      },
-      "R": {
-        "type": "scaled_identity",
-        "r2": 0.001
-      },
-      "obs_distribution": {
-        "name": "gaussian"
-      }
-    },
-    "shift": {
-      "t0": 8,
-      "post_shift": {
-        "obs_distribution": {
-          "name": "gaussian"
-        },
-        "R_scale": 10.0
-      }
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
     "selected_class": "mnets.KNet_mnet.KalmanNetNN"

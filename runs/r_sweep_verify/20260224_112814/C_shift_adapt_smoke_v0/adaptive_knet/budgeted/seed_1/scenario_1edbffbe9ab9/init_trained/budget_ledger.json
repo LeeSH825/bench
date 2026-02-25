@@ -1,0 +1,33 @@
+{
+  "train_updates_used": 0,
+  "adapt_updates_used": 8,
+  "train_max_updates": 160,
+  "train_skipped": true,
+  "cache_enabled": true,
+  "cache_hit": true,
+  "cache_key": "942c08d00cbe590bff47c818",
+  "track_id": "budgeted",
+  "init_id": "trained",
+  "adapt_updates_per_step": {
+    "0": 0,
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0,
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1
+  },
+  "adapt_t0": 8,
+  "allowed_after_t0_only": true,
+  "adapt_max_updates": 200,
+  "adapt_max_updates_per_step": 1
+}

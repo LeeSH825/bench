@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "failure_type": "policy_violation",
+  "phase": "runner",
+  "failure_stage": "runner",
+  "message": "RuntimeError: policy_violation: trained plan requires positive train_updates_used unless train_skipped=true.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1561, in run_one\n    raise RuntimeError(\nRuntimeError: policy_violation: trained plan requires positive train_updates_used unless train_skipped=true.\n",
+  "context": {
+    "suite_name": "full_compare",
+    "task_id": "TG5_lorenz_fullinfo_full_compare_v0",
+    "scenario_id": "9b73c2c34457",
+    "scenario_id_resolved_from_cache": false,
+    "seed": 0,
+    "model_id": "mb_kf_oracle",
+    "track_id": "frozen",
+    "init_id": "trained",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {}
+  },
+  "error": "RuntimeError: policy_violation: trained plan requires positive train_updates_used unless train_skipped=true."
+}

@@ -1,0 +1,128 @@
+{
+  "status": "ok",
+  "suite_name": "r_sweep_verify_20260224_112814",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "17a6d03c9dd5",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 1,
+  "model_id": "adaptive_knet",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 2,
+    "y_dim": 2,
+    "T": 16
+  },
+  "accuracy": {
+    "mse": 21341169664.0,
+    "rmse": 146086.17204923948,
+    "mse_db": 103.292182184952
+  },
+  "timing": {
+    "timing_ms_per_step": 0.4875270078628091,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 64
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": {
+    "t0": 8,
+    "W": 20,
+    "eps": 0.05,
+    "E_pre": 4418.8349609375,
+    "recovery_k": 8,
+    "recovered": false,
+    "failure_policy": "cap"
+  },
+  "t0_used": 8,
+  "scenario_settings": {
+    "noise.pre_shift.R.r2": 0.0031622776601683794
+  },
+  "scenario_cfg_basis": {
+    "noise": {
+      "pre_shift": {
+        "R": {
+          "r2": 0.0031622776601683794
+        }
+      }
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "mnets.KNet_mnet.KalmanNetNN"
+  },
+  "adapter_meta": {
+    "adapter_id": "adaptive_knet",
+    "adapter_version": "s3_route_b_v1",
+    "runtime_device": "cuda",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BDT_stepwise",
+    "class_path": "mnets.KNet_mnet.KalmanNetNN",
+    "entrypoints": {
+      "config": "simulations/config.py::general_settings",
+      "system_model": "simulations/Linear_sysmdl.py::SystemModel",
+      "pipeline_train_ref": "pipelines/Pipeline_EKF.py::Pipeline_EKF.NNTrain",
+      "pipeline_eval_ref": "pipelines/Pipeline_EKF.py::Pipeline_EKF.NNTest",
+      "pipeline_adapt_ref": "noise_estimator/search.py::Pipeline_NE"
+    },
+    "adaptation_objective": "unsupervised_observation_reconstruction_mse",
+    "adapt_updates_per_step_policy": "fail_if_exceeds_max_updates_per_step",
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "mnets.KNet_mnet.KalmanNetNN"
+  },
+  "run_plan": {
+    "plan_id": "trained__frozen",
+    "init_id": "trained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": true,
+    "suite_name": "r_sweep_verify_20260224_112814",
+    "task_id": "C_shift_adapt_smoke_v0",
+    "scenario_id": "17a6d03c9dd5",
+    "seed": 1,
+    "model_id": "adaptive_knet",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 160,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": 8
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": true,
+      "model_cache_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814",
+      "cache_key": "091971952da5878393f9f686",
+      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814/adaptive_knet/091971952da5878393f9f686",
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 160,
+    "adapt_updates_used": 0,
+    "train_max_updates": 160,
+    "train_skipped": false,
+    "cache_enabled": true,
+    "cache_hit": false,
+    "cache_key": "091971952da5878393f9f686",
+    "track_id": "frozen",
+    "init_id": "trained",
+    "adapt_updates_per_step": {}
+  },
+  "run_dir": "/home/xynus/bench/runs/r_sweep_verify/20260224_112814/C_shift_adapt_smoke_v0/adaptive_knet/frozen/seed_1/scenario_17a6d03c9dd5/init_trained"
+}

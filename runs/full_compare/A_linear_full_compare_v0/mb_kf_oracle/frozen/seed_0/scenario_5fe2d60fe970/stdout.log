@@ -1,0 +1,4 @@
+[INFO] set CUBLAS_WORKSPACE_CONFIG=:4096:8 (deterministic CUDA)
+[INFO] set CUBLAS_WORKSPACE_CONFIG=:4096:8 (deterministic CUDA)
+[OK] wrote metrics to /home/xynus/bench/runs/full_compare/A_linear_full_compare_v0/mb_kf_oracle/frozen/seed_0/scenario_5fe2d60fe970
+[OK] wrote metrics to /home/xynus/bench/runs/full_compare/A_linear_full_compare_v0/mb_kf_oracle/frozen/seed_0/scenario_5fe2d60fe970

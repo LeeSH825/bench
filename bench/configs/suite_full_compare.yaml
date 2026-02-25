@@ -1,0 +1,318 @@
+suite:
+  name: full_compare
+  version: "0.1.0"
+  description: >
+    Route-B full comparison suite across stationary linear, shift linear, and TG5 Lorenz tasks.
+    Includes frozen and budgeted tracks with shared budget semantics (optimizer.step counts).
+
+seeds: [0, 1]
+
+tasks:
+  - task_id: A_linear_full_compare_v0
+    task_name: "Linear Canonical (Full Compare)"
+    system_type: linear
+    x_dim: 3
+    y_dim: 3
+    sequence_length_T: 60
+    dataset_sizes:
+      N_train: 192
+      N_val: 64
+      N_test: 64
+    noise:
+      form: "diag"
+      Q:
+        type: "scaled_identity"
+        q2: 1.0e-3
+      R:
+        type: "scaled_identity"
+        r2: 1.0e-3
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: C_shift_Rscale_full_compare_v0
+    task_name: "Linear Shift R-scale (Full Compare)"
+    system_type: linear
+    x_dim: 3
+    y_dim: 3
+    sequence_length_T: 80
+    dataset_sizes:
+      N_train: 192
+      N_val: 64
+      N_test: 64
+    noise:
+      pre_shift:
+        Q: { type: "scaled_identity", q2: 1.0e-3 }
+        R: { type: "scaled_identity", r2: 1.0e-3 }
+        obs_distribution: { name: "gaussian" }
+      shift:
+        t0: 40
+        post_shift:
+          obs_distribution: { name: "gaussian" }
+          R_scale: 10.0
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG5_lorenz_fullinfo_full_compare_v0
+    task_name: "Lorenz Full-Info (Full Compare)"
+    task_family: lorenz_v0
+    system_type: nonlinear
+    x_dim: 3
+    y_dim: 3
+    sequence_length_T: 60
+    dataset_sizes:
+      N_train: 192
+      N_val: 64
+      N_test: 64
+    lorenz:
+      sigma: 10.0
+      rho: 28.0
+      beta: 2.6666666667
+      J_true: 5
+      J_assumed: 5
+      delta_tau_true: 0.02
+      delta_tau_assumed: 0.02
+      obs_mode: identity
+      state_clip: 100.0
+    splits:
+      train: { N: 192, T: 60 }
+      val:   { N: 64,  T: 60 }
+      test:  { N: 64,  T: 60 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-5 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "full"
+      h_type: "identity"
+      mode: "identity"
+    mismatch:
+      enabled: false
+      kind: "none"
+      params: {}
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG5_lorenz_Jmismatch_full_compare_v0
+    task_name: "Lorenz J-Mismatch (Full Compare)"
+    task_family: lorenz_v0
+    system_type: nonlinear
+    x_dim: 3
+    y_dim: 3
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 192
+      N_val: 64
+      N_test: 64
+    lorenz:
+      sigma: 10.0
+      rho: 28.0
+      beta: 2.6666666667
+      J_true: 5
+      J_assumed: 2
+      delta_tau_true: 0.02
+      delta_tau_assumed: 0.02
+      obs_mode: identity
+      state_clip: 100.0
+    splits:
+      train: { N: 192, T: 40 }
+      val:   { N: 64,  T: 40 }
+      test:  { N: 64,  T: 120 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-5 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "full"
+      h_type: "identity"
+      mode: "identity"
+    mismatch:
+      enabled: true
+      kind: "lorenz_J"
+      params:
+        obs_rotation_deg: 1.0
+        obs_rotation_assumed_deg: 0.0
+        sampling_decimation: 1
+        time_axis_shift_steps: 0
+        time_axis_resample_stride: 1
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+models:
+  - model_id: mb_kf_oracle
+    display_name: "Model-Based KF (Oracle)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "oracle"
+    outputs_covariance: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: mb_kf_nominal
+    display_name: "Model-Based KF (Nominal)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "nominal"
+    outputs_covariance: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        A_linear_full_compare_v0: "main_linear_canonical.py"
+        C_shift_Rscale_full_compare_v0: "main_linear_canonical.py"
+        TG5_lorenz_fullinfo_full_compare_v0: "main_linear_canonical.py"
+        TG5_lorenz_Jmismatch_full_compare_v0: "main_linear_canonical.py"
+    input_layout: "BTD"
+    batch_size: 16
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 20
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: adaptive_knet
+    display_name: "Adaptive-KNet-ICASSP24"
+    adapter: "bench.models.adaptive_knet:AdaptiveKNetAdapter"
+    repo:
+      path: "third_party/Adaptive-KNet-ICASSP24"
+      entrypoints:
+        A_linear_full_compare_v0: "main_cm_linear.py"
+        C_shift_Rscale_full_compare_v0: "main_cm_linear.py"
+        TG5_lorenz_fullinfo_full_compare_v0: "main_cm_linear.py"
+        TG5_lorenz_Jmismatch_full_compare_v0: "main_cm_linear.py"
+    estimator_class_path: "mnets.KNet_mnet.KalmanNetNN"
+    input_layout: "BTD"
+    batch_size: 16
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 20
+    knet_trainable: true
+    adapt_lr: 1.0e-5
+    adapt_overflow_policy: "fail"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: maml_knet
+    display_name: "MAML-KalmanNet"
+    adapter: "bench.models.maml_knet:MAMLKNetAdapter"
+    enabled: true
+    repo:
+      path: "third_party/MAML_KalmanNet"
+      entrypoints:
+        A_linear_full_compare_v0: "main_linear.py"
+        C_shift_Rscale_full_compare_v0: "main_linear.py"
+        TG5_lorenz_fullinfo_full_compare_v0: "main_linear.py"
+        TG5_lorenz_Jmismatch_full_compare_v0: "main_linear.py"
+    input_layout: "BTD"
+    batch_size: 16
+    eval_batch_size: 32
+    meta_task_num: 4
+    support_size: 8
+    query_size: 8
+    inner_steps: 1
+    inner_lr: 5.0e-2
+    outer_lr: 1.0e-3
+    update_step_test: 1
+    val_eval_interval_updates: 20
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: my_model
+    display_name: "My Model (placeholder)"
+    adapter: "bench.models.my_model:MyModelAdapter"
+    enabled: false
+    repo:
+      path: null
+      entrypoints:
+        A_linear_full_compare_v0: "adapter_native"
+        C_shift_Rscale_full_compare_v0: "adapter_native"
+        TG5_lorenz_fullinfo_full_compare_v0: "adapter_native"
+        TG5_lorenz_Jmismatch_full_compare_v0: "adapter_native"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: false
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/full_compare"
+  budget:
+    train_max_updates: 200
+    train_batch_size: 16
+    eval_batch_size: 32
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 4
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+    - track_id: budgeted
+      adaptation_enabled: true
+      adaptation_budget:
+        max_updates: 40
+        max_updates_per_step: 1
+        allowed_after_t0_only: true
+        overflow_policy: "fail"
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    window_W: 20
+    tolerance_eps: 0.05
+    metric: "mse"
+    aggregation: "mean_over_window"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+    - "env.txt"
+    - "git_versions.txt"
+  tables:
+    summary_csv: "reports/summary_full_compare.csv"

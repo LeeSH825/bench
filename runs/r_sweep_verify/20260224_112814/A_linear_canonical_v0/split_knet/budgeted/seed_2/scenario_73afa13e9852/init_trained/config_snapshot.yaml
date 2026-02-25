@@ -1,0 +1,81 @@
+suite:
+  name: r_sweep_verify_20260224_112814
+  version: '0.1'
+  description: r-sweep verification harness
+task:
+  task_id: A_linear_canonical_v0
+  task_name: Linear Canonical (v0 fixed)
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 200
+  dataset_sizes:
+    N_train: 2000
+    N_val: 500
+    N_test: 500
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: split_knet
+  display_name: Split-KalmanNet
+  adapter: bench.models.split_knet:SplitKNetAdapter
+  repo:
+    path: third_party/Split_KalmanNet
+    entrypoints:
+      A_linear_gpu_models_smoke_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+  estimator_class_path: GSSFiltering.filtering.Split_KalmanNet_Filter
+  input_layout: BTD
+  batch_size: 2
+  lr: 0.001
+  weight_decay: 0.0
+  val_eval_interval_updates: 2
+  train_init_from_gt: true
+  eval_init_from_gt: false
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+  enabled: true
+  train_max_updates: 20000
+scenario_settings:
+  noise.R.r2: 0.00023713737056616554
+scenario_cfg_basis:
+  noise:
+    R:
+      r2: 0.00023713737056616554
+scenario_id: 73afa13e9852
+scenario_id_resolved_from_cache: false
+seed: 2
+track_id: budgeted
+track_cfg:
+  track_id: budgeted
+  adaptation_enabled: true
+  adaptation_budget:
+    max_updates: 200
+    max_updates_per_step: 1
+    allowed_after_t0_only: true
+    overflow_policy: fail
+init_id: trained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/A_linear_canonical_v0/scenario_73afa13e9852/seed_2/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/A_linear_canonical_v0/scenario_73afa13e9852/seed_2/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/A_linear_canonical_v0/scenario_73afa13e9852/seed_2/test.npz
+  canonical_layout: NTD

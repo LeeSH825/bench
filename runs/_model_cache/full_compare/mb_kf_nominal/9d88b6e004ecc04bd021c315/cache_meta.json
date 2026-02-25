@@ -1,0 +1,16 @@
+{
+  "cache_key": "9d88b6e004ecc04bd021c315",
+  "model_id": "mb_kf_nominal",
+  "adapter_version": "s10_kf_baseline_v1",
+  "task_id": "A_linear_full_compare_v0",
+  "scenario_id": "5fe2d60fe970",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 200,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "6af5aacd5a2fc6b5a3ff62df4b2c7ccafabb47a8",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "389e619eeefcb76563415c277621a349ecf23b5d"
+}

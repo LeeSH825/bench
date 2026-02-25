@@ -1,0 +1,2 @@
+batch_idx,batch_size,ms_predict_whole_seq
+0,8,237.2898760077078

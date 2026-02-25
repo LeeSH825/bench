@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "best_step": 0,
+  "best_val_mse": null,
+  "updates_used": 0,
+  "max_updates": 20,
+  "note": "mb_kf baseline has no trainable parameters; no-op train."
+}

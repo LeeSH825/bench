@@ -1,0 +1,69 @@
+suite:
+  name: full_compare
+  version: 0.1.0
+  description: 'Route-B full comparison suite across stationary linear, shift linear,
+    and TG5 Lorenz tasks. Includes frozen and budgeted tracks with shared budget semantics
+    (optimizer.step counts).
+
+    '
+task:
+  task_id: A_linear_full_compare_v0
+  task_name: Linear Canonical (Full Compare)
+  system_type: linear
+  x_dim: 3
+  y_dim: 3
+  sequence_length_T: 60
+  dataset_sizes:
+    N_train: 192
+    N_val: 64
+    N_test: 64
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: mb_kf_oracle
+  display_name: Model-Based KF (Oracle)
+  adapter: bench.models.mb_kf:ModelBasedKFAdapter
+  baseline_mode: oracle
+  outputs_covariance: false
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis: {}
+scenario_id: 5fe2d60fe970
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: budgeted
+track_cfg:
+  track_id: budgeted
+  adaptation_enabled: true
+  adaptation_budget:
+    max_updates: 40
+    max_updates_per_step: 1
+    allowed_after_t0_only: true
+    overflow_policy: fail
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/full_compare/A_linear_full_compare_v0/scenario_5fe2d60fe970/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/full_compare/A_linear_full_compare_v0/scenario_5fe2d60fe970/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/full_compare/A_linear_full_compare_v0/scenario_5fe2d60fe970/seed_0/test.npz
+  canonical_layout: NTD

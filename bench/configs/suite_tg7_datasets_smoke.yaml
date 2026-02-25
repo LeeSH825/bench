@@ -1,0 +1,59 @@
+suite:
+  name: tg7_datasets_smoke
+  version: "0.1.0"
+  description: >
+    TG7 dataset-loader smoke suite for external NCLT and UZH-FPV cache conversion.
+    This suite is local-only unless raw datasets are prepared and env vars are set.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG7_nclt_loader_smoke_v0
+    task_name: "TG7 NCLT Loader Smoke"
+    task_family: nclt_v0
+    system_type: real
+    x_dim: 6
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes:
+      N_train: 80
+      N_val: 5
+      N_test: 1
+    dataset:
+      protocol: split_kalmannet_2023
+      sampling_hz: 1.0
+      split_overrides:
+        train: { session: "2012-01-22", L: 80, T: 50, stride: 1 }
+        val:   { session: "2012-01-22", L: 5,  T: 200, stride: 1 }
+        test:  { session: "2012-04-29", L: 1,  T: 2000, stride: 1 }
+    observation:
+      type: "real"
+      h_type: "unknown"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG7_uzh_fpv_loader_smoke_v0
+    task_name: "TG7 UZH-FPV Loader Smoke"
+    task_family: uzh_fpv_v0
+    system_type: real
+    x_dim: 9
+    y_dim: 3
+    sequence_length_T: 80
+    dataset_sizes:
+      N_train: 25
+      N_val: 0
+      N_test: 1
+    dataset:
+      protocol: maml_kalmannet_2025
+      session: "6th_indoor_forward_facing"
+      sampling_hz: 100.0
+      dt: 0.01
+    observation:
+      type: "real"
+      h_type: "unknown"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}

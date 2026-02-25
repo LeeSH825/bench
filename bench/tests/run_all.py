@@ -8,6 +8,14 @@ from typing import List
 
 from .test_seed_repro import run_seed_repro
 from .test_data_format import run_data_format_check
+from .test_generator_contract_tg0 import run_generator_contract_tg0_smoke
+from .test_noise_schedule_tg1 import run_noise_schedule_tg1
+from .test_linear_mismatch_tg2 import run_linear_mismatch_tg2
+from .test_ucm_tg3 import run_ucm_tg3
+from .test_sine_poly_tg4 import run_sine_poly_tg4
+from .test_lorenz_tg5 import run_lorenz_tg5
+from .test_switching_tg6 import run_switching_tg6
+from .test_datasets_tg7 import run_dataset_loaders_tg7
 from .test_adapter_smoke import run_adapter_smoke
 from .test_runner_smoke import run_runner_smoke
 from .test_report_smoke import run_report_smoke
@@ -122,6 +130,38 @@ def main() -> None:
     suite_name = "shift"
     df = run_data_format_check(cache_root=cache_root, suite_name=suite_name, task_id=task_id, seed=seed)
     step("test_data_format", df.ok, df.note)
+
+    # 2b) TG0 generator contract schema + determinism smoke
+    tg0 = run_generator_contract_tg0_smoke()
+    step("test_generator_contract_tg0", tg0.ok, f"{tg0.note} (npz={tg0.npz_path})")
+
+    # 2c) TG1 shared noise_schedule utility smoke
+    tg1 = run_noise_schedule_tg1()
+    step("test_noise_schedule_tg1", tg1.ok, f"{tg1.note} (npz={tg1.npz_path})")
+
+    # 2d) TG2 linear mismatch (rotated true-vs-assumed F/H) smoke
+    tg2 = run_linear_mismatch_tg2()
+    step("test_linear_mismatch_tg2", tg2.ok, f"{tg2.note} (npz={tg2.npz_path})")
+
+    # 2e) TG3 UCM generator smoke (linear/nonlinear + optional task_set/task_key)
+    tg3 = run_ucm_tg3()
+    step("test_ucm_tg3", tg3.ok, f"{tg3.note} (npz={tg3.npz_path})")
+
+    # 2f) TG4 synthetic nonlinear sine/poly generator smoke
+    tg4 = run_sine_poly_tg4()
+    step("test_sine_poly_tg4", tg4.ok, f"{tg4.note} (npz={tg4.npz_path})")
+
+    # 2g) TG5 lorenz family generator smoke
+    tg5 = run_lorenz_tg5()
+    step("test_lorenz_tg5", tg5.ok, f"{tg5.note} (npz={tg5.npz_path})")
+
+    # 2h) TG6 switching dynamics generator smoke
+    tg6 = run_switching_tg6()
+    step("test_switching_tg6", tg6.ok, f"{tg6.note} (npz={tg6.npz_path})")
+
+    # 2i) TG7 dataset loader scaffolding diagnostics (CI-safe skip when datasets absent)
+    tg7 = run_dataset_loaders_tg7()
+    step("test_datasets_tg7", tg7.ok, tg7.note, skipped=bool(tg7.skipped))
 
     # 3) adapter smoke: forward one batch (prefer cpu by default)
     ad = run_adapter_smoke(suite_yaml=suite_yaml, task_id=task_id, model_id=model_id, seed=seed, device=device)

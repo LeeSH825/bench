@@ -1,0 +1,45 @@
+{
+  "plan_id": "trained__budgeted",
+  "init_id": "trained",
+  "track_id": "budgeted",
+  "official_benchmark_eligible": true,
+  "suite_name": "r_sweep_verify_20260224_112814",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "2ed86822e379",
+  "seed": 1,
+  "model_id": "maml_knet",
+  "deterministic": true,
+  "device_requested": "cuda",
+  "device_resolved": "cuda",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 40,
+    "adapt_max_updates": 200,
+    "adapt_max_updates_per_step": 1,
+    "t0_gate_enabled": true,
+    "adaptation_budget": {
+      "allowed_after_t0_only": true,
+      "max_updates": 200,
+      "max_updates_per_step": 1,
+      "overflow_policy": "fail"
+    }
+  },
+  "shift": {
+    "t0": 8
+  },
+  "adaptation": {
+    "enabled": true,
+    "allowed_after_t0_only": true,
+    "max_updates": 200,
+    "max_updates_per_step": 1,
+    "will_run": true
+  },
+  "cache": {
+    "enabled": true,
+    "model_cache_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814",
+    "cache_key": "2b2619240ab8ced3814c98c0",
+    "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814/maml_knet/2b2619240ab8ced3814c98c0",
+    "cache_hit": true,
+    "train_skipped": true
+  }
+}

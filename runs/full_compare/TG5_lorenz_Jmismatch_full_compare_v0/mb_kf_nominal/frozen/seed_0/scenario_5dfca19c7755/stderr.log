@@ -1,0 +1,23 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /home/xynus/bench/bench_data_cache/full_compare/TG5_lorenz_Jmismatch_full_compare_v0/scenario_5dfca19c7755/seed_0/test.npz",
+  "context": {
+    "suite_name": "full_compare",
+    "task_id": "TG5_lorenz_Jmismatch_full_compare_v0",
+    "scenario_id": "5dfca19c7755",
+    "seed": 0,
+    "model_id": "mb_kf_nominal",
+    "track_id": "frozen",
+    "init_id": "untrained",
+    "cache_root": "/home/xynus/bench/bench_data_cache",
+    "scenario_settings": {},
+    "scenario_cfg_basis": {},
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/home/xynus/bench/bench_data_cache/full_compare/TG5_lorenz_Jmismatch_full_compare_v0/scenario_5dfca19c7755/seed_0/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}

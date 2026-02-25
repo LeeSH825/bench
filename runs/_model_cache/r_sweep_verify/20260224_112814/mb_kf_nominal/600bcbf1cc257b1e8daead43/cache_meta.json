@@ -1,0 +1,16 @@
+{
+  "cache_key": "600bcbf1cc257b1e8daead43",
+  "model_id": "mb_kf_nominal",
+  "adapter_version": "s10_kf_baseline_v1",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "73afa13e9852",
+  "seed": 2,
+  "train_budget": {
+    "train_max_updates": 1260,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "f310d16043aca8c8405655c25b2e809d8aadc0a5",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "6f026d6a28ba20351461ecd6cc7e446c56f73990"
+}

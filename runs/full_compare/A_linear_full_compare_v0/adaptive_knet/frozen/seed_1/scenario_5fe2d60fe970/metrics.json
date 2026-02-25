@@ -1,0 +1,107 @@
+{
+  "status": "ok",
+  "suite_name": "full_compare",
+  "task_id": "A_linear_full_compare_v0",
+  "scenario_id": "5fe2d60fe970",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 1,
+  "model_id": "adaptive_knet",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 3,
+    "y_dim": 3,
+    "T": 60
+  },
+  "accuracy": {
+    "mse": Infinity,
+    "rmse": Infinity,
+    "mse_db": Infinity
+  },
+  "timing": {
+    "timing_ms_per_step": 0.02351275937447402,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": null,
+  "t0_used": null,
+  "scenario_settings": {},
+  "scenario_cfg_basis": {},
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "mnets.KNet_mnet.KalmanNetNN"
+  },
+  "adapter_meta": {
+    "adapter_id": "adaptive_knet",
+    "adapter_version": "s3_route_b_v1",
+    "runtime_device": "cpu",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BDT_stepwise",
+    "class_path": "mnets.KNet_mnet.KalmanNetNN",
+    "entrypoints": {
+      "config": "simulations/config.py::general_settings",
+      "system_model": "simulations/Linear_sysmdl.py::SystemModel",
+      "pipeline_train_ref": "pipelines/Pipeline_EKF.py::Pipeline_EKF.NNTrain",
+      "pipeline_eval_ref": "pipelines/Pipeline_EKF.py::Pipeline_EKF.NNTest",
+      "pipeline_adapt_ref": "noise_estimator/search.py::Pipeline_NE"
+    },
+    "adaptation_objective": "unsupervised_observation_reconstruction_mse",
+    "adapt_updates_per_step_policy": "fail_if_exceeds_max_updates_per_step",
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "mnets.KNet_mnet.KalmanNetNN"
+  },
+  "run_plan": {
+    "plan_id": "untrained__frozen",
+    "init_id": "untrained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": false,
+    "suite_name": "full_compare",
+    "task_id": "A_linear_full_compare_v0",
+    "scenario_id": "5fe2d60fe970",
+    "seed": 1,
+    "model_id": "adaptive_knet",
+    "deterministic": true,
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 200,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": null
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": false,
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 200,
+    "train_skipped": false,
+    "cache_enabled": false,
+    "cache_hit": false,
+    "cache_key": null,
+    "track_id": "frozen",
+    "init_id": "untrained",
+    "adapt_updates_per_step": {}
+  },
+  "run_dir": "/home/xynus/bench/runs/full_compare/A_linear_full_compare_v0/adaptive_knet/frozen/seed_1/scenario_5fe2d60fe970"
+}

@@ -26,6 +26,9 @@ _REGISTRY: Dict[str, Type[ModelAdapter]] = {
     "oracle_kf": ModelBasedKFAdapter,
     "nominal_kf": ModelBasedKFAdapter,
     "oracle_shift_kf": ModelBasedKFAdapter,
+    # Route-B closeout aliases for model-based KF baselines.
+    "mb_kf_oracle": ModelBasedKFAdapter,
+    "mb_kf_nominal": ModelBasedKFAdapter,
     # future:
     # "my_model": MyModelAdapter,
 }

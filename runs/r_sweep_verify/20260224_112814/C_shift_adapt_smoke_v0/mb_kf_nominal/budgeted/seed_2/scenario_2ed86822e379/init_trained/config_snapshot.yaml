@@ -1,0 +1,74 @@
+suite:
+  name: r_sweep_verify_20260224_112814
+  version: '0.1'
+  description: r-sweep verification harness
+task:
+  task_id: C_shift_adapt_smoke_v0
+  task_name: Linear Shift Tiny
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 16
+  dataset_sizes:
+    N_train: 32
+    N_val: 8
+    N_test: 8
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 8
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: mb_kf_nominal
+  display_name: Model-Based KF (Nominal)
+  baseline_mode: nominal
+  enabled: true
+  train_max_updates: 20
+scenario_settings:
+  noise.pre_shift.R.r2: 0.0005623413251903491
+scenario_cfg_basis:
+  noise:
+    pre_shift:
+      R:
+        r2: 0.0005623413251903491
+scenario_id: 2ed86822e379
+scenario_id_resolved_from_cache: false
+seed: 2
+track_id: budgeted
+track_cfg:
+  track_id: budgeted
+  adaptation_enabled: true
+  adaptation_budget:
+    max_updates: 200
+    max_updates_per_step: 1
+    allowed_after_t0_only: true
+    overflow_policy: fail
+init_id: trained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_2ed86822e379/seed_2/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_2ed86822e379/seed_2/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/r_sweep_verify_20260224_112814/C_shift_adapt_smoke_v0/scenario_2ed86822e379/seed_2/test.npz
+  canonical_layout: NTD

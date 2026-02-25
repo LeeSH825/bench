@@ -1,0 +1,36 @@
+{
+  "plan_id": "untrained__frozen",
+  "init_id": "untrained",
+  "track_id": "frozen",
+  "official_benchmark_eligible": false,
+  "suite_name": "full_compare",
+  "task_id": "A_linear_full_compare_v0",
+  "scenario_id": "5fe2d60fe970",
+  "seed": 1,
+  "model_id": "adaptive_knet",
+  "deterministic": true,
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 200,
+    "adapt_max_updates": 0,
+    "adapt_max_updates_per_step": 0,
+    "t0_gate_enabled": false,
+    "adaptation_budget": {}
+  },
+  "shift": {
+    "t0": null
+  },
+  "adaptation": {
+    "enabled": false,
+    "allowed_after_t0_only": false,
+    "max_updates": 0,
+    "max_updates_per_step": 0
+  },
+  "cache": {
+    "enabled": false,
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}

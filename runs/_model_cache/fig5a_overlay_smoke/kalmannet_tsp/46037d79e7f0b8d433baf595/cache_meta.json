@@ -1,0 +1,16 @@
+{
+  "cache_key": "46037d79e7f0b8d433baf595",
+  "model_id": "kalmannet_tsp",
+  "adapter_version": "s2_route_b_v1",
+  "task_id": "F5aS_m2n2_T50_invR2db_20",
+  "scenario_id": "60e3d83b967c",
+  "seed": 0,
+  "train_budget": {
+    "train_max_updates": 20,
+    "patience_evals": 2,
+    "min_delta": 0.0
+  },
+  "data_hash": "171c5011c9c20059217e4b329037f5e26057e7b2",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "389e619eeefcb76563415c277621a349ecf23b5d"
+}

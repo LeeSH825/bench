@@ -1,0 +1,39 @@
+{
+  "plan_id": "trained__frozen",
+  "init_id": "trained",
+  "track_id": "frozen",
+  "official_benchmark_eligible": true,
+  "suite_name": "r_sweep_verify_20260224_112814",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "a234aff85e77",
+  "seed": 0,
+  "model_id": "mb_kf_nominal",
+  "deterministic": true,
+  "device_requested": "cuda",
+  "device_resolved": "cuda",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 20,
+    "adapt_max_updates": 0,
+    "adapt_max_updates_per_step": 0,
+    "t0_gate_enabled": false,
+    "adaptation_budget": {}
+  },
+  "shift": {
+    "t0": 8
+  },
+  "adaptation": {
+    "enabled": false,
+    "allowed_after_t0_only": false,
+    "max_updates": 0,
+    "max_updates_per_step": 0
+  },
+  "cache": {
+    "enabled": true,
+    "model_cache_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814",
+    "cache_key": "36727269c8f9fb335225bb91",
+    "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814/mb_kf_nominal/36727269c8f9fb335225bb91",
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}

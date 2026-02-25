@@ -3,7 +3,7 @@
   "suite_name": "kf_baseline_smoke",
   "task_id": "C_shift_kf_baseline_smoke_v0",
   "scenario_id": "500e60702ca6",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "oracle_shift_kf",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": -26.721714941858625
   },
   "timing": {
-    "timing_ms_per_step": 0.030368354221839883,
+    "timing_ms_per_step": 0.029723994733406773,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 4
@@ -38,30 +38,7 @@
   },
   "t0_used": 12,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "pre_shift": {
-      "Q": {
-        "type": "scaled_identity",
-        "q2": 0.001
-      },
-      "R": {
-        "type": "scaled_identity",
-        "r2": 0.001
-      },
-      "obs_distribution": {
-        "name": "gaussian"
-      }
-    },
-    "shift": {
-      "t0": 12,
-      "post_shift": {
-        "obs_distribution": {
-          "name": "gaussian"
-        },
-        "R_scale": 10.0
-      }
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_BTD",
     "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"

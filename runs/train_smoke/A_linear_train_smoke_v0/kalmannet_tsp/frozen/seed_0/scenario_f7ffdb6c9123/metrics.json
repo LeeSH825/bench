@@ -3,7 +3,7 @@
   "suite_name": "train_smoke",
   "task_id": "A_linear_train_smoke_v0",
   "scenario_id": "f7ffdb6c9123",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "kalmannet_tsp",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": 5.364650696729614
   },
   "timing": {
-    "timing_ms_per_step": 0.18185382289933236,
+    "timing_ms_per_step": 0.23798562491113748,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 4
@@ -30,17 +30,7 @@
   "shift_recovery": null,
   "t0_used": null,
   "scenario_settings": {},
-  "scenario_cfg_basis": {
-    "form": "diag",
-    "Q": {
-      "type": "scaled_identity",
-      "q2": 0.001
-    },
-    "R": {
-      "type": "scaled_identity",
-      "r2": 0.001
-    }
-  },
+  "scenario_cfg_basis": {},
   "adapter_info": {
     "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
     "selected_class": "KalmanNetNN"

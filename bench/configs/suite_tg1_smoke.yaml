@@ -1,0 +1,42 @@
+suite:
+  name: tg1_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG1 smoke suite for shared noise_schedule wiring and NPZ extras validation.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG1_noise_schedule_smoke_v0
+    task_name: "TG1 Noise Schedule Smoke"
+    task_family: linear_gaussian_v0
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 15
+    dataset_sizes:
+      N_train: 12
+      N_val: 4
+      N_test: 4
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    noise_schedule:
+      enabled: true
+      kind: "split_eq20"
+      params:
+        phase: "train"
+        t0: 20
+        q2_base: 1.0e-3
+      sow_hat:
+        enabled: true
+        mode: "add_db"
+        sigma_db: 1.25
+    sweep: {}

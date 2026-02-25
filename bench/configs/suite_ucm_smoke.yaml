@@ -1,0 +1,93 @@
+suite:
+  name: ucm_smoke
+  version: "0.1.0"
+  description: >
+    Tiny TG3 smoke suite for UCM generator with linear/nonlinear observations
+    and optional per-sequence task-set sampling.
+
+seeds: [0]
+
+tasks:
+  - task_id: TG3_ucm_linear_smoke_v0
+    task_name: "TG3 UCM Linear Observation Smoke"
+    task_family: ucm_v0
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    theta_deg: 10.0
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      mode: "linear"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG3_ucm_nonlinear_smoke_v0
+    task_name: "TG3 UCM Nonlinear Observation Smoke"
+    task_family: ucm_v0
+    system_type: nonlinear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 40
+    dataset_sizes:
+      N_train: 8
+      N_val: 4
+      N_test: 4
+    theta_deg: 10.0
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    observation:
+      type: "full"
+      h_type: "nonlinear"
+      mode: "nonlinear"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+  - task_id: TG3_ucm_taskset_smoke_v0
+    task_name: "TG3 UCM Task-Set Smoke"
+    task_family: ucm_v0
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 36
+    dataset_sizes:
+      N_train: 10
+      N_val: 4
+      N_test: 4
+    theta_deg: 10.0
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-2 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      mode: "linear"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    task_set:
+      enabled: true
+      sample_per_sequence: true
+      q2_dist:
+        kind: "list"
+        values: [5.0e-4, 1.0e-3, 2.0e-3]
+      r2_dist:
+        kind: "list"
+        values: [5.0e-3, 1.0e-2, 2.0e-2]
+      task_key:
+        mode: "(q2,r2)"
+        store_in_extras: true
+    sweep: {}

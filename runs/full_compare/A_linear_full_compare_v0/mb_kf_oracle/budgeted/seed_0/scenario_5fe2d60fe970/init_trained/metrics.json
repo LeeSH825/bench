@@ -1,0 +1,126 @@
+{
+  "status": "ok",
+  "suite_name": "full_compare",
+  "task_id": "A_linear_full_compare_v0",
+  "scenario_id": "5fe2d60fe970",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "mb_kf_oracle",
+  "track_id": "budgeted",
+  "dims": {
+    "x_dim": 3,
+    "y_dim": 3,
+    "T": 60
+  },
+  "accuracy": {
+    "mse": 0.0006981927435845137,
+    "rmse": 0.02642333710159475,
+    "mse_db": -31.560246691820815
+  },
+  "timing": {
+    "timing_ms_per_step": 0.005635171874018852,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": null,
+  "t0_used": null,
+  "scenario_settings": {},
+  "scenario_cfg_basis": {},
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BTD",
+    "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
+  },
+  "adapter_meta": {
+    "adapter_id": "mb_kf",
+    "adapter_version": "s10_kf_baseline_v1",
+    "runtime_device": "cpu",
+    "baseline": "mb_kf",
+    "mode": "oracle",
+    "uses_shift_meta": false,
+    "t0_shift": null,
+    "R_scale": 1.0,
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BTD_batched_linear_kf",
+    "capabilities": {
+      "train_supported": false,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_linear_system": "F/H are linear system matrices from bench-generated NPZ/system_info.",
+      "B_oracle_shift_info": "oracle_shift mode uses shift meta (t0,R_scale) from D15 meta_json.",
+      "C_metrics_ownership": "official metrics are computed by bench layer only."
+    },
+    "how_to_verify": {
+      "A_linear_system": "bench/tasks/bench_generated.py (save_npz_split_v0 includes F/H/meta_json).",
+      "B_oracle_shift_info": "bench/tasks/bench_generated.py noise_meta['shift']['post_shift']['R_scale'] and t0.",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and adapter eval()/predict() outputs."
+    },
+    "selected_layout": "bench_BTD_to_repo_BTD",
+    "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
+  },
+  "run_plan": {
+    "plan_id": "trained__budgeted",
+    "init_id": "trained",
+    "track_id": "budgeted",
+    "official_benchmark_eligible": true,
+    "suite_name": "full_compare",
+    "task_id": "A_linear_full_compare_v0",
+    "scenario_id": "5fe2d60fe970",
+    "seed": 0,
+    "model_id": "mb_kf_oracle",
+    "deterministic": true,
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 200,
+      "adapt_max_updates": 40,
+      "adapt_max_updates_per_step": 1,
+      "t0_gate_enabled": true,
+      "adaptation_budget": {
+        "allowed_after_t0_only": true,
+        "max_updates": 40,
+        "max_updates_per_step": 1,
+        "overflow_policy": "fail"
+      }
+    },
+    "shift": {
+      "t0": null
+    },
+    "adaptation": {
+      "enabled": true,
+      "allowed_after_t0_only": true,
+      "max_updates": 40,
+      "max_updates_per_step": 1,
+      "will_run": false
+    },
+    "cache": {
+      "enabled": true,
+      "model_cache_dir": "/home/xynus/bench/runs/_model_cache/full_compare",
+      "cache_key": "741116d62b07d8173b177e28",
+      "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/full_compare/mb_kf_oracle/741116d62b07d8173b177e28",
+      "cache_hit": true,
+      "train_skipped": true
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 200,
+    "train_skipped": true,
+    "cache_enabled": true,
+    "cache_hit": true,
+    "cache_key": "741116d62b07d8173b177e28",
+    "track_id": "budgeted",
+    "init_id": "trained"
+  },
+  "run_dir": "/home/xynus/bench/runs/full_compare/A_linear_full_compare_v0/mb_kf_oracle/budgeted/seed_0/scenario_5fe2d60fe970/init_trained"
+}

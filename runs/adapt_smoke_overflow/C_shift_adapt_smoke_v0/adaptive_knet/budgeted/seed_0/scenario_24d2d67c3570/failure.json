@@ -4,41 +4,18 @@
   "phase": "adapt",
   "failure_stage": "adapt",
   "message": "RuntimeError: budget_overflow: adapt max_updates=0 exhausted before t=8 (allowed_after_t0_only=True, t0=8)",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1428, in run_one\n    _try_call_adapt(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 896, in _try_call_adapt\n    return adapter.adapt(  # type: ignore\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 784, in adapt\n    raise RuntimeError(\nRuntimeError: budget_overflow: adapt max_updates=0 exhausted before t=8 (allowed_after_t0_only=True, t0=8)\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1434, in run_one\n    _try_call_adapt(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 897, in _try_call_adapt\n    return adapter.adapt(  # type: ignore\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 784, in adapt\n    raise RuntimeError(\nRuntimeError: budget_overflow: adapt max_updates=0 exhausted before t=8 (allowed_after_t0_only=True, t0=8)\n",
   "context": {
     "suite_name": "adapt_smoke_overflow",
     "task_id": "C_shift_adapt_smoke_v0",
     "scenario_id": "24d2d67c3570",
-    "scenario_id_resolved_from_cache": true,
+    "scenario_id_resolved_from_cache": false,
     "seed": 0,
     "model_id": "adaptive_knet",
     "track_id": "budgeted",
     "init_id": "trained",
     "scenario_settings": {},
-    "scenario_cfg_basis": {
-      "pre_shift": {
-        "Q": {
-          "type": "scaled_identity",
-          "q2": 0.001
-        },
-        "R": {
-          "type": "scaled_identity",
-          "r2": 0.001
-        },
-        "obs_distribution": {
-          "name": "gaussian"
-        }
-      },
-      "shift": {
-        "t0": 8,
-        "post_shift": {
-          "obs_distribution": {
-            "name": "gaussian"
-          },
-          "R_scale": 10.0
-        }
-      }
-    }
+    "scenario_cfg_basis": {}
   },
   "error": "RuntimeError: budget_overflow: adapt max_updates=0 exhausted before t=8 (allowed_after_t0_only=True, t0=8)"
 }

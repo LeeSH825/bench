@@ -1,0 +1,16 @@
+{
+  "cache_key": "4c30d885017bfa3ee13222f6",
+  "model_id": "maml_knet",
+  "adapter_version": "s9_route_b_train_v1",
+  "task_id": "C_shift_adapt_smoke_v0",
+  "scenario_id": "e158c63cad44",
+  "seed": 1,
+  "train_budget": {
+    "train_max_updates": 40,
+    "patience_evals": 4,
+    "min_delta": 0.0
+  },
+  "data_hash": "6b96f2be2fb67bb395104214d1e3ac3e63e60686",
+  "git_digest": "aedb30245ca208caa7b0f9dff0dcf9de5273c4c7",
+  "env_digest": "6f026d6a28ba20351461ecd6cc7e446c56f73990"
+}

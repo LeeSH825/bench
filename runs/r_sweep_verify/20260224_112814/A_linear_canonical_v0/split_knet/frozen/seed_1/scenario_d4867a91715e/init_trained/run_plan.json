@@ -1,0 +1,39 @@
+{
+  "plan_id": "trained__frozen",
+  "init_id": "trained",
+  "track_id": "frozen",
+  "official_benchmark_eligible": true,
+  "suite_name": "r_sweep_verify_20260224_112814",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "d4867a91715e",
+  "seed": 1,
+  "model_id": "split_knet",
+  "deterministic": true,
+  "device_requested": "cuda",
+  "device_resolved": "cuda",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 20000,
+    "adapt_max_updates": 0,
+    "adapt_max_updates_per_step": 0,
+    "t0_gate_enabled": false,
+    "adaptation_budget": {}
+  },
+  "shift": {
+    "t0": null
+  },
+  "adaptation": {
+    "enabled": false,
+    "allowed_after_t0_only": false,
+    "max_updates": 0,
+    "max_updates_per_step": 0
+  },
+  "cache": {
+    "enabled": true,
+    "model_cache_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814",
+    "cache_key": "bb97bf6c6447cf8316b6fbde",
+    "cache_entry_dir": "/home/xynus/bench/runs/_model_cache/r_sweep_verify/20260224_112814/split_knet/bb97bf6c6447cf8316b6fbde",
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}
