@@ -1,0 +1,2 @@
+[INFO] set CUBLAS_WORKSPACE_CONFIG=:4096:8 (deterministic CUDA)
+[OK] wrote metrics to /home/xynus/bench/runs/all_simple_tiny/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_ebdd3128c726

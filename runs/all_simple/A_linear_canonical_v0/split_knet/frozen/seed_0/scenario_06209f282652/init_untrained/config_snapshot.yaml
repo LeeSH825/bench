@@ -1,0 +1,86 @@
+suite:
+  name: all_simple
+  version: 0.1.0
+  description: 'Simple all-in-one suite covering linear, shift, lorenz, and NCLT-style
+    tasks. Designed for broad model coverage with explicit budget caps.
+
+    '
+task:
+  task_id: A_linear_canonical_v0
+  task_name: Linear Canonical (v0)
+  task_family: linear_gaussian_v0
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 20
+  dataset_sizes:
+    N_train: 200
+    N_val: 50
+    N_test: 50
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      start: -10
+      stop: 40
+      step: 5
+model:
+  model_id: split_knet
+  display_name: Split-KalmanNet
+  adapter: bench.models.split_knet:SplitKNetAdapter
+  enabled: true
+  repo:
+    path: third_party/Split_KalmanNet
+    entrypoints:
+      A_linear_canonical_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      C_shift_Rscale_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      B_lorenz_dt_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      D_nclt_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+  estimator_class_path: GSSFiltering.filtering.Split_KalmanNet_Filter
+  lr: 0.0001
+  max_grad_norm: 1.0
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: false
+scenario_settings:
+  inv_r2_db: 35
+scenario_cfg_basis:
+  form: diag
+  Q:
+    type: scaled_identity
+    q2: 0.001
+  R:
+    type: scaled_identity
+    r2: 0.00031622776601683794
+scenario_id: 06209f282652
+cache_scenario_id: 06209f282652
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: untrained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple/A_linear_canonical_v0/scenario_06209f282652/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple/A_linear_canonical_v0/scenario_06209f282652/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple/A_linear_canonical_v0/scenario_06209f282652/seed_0/test.npz
+  canonical_layout: NTD

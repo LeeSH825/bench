@@ -1,0 +1,49 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /tmp/bench_data_cache/all_simple/C_shift_Rscale_v0/scenario_99ef90b11e5f/seed_0/test.npz",
+  "context": {
+    "suite_name": "all_simple",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "99ef90b11e5f",
+    "cache_scenario_id": "99ef90b11e5f",
+    "seed": 0,
+    "model_id": "kalmannet_tsp",
+    "track_id": "frozen",
+    "init_id": "untrained",
+    "cache_root": "/tmp/bench_data_cache",
+    "scenario_settings": {
+      "shift.post_shift.R_scale": 30
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 0.001
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 100,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 30
+        }
+      }
+    },
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/tmp/bench_data_cache/all_simple/C_shift_Rscale_v0/scenario_99ef90b11e5f/seed_0/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}

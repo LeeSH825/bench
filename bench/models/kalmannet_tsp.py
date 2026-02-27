@@ -631,7 +631,10 @@ class KalmanNetTSPAdapter(ModelAdapter):
     def load(self, ckpt_path: str) -> None:
         if self.model is None:
             raise RuntimeError("setup() must be called before load().")
-        state = torch.load(ckpt_path, map_location=self.device)
+        try:
+            state = torch.load(ckpt_path, map_location=self.device, weights_only=True)
+        except TypeError:
+            state = torch.load(ckpt_path, map_location=self.device)
         if isinstance(state, dict) and "state_dict" in state:
             state = state["state_dict"]
         self.model.load_state_dict(state, strict=True)

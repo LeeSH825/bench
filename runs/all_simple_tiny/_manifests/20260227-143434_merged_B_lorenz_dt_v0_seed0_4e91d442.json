@@ -1,0 +1,21 @@
+{
+  "suite_name": "all_simple_tiny",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_tiny.yaml",
+  "created_at_unix": 1772170474.8169599,
+  "source": "run_all_sweeps_and_make_plots.sh",
+  "task_id": "B_lorenz_dt_v0",
+  "seed": "0",
+  "run_count": 10,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/adaptive_knet/frozen/seed_0/scenario_e62695e09c61/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/adaptive_knet/frozen/seed_0/scenario_e62695e09c61/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/kalmannet_tsp/frozen/seed_0/scenario_e62695e09c61/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/kalmannet_tsp/frozen/seed_0/scenario_e62695e09c61/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/maml_knet/frozen/seed_0/scenario_e62695e09c61/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/maml_knet/frozen/seed_0/scenario_e62695e09c61/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/mb_kf_nominal/frozen/seed_0/scenario_e62695e09c61",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/mb_kf_oracle/frozen/seed_0/scenario_e62695e09c61",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/split_knet/frozen/seed_0/scenario_e62695e09c61/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/split_knet/frozen/seed_0/scenario_e62695e09c61/init_untrained"
+  ]
+}

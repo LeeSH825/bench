@@ -3,7 +3,7 @@
   "suite_name": "shift_light",
   "task_id": "C_shift_Rscale_light_v0",
   "scenario_id": "c2781d0d162b",
-  "scenario_id_resolved_from_cache": true,
+  "scenario_id_resolved_from_cache": false,
   "seed": 0,
   "model_id": "kalmannet_tsp",
   "track_id": "frozen",
@@ -18,7 +18,7 @@
     "mse_db": 83.75876675020338
   },
   "timing": {
-    "timing_ms_per_step": 0.018830906119641593,
+    "timing_ms_per_step": 0.017814507096384585,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 64
@@ -41,25 +41,8 @@
     "shift.post_shift.R_scale": 3.0
   },
   "scenario_cfg_basis": {
-    "pre_shift": {
-      "Q": {
-        "type": "scaled_identity",
-        "q2": 0.001
-      },
-      "R": {
-        "type": "scaled_identity",
-        "r2": 0.001
-      },
-      "obs_distribution": {
-        "name": "gaussian"
-      }
-    },
     "shift": {
-      "t0": 60,
       "post_shift": {
-        "obs_distribution": {
-          "name": "gaussian"
-        },
         "R_scale": 3.0
       }
     }
@@ -71,6 +54,7 @@
   "adapter_meta": {
     "adapter_id": "kalmannet_tsp",
     "adapter_version": "s2_route_b_v1",
+    "runtime_device": "cpu",
     "covariance_support": false,
     "input_layout_bench": "BTD",
     "internal_layout_repo": "BDT_stepwise",

@@ -238,10 +238,32 @@ def _organize_outputs_by_suite(
 
 
 def main() -> None:
+    severity_x_choices = (
+        "severity_key",
+        "mse_mean",
+        "mse_db_mean",
+        "rmse_mean",
+        "inv_r2_db",
+        "severity_r_scale_mean",
+    )
+    severity_y_choices = (
+        "mse_mean",
+        "mse_db_mean",
+        "rmse_mean",
+        "severity_key",
+        "severity_r_scale_mean",
+    )
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite-yaml", type=str, required=True)
     ap.add_argument("--runs-root", type=str, default=None, help="default: <bench_root>/runs")
     ap.add_argument("--out-dir", type=str, default=None, help="default: <bench_root>/reports")
+    ap.add_argument(
+        "--input-scope",
+        type=str,
+        choices=("latest_manifest", "all_runs"),
+        default="latest_manifest",
+        help="run discovery scope. default: latest_manifest",
+    )
     ap.add_argument("--dry-run", action="store_true", help="print plan only; do not write files")
     ap.add_argument("--latex", action="store_true", help="also write summary_<suite>.tex (aggregate table)")
     # S6 additive report views
@@ -270,6 +292,20 @@ def main() -> None:
         "--fig5a-plot",
         action="store_true",
         help="write Fig5(a)-style plot: mse_db vs inv_r2_db grouped by (model_id,x_dim,y_dim,T)",
+    )
+    ap.add_argument(
+        "--severity-x-field",
+        type=str,
+        choices=severity_x_choices,
+        default="severity_key",
+        help="x field for severity sweep plot (default: severity_key)",
+    )
+    ap.add_argument(
+        "--severity-y-field",
+        type=str,
+        choices=severity_y_choices,
+        default="mse_mean",
+        help="y field for severity sweep plot (default: mse_mean)",
     )
     ap.add_argument(
         "--organize-by-suite",
@@ -314,7 +350,16 @@ def main() -> None:
     fig5a_overlay_path = out_dir / f"fig5a_overlay_mse_db_vs_inv_r2_db_{suite_name}.png"
     fig5a_legacy_path = out_dir / f"fig5a_mse_db_vs_inv_r2_db_{suite_name}.png"
 
-    scanned = scan_runs(runs_root=runs_root, suite_name=suite_name)
+    scanned = scan_runs(
+        runs_root=runs_root,
+        suite_name=suite_name,
+        input_scope=str(args.input_scope),
+    )
+    if args.input_scope == "latest_manifest" and len(scanned) == 0:
+        print(
+            f"[make_report] note: no runs discovered via latest manifest for suite={suite_name}. "
+            "Use --input-scope all_runs to include historical scan."
+        )
     expected = expected_plan_from_suite(suite)
     records = merge_records_with_expected(scanned, expected)
     agg_rows = aggregate_by_seed(records)
@@ -322,6 +367,7 @@ def main() -> None:
     if args.dry_run:
         print("[dry-run] suite:", suite_name)
         print("[dry-run] runs_root:", runs_root)
+        print("[dry-run] input_scope:", args.input_scope)
         print("[dry-run] out_dir:", out_dir)
         print("[dry-run] scanned run_dirs:", len(scanned))
         print("[dry-run] total rows (with expected missing):", len(records))
@@ -344,7 +390,16 @@ def main() -> None:
         for task_id in _suite_task_ids(suite, records):
             if suite_name == "shift":
                 print("[dry-run] will plot:", f"shift_recovery_{task_id}.png")
-                print("[dry-run] will plot:", f"severity_sweep_{task_id}_R_scale.png")
+                if (
+                    str(args.severity_x_field) == "severity_key"
+                    and str(args.severity_y_field) == "mse_mean"
+                ):
+                    print("[dry-run] will plot:", f"severity_sweep_{task_id}_R_scale.png")
+                else:
+                    print(
+                        "[dry-run] will plot:",
+                        f"severity_sweep_{task_id}_{args.severity_x_field}_vs_{args.severity_y_field}.png",
+                    )
             if args.plan_views:
                 print("[dry-run] will plot:", f"track_compare_{task_id}_<metric>.png")
                 print("[dry-run] will plot:", f"mse_db_by_model_{task_id}.png")
@@ -392,12 +447,22 @@ def main() -> None:
             )
             written_plots.append(out_png)
 
-            out_png2 = out_dir / f"severity_sweep_{task_id}_R_scale.png"
+            if (
+                str(args.severity_x_field) == "severity_key"
+                and str(args.severity_y_field) == "mse_mean"
+            ):
+                out_png2 = out_dir / f"severity_sweep_{task_id}_R_scale.png"
+            else:
+                out_png2 = out_dir / (
+                    f"severity_sweep_{task_id}_{args.severity_x_field}_vs_{args.severity_y_field}.png"
+                )
             plot_severity_sweep(
                 task_id=str(task_id),
                 records=task_records,
                 out_path=out_png2,
                 severity_key="shift.post_shift.R_scale",
+                x_field=str(args.severity_x_field),
+                y_field=str(args.severity_y_field),
             )
             written_plots.append(out_png2)
 

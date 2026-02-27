@@ -13,12 +13,12 @@
     "T": 200
   },
   "accuracy": {
-    "mse": 1070882248196096.0,
-    "rmse": 32724337.246094014,
-    "mse_db": 150.29741719412502
+    "mse": 1070882382413824.0,
+    "rmse": 32724339.296826515,
+    "mse_db": 150.2974177384427
   },
   "timing": {
-    "timing_ms_per_step": 0.028500420880000092,
+    "timing_ms_per_step": 0.026965161789994453,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 32
@@ -31,7 +31,7 @@
     "t0": 100,
     "W": 20,
     "eps": 0.05,
-    "E_pre": 11726781.0,
+    "E_pre": 11726779.0,
     "recovery_k": 100,
     "recovered": false,
     "failure_policy": "cap"

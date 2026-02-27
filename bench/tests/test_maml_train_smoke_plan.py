@@ -129,10 +129,21 @@ def run_maml_train_smoke_route_b(suite_yaml: Path) -> MAMLTrainSmokeResult:
             run_dir=run_dir,
             note=f"frozen track violation: adapt_updates_used={ledger.get('adapt_updates_used')}",
         )
-    if int(ledger.get("train_updates_used", 0)) <= 0:
-        return MAMLTrainSmokeResult(ok=False, run_dir=run_dir, note="train_updates_used must be > 0")
-    if int(ledger.get("train_updates_used", 0)) > int(ledger.get("train_max_updates", 0)):
-        return MAMLTrainSmokeResult(ok=False, run_dir=run_dir, note="train_updates_used exceeded train_max_updates")
+    train_outer = int(ledger.get("train_outer_updates_used", ledger.get("train_updates_used", 0)))
+    train_inner = int(ledger.get("train_inner_updates_used", 0))
+    train_alias = int(ledger.get("train_updates_used", train_outer))
+    if train_outer <= 0:
+        return MAMLTrainSmokeResult(ok=False, run_dir=run_dir, note="train_outer_updates_used must be > 0")
+    if train_inner <= 0:
+        return MAMLTrainSmokeResult(ok=False, run_dir=run_dir, note="train_inner_updates_used must be > 0")
+    if train_alias != train_outer:
+        return MAMLTrainSmokeResult(
+            ok=False,
+            run_dir=run_dir,
+            note=f"train_updates_used alias mismatch: alias={train_alias} outer={train_outer}",
+        )
+    if train_outer > int(ledger.get("train_max_updates", 0)):
+        return MAMLTrainSmokeResult(ok=False, run_dir=run_dir, note="train_outer_updates_used exceeded train_max_updates")
 
     m1 = _read_metrics(run_dir)
 
@@ -155,4 +166,3 @@ def run_maml_train_smoke_route_b(suite_yaml: Path) -> MAMLTrainSmokeResult:
         run_dir=run_dir,
         note="maml_knet trained,frozen smoke passed with artifact checks + reproducibility",
     )
-

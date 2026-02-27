@@ -1,0 +1,22 @@
+{
+  "suite_name": "all_simple_tiny",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_tiny.yaml",
+  "created_at_unix": 1772170357.874846,
+  "source": "run_all_sweeps_and_make_plots.sh",
+  "task_id": "C_shift_Rscale_v0",
+  "seed": "0",
+  "run_count": 11,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/adaptive_knet/budgeted/seed_0/scenario_582474f2e1b2/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/adaptive_knet/frozen/seed_0/scenario_582474f2e1b2/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/adaptive_knet/frozen/seed_0/scenario_582474f2e1b2/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/kalmannet_tsp/frozen/seed_0/scenario_582474f2e1b2/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/kalmannet_tsp/frozen/seed_0/scenario_582474f2e1b2/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/maml_knet/frozen/seed_0/scenario_582474f2e1b2/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/maml_knet/frozen/seed_0/scenario_582474f2e1b2/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_582474f2e1b2",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_582474f2e1b2",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_582474f2e1b2/init_trained",
+    "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_582474f2e1b2/init_untrained"
+  ]
+}

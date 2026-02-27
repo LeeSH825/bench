@@ -1,0 +1,19 @@
+{
+  "suite_name": "all_simple",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple.yaml",
+  "created_at_unix": 1772165276.1022842,
+  "run_count": 11,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_ebdd3128c726",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_8d508046a042",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_6342acad14a9",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_c216f8adbad4",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_eb80d13a14d9",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_1ecac97e72d8",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_e430cbdcf2b5",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_2a5fc6ce49c8",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_fd75d1016844",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_06209f282652",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_b24c25d48dde"
+  ]
+}

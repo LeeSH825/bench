@@ -38,7 +38,8 @@ tasks:
     ground_truth:
       has_gt: true
     sweep:
-      shift.post_shift.R_scale: [3.0, 10.0, 30.0]
+      shift.post_shift.R_scale:
+        tuple: [3.0, 30.0, 3]  # (start, end, steps) => linspace with 3 points
 
   - task_id: C_shift_dist_v0
     task_name: "Noise Shift: distribution (Gaussian -> Student-t)"
@@ -72,10 +73,31 @@ tasks:
     ground_truth:
       has_gt: true
     sweep:
-      shift.post_shift.R_scale: [3.0, 10.0, 30.0]
+      shift.post_shift.R_scale:
+        tuple: [3.0, 30.0, 3]  # (start, end, steps) => linspace with 3 points
       shift.post_shift.obs_distribution.df: [3, 5]
 
 models:
+  - model_id: mb_kf_oracle
+    display_name: "Model-Based KF (Oracle)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    enabled: true
+    baseline_mode: "oracle"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: mb_kf_nominal
+    display_name: "Model-Based KF (Nominal)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    enabled: true
+    baseline_mode: "nominal"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
   - model_id: kalmannet_tsp
     display_name: "KalmanNet_TSP"
     adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
@@ -85,6 +107,8 @@ models:
       entrypoints:
         C_shift_Rscale_v0: "main_linear_canonical.py"  # CONFIRMED(script exists; shift는 bench_generated로 주입)
         C_shift_dist_v0: "main_linear_canonical.py"  # CONFIRMED(script exists; shift는 bench_generated로 주입)
+    lr: 5.0e-5
+    max_grad_norm: 1.0
     capabilities:
       supports_adaptation: false
       outputs_covariance: false
@@ -99,6 +123,10 @@ models:
       entrypoints:
         C_shift_Rscale_v0: "main_cm_linear_noise.py"  # CONFIRMED(script exists; shift는 bench_generated로 주입)
         C_shift_dist_v0: "main_cm_linear_noise.py"  # CONFIRMED(script exists; shift는 bench_generated로 주입)
+    lr: 5.0e-5
+    max_grad_norm: 1.0
+    adapt_lr: 1.0e-6
+    adapt_max_grad_norm: 1.0
     capabilities:
       supports_adaptation: true
       outputs_covariance: false
@@ -123,7 +151,7 @@ models:
   - model_id: my_model
     display_name: "<내_모델_이름>"
     adapter: "bench.models.my_model:MyModelAdapter"
-    enabled: true
+    enabled: false
     repo:
       path: null
       entrypoints:
@@ -144,7 +172,7 @@ runner:
     skip_if_disabled: true
   data_mode: "bench_generated"
   budget:
-    train_max_updates: 20000
+    train_max_updates: 100
     eval_batch_size: 32
   early_stopping:
     monitor: "val/mse_db"
@@ -157,7 +185,7 @@ runner:
     - track_id: budgeted
       adaptation_enabled: true
       adaptation_budget:
-        max_updates: 200
+        max_updates: 100
         max_updates_per_step: 1
         allowed_after_t0_only: true
 
@@ -188,4 +216,3 @@ reporting:
     - "mse_vs_time.png"
     - "shift_recovery_curve.png"
     - "mismatch_severity_sweep.png"
-

@@ -1,0 +1,9 @@
+{
+  "suite_name": "maml_train_smoke",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_maml_train_smoke.yaml",
+  "created_at_unix": 1772151273.5572283,
+  "run_count": 1,
+  "run_dirs": [
+    "/home/xynus/bench/runs/maml_train_smoke/A_linear_maml_train_smoke_v0/maml_knet/frozen/seed_0/scenario_e2e9ed0f0692"
+  ]
+}

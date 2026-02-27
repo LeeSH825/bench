@@ -1,0 +1,84 @@
+suite:
+  name: maml_train_smoke
+  version: 0.1.0
+  description: 'Tiny Route-B smoke suite for MAML-KalmanNet trained+frozen plan.
+
+    '
+task:
+  task_id: A_linear_maml_train_smoke_v0
+  task_name: Linear Canonical Tiny (MAML-KNet)
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 16
+  dataset_sizes:
+    N_train: 20
+    N_val: 8
+    N_test: 8
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: maml_knet
+  display_name: MAML-KalmanNet
+  adapter: bench.models.maml_knet:MAMLKNetAdapter
+  repo:
+    path: third_party/MAML_KalmanNet
+    entrypoints:
+      A_linear_maml_train_smoke_v0: main_linear.py
+  input_layout: BTD
+  batch_size: 4
+  eval_batch_size: 4
+  meta_task_num: 2
+  support_size: 4
+  query_size: 4
+  inner_steps: 1
+  inner_lr: 0.05
+  outer_lr: 0.001
+  update_step: 1
+  update_step_test: 1
+  val_eval_interval_updates: 2
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings: {}
+scenario_cfg_basis:
+  form: diag
+  Q:
+    type: scaled_identity
+    q2: 0.001
+  R:
+    type: scaled_identity
+    r2: 0.001
+scenario_id: e2e9ed0f0692
+cache_scenario_id: 320617f703b8
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/maml_train_smoke/A_linear_maml_train_smoke_v0/scenario_320617f703b8/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/maml_train_smoke/A_linear_maml_train_smoke_v0/scenario_320617f703b8/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/maml_train_smoke/A_linear_maml_train_smoke_v0/scenario_320617f703b8/seed_0/test.npz
+  canonical_layout: NTD

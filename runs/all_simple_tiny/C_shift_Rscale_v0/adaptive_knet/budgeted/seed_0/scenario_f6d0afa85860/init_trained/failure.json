@@ -1,0 +1,47 @@
+{
+  "status": "failed",
+  "failure_type": "budget_overflow",
+  "phase": "adapt",
+  "failure_stage": "adapt",
+  "message": "RuntimeError: budget_overflow: adapt max_updates=8 exhausted before t=38 (allowed_after_t0_only=True, t0=30)",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1512, in run_one\n    _try_call_adapt(\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 945, in _try_call_adapt\n    return adapter.adapt(  # type: ignore\n  File \"/home/xynus/bench/bench/models/adaptive_knet.py\", line 784, in adapt\n    raise RuntimeError(\nRuntimeError: budget_overflow: adapt max_updates=8 exhausted before t=38 (allowed_after_t0_only=True, t0=30)\n",
+  "context": {
+    "suite_name": "all_simple_tiny",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "f6d0afa85860",
+    "cache_scenario_id": "f6d0afa85860",
+    "scenario_id_resolved_from_cache": false,
+    "seed": 0,
+    "model_id": "adaptive_knet",
+    "track_id": "budgeted",
+    "init_id": "trained",
+    "scenario_settings": {
+      "inv_r2_db": -10
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 10.0
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 30,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 3.0
+        }
+      }
+    }
+  },
+  "error": "RuntimeError: budget_overflow: adapt max_updates=8 exhausted before t=38 (allowed_after_t0_only=True, t0=30)"
+}

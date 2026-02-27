@@ -106,6 +106,8 @@ def run_report_plan_views_smoke(suite_yaml: Path) -> ReportPlanViewsResult:
         str(bench_root / "runs"),
         "--out-dir",
         str(bench_root / "reports"),
+        "--input-scope",
+        "all_runs",
         "--group-by",
         "init_id,track_id",
         "--plan-views",

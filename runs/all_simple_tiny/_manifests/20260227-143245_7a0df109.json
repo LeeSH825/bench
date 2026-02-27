@@ -1,0 +1,9 @@
+{
+  "suite_name": "all_simple_tiny",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_tiny.yaml",
+  "created_at_unix": 1772170365.5237515,
+  "run_count": 1,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_tiny/B_lorenz_dt_v0/mb_kf_oracle/frozen/seed_0/scenario_e62695e09c61"
+  ]
+}

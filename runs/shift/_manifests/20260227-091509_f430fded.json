@@ -1,0 +1,14 @@
+{
+  "suite_name": "shift",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_shift.yaml",
+  "created_at_unix": 1772151309.3746,
+  "run_count": 6,
+  "run_dirs": [
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_f46f1dd56990",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/adaptive_knet/frozen/seed_0/scenario_f46f1dd56990",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_339fdebda713",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/adaptive_knet/frozen/seed_0/scenario_339fdebda713",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_b82eac38c3a2",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/adaptive_knet/frozen/seed_0/scenario_b82eac38c3a2"
+  ]
+}

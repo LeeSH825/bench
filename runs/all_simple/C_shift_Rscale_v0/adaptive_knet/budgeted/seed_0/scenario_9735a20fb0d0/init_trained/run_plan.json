@@ -1,0 +1,35 @@
+{
+  "plan_id": "trained__budgeted",
+  "init_id": "trained",
+  "track_id": "budgeted",
+  "official_benchmark_eligible": true,
+  "suite_name": "all_simple",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "9735a20fb0d0",
+  "seed": 0,
+  "model_id": "adaptive_knet",
+  "deterministic": true,
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
+  "precision": "fp32",
+  "budgets": {
+    "train_max_updates": 100,
+    "adapt_max_updates": 100,
+    "adapt_max_updates_per_step": 1,
+    "t0_gate_enabled": true,
+    "adaptation_budget": {
+      "allowed_after_t0_only": true,
+      "max_updates": 100,
+      "max_updates_per_step": 1
+    }
+  },
+  "shift": {
+    "t0": 100
+  },
+  "adaptation": {
+    "enabled": true,
+    "allowed_after_t0_only": true,
+    "max_updates": 100,
+    "max_updates_per_step": 1
+  }
+}

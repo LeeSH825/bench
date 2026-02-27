@@ -68,6 +68,8 @@ def run_report_schema_guardrails(suite_yaml: Path) -> ReportSchemaGuardrailsResu
         str(bench_root / "runs"),
         "--out-dir",
         str(bench_root / "reports"),
+        "--input-scope",
+        "all_runs",
         "--group-by",
         "init_id,track_id",
         "--plan-views",

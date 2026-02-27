@@ -1,0 +1,13 @@
+{
+  "suite_name": "all_simple_tiny",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_tiny.yaml",
+  "created_at_unix": 1772171700.8178108,
+  "run_count": 5,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/mb_kf_nominal/frozen/seed_0/scenario_3a5e31f570de",
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/mb_kf_nominal/frozen/seed_0/scenario_86b5ce3b227c",
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/mb_kf_nominal/frozen/seed_0/scenario_21440eb42dca",
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/mb_kf_nominal/frozen/seed_0/scenario_ffb5103b105c",
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/mb_kf_nominal/frozen/seed_0/scenario_7c1d0a5524c3"
+  ]
+}

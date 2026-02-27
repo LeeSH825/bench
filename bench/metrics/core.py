@@ -22,7 +22,10 @@ def mse_per_step(x_hat: np.ndarray, x_gt: np.ndarray) -> np.ndarray:
     """
     assert x_hat.ndim == 3 and x_gt.ndim == 3
     assert x_hat.shape == x_gt.shape
-    err2 = (x_hat - x_gt) ** 2  # [B,T,D]
+    # Use float64 accumulation to reduce overflow risk on large-magnitude predictions.
+    xh = np.asarray(x_hat, dtype=np.float64)
+    xg = np.asarray(x_gt, dtype=np.float64)
+    err2 = (xh - xg) ** 2  # [B,T,D]
     return err2.mean(axis=(0, 2))  # [T]
 
 
@@ -30,7 +33,9 @@ def mse_scalar(x_hat: np.ndarray, x_gt: np.ndarray) -> float:
     """
     Scalar MSE = mean_{b,t} ||e||^2  (dimension 평균 포함)
     """
-    return float(((x_hat - x_gt) ** 2).mean())
+    xh = np.asarray(x_hat, dtype=np.float64)
+    xg = np.asarray(x_gt, dtype=np.float64)
+    return float(((xh - xg) ** 2).mean())
 
 
 def rmse_scalar(x_hat: np.ndarray, x_gt: np.ndarray) -> float:
@@ -155,4 +160,3 @@ def gaussian_nll_per_step(
             acc += 0.5 * logdet + 0.5 * quad + const
         nll_t[t] = acc / float(B)
     return nll_t
-

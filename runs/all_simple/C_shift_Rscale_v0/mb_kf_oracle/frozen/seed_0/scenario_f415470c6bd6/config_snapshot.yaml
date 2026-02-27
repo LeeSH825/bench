@@ -1,0 +1,93 @@
+suite:
+  name: all_simple
+  version: 0.1.0
+  description: 'Simple all-in-one suite covering linear, shift, lorenz, and NCLT-style
+    tasks. Designed for broad model coverage with explicit budget caps.
+
+    '
+task:
+  task_id: C_shift_Rscale_v0
+  task_name: 'Noise Shift: R scale (Gaussian)'
+  task_family: linear_gaussian_v0
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 200
+  dataset_sizes:
+    N_train: 2000
+    N_val: 500
+    N_test: 500
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 100
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      start: -10
+      stop: 40
+      step: 5
+model:
+  model_id: mb_kf_oracle
+  display_name: Model-Based KF (Oracle)
+  adapter: bench.models.mb_kf:ModelBasedKFAdapter
+  enabled: true
+  baseline_mode: oracle
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings:
+  inv_r2_db: 40
+scenario_cfg_basis:
+  pre_shift:
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.0001
+    obs_distribution:
+      name: gaussian
+  shift:
+    t0: 100
+    post_shift:
+      obs_distribution:
+        name: gaussian
+      R_scale: 10.0
+scenario_id: f415470c6bd6
+cache_scenario_id: f415470c6bd6
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: untrained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple/C_shift_Rscale_v0/scenario_f415470c6bd6/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple/C_shift_Rscale_v0/scenario_f415470c6bd6/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple/C_shift_Rscale_v0/scenario_f415470c6bd6/seed_0/test.npz
+  canonical_layout: NTD

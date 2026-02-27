@@ -1,0 +1,98 @@
+suite:
+  name: all_simple_tiny
+  version: 0.1.0
+  description: 'Really small version of all_simple for fast debugging. Every task
+    uses total dataset size < 100 and update budgets < 10.
+
+    '
+task:
+  task_id: D_nclt_v0
+  task_name: NCLT (real dataset, tiny)
+  task_family: nclt_v0
+  system_type: real
+  x_dim: 6
+  y_dim: 2
+  sequence_length_T: 40
+  dataset_sizes:
+    N_train: 40
+    N_val: 20
+    N_test: 20
+  dataset:
+    protocol: split_kalmannet_2023
+    sampling_hz: 1.0
+    split_overrides:
+      train:
+        session: '2012-01-22'
+        L: 40
+        T: 40
+        stride: 2
+      val:
+        session: '2012-01-22'
+        L: 20
+        T: 40
+        stride: 2
+      test:
+        session: '2012-04-29'
+        L: 20
+        T: 40
+        stride: 2
+  observation:
+    type: real
+    h_type: unknown
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      values:
+      - -10
+      - 0
+      - 10
+      - 20
+      - 30
+model:
+  model_id: maml_knet
+  display_name: MAML-KalmanNet
+  adapter: bench.models.maml_knet:MAMLKNetAdapter
+  enabled: true
+  repo:
+    path: third_party/MAML_KalmanNet
+    entrypoints:
+      A_linear_canonical_v0: main_linear.py
+      C_shift_Rscale_v0: main_linear.py
+      B_lorenz_dt_v0: main_nonlinear.py
+      D_nclt_v0: main_linear.py
+  outer_lr: 0.0001
+  inner_lr: 0.01
+  inner_steps: 1
+  meta_task_num: 2
+  max_grad_norm: 0.5
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+  notes:
+    data_generation_use_cuda: false
+scenario_settings:
+  inv_r2_db: 20
+scenario_cfg_basis:
+  R:
+    r2: 0.01
+scenario_id: ffb5103b105c
+cache_scenario_id: ffb5103b105c
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple_tiny/D_nclt_v0/scenario_ffb5103b105c/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple_tiny/D_nclt_v0/scenario_ffb5103b105c/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple_tiny/D_nclt_v0/scenario_ffb5103b105c/seed_0/test.npz
+  canonical_layout: NTD

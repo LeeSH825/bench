@@ -1,0 +1,5 @@
+status,suite,task_id,scenario_id,seed,model_id,track_id,init_id,mse,rmse,mse_db,timing_ms_per_step,recovery_k,run_dir,error
+ok,shift_light,C_shift_Rscale_light_v0,c2781d0d162b,0,kalmannet_tsp,frozen,untrained,237616544.0,15414.815730329052,83.75876675020338,0.017814507096384585,60,/home/xynus/bench/runs/shift_light/C_shift_Rscale_light_v0/kalmannet_tsp/frozen/seed_0/scenario_c2781d0d162b,
+ok,shift_light,C_shift_Rscale_light_v0,c2781d0d162b,0,adaptive_knet,frozen,untrained,inf,inf,inf,0.01598113776045314,0,/home/xynus/bench/runs/shift_light/C_shift_Rscale_light_v0/adaptive_knet/frozen/seed_0/scenario_c2781d0d162b,
+ok,shift_light,C_shift_Rscale_light_v0,d951006a3e97,0,kalmannet_tsp,frozen,untrained,112041064.0,10584.945158100725,80.49377224456552,0.01667147350262373,60,/home/xynus/bench/runs/shift_light/C_shift_Rscale_light_v0/kalmannet_tsp/frozen/seed_0/scenario_d951006a3e97,
+ok,shift_light,C_shift_Rscale_light_v0,d951006a3e97,0,adaptive_knet,frozen,untrained,inf,inf,inf,0.014583502799444167,0,/home/xynus/bench/runs/shift_light/C_shift_Rscale_light_v0/adaptive_knet/frozen/seed_0/scenario_d951006a3e97,

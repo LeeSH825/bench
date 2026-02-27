@@ -1,7 +1,0 @@
-bench: d71b7519753d93ddfda9d1e9db653e9ae922e421
-
-[submodules]
-acff2a65f6627139f53331ac4c5ce6741fae4c90 third_party/Adaptive-KNet-ICASSP24 (heads/main)
- 828a2cf529bc84f43b37d543d916fe5858054457 third_party/KalmanNet_TSP (heads/main)
- 01834cd3a03a31e0e5446c373d7efbd81308ce60 third_party/MAML_KalmanNet (heads/master)
- 0d6265668e58e6f934a09212b465a82666e544a6 third_party/Split_KalmanNet (heads/main)

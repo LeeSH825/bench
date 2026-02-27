@@ -1,0 +1,14 @@
+{
+  "suite_name": "all_simple",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple.yaml",
+  "created_at_unix": 1772160739.8630202,
+  "run_count": 6,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_d121a846d766/init_untrained",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_d121a846d766/init_trained",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_95884c87f654/init_untrained",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_95884c87f654/init_trained",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_99ef90b11e5f/init_untrained",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_99ef90b11e5f/init_trained"
+  ]
+}

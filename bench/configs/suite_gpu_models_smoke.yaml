@@ -3,6 +3,7 @@ suite:
   version: "0.1.0"
   description: >
     Tiny GPU smoke suite to validate CUDA device handling across model adapters.
+    Includes a conservative inv_r2_db sweep around the stable operating region.
 
 seeds: [0]
 
@@ -32,9 +33,31 @@ tasks:
     control_input_u: false
     ground_truth:
       has_gt: true
-    sweep: {}
+    sweep:
+      inv_r2_db:
+        start: 25
+        stop: 35
+        step: 5
 
 models:
+  - model_id: mb_kf_oracle
+    display_name: "Model-Based KF (Oracle)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "oracle"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: mb_kf_nominal
+    display_name: "Model-Based KF (Nominal)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "nominal"
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
   - model_id: kalmannet_tsp
     display_name: "KalmanNet_TSP"
     adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"

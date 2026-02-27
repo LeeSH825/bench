@@ -132,16 +132,15 @@
 
 ## D16. Train budget semantics (train_max_updates 카운팅 단위)
 
-- DECISION: train_max_updates(FAIRNESS의 1차 공정 기준)는 optimizer.step() 호출 횟수로 카운트한다. 
-- WHY: 레포마다 epoch/iteration 정의가 달라 epoch 기반 예산은 불공정해지기 쉽다. update(gradient step)는 가장 공통된 최소 단위다.
-- RULES:
-  1) 1 update = 1회 optimizer.step()
-  2) 어댑터는 학습 중 사용한 train_updates_used를 BudgetLedger로 반드시 반환한다.
-  3) runner는 ledger를 검증하여 train_updates_used > train_max_updates이면 실패 처리한다.
-  4) ASSUMPTION: third_party 학습 루프가 optimizer.step()를 사용한다.
+- DECISION: train_max_updates는 기본적으로 "train loop의 공식 update 카운트"를 제한한다.
+- MODEL-SPECIFIC RULE (MAML-KNet):
+  - train_outer_updates_used(outer optimizer.step)만 train_max_updates로 강제한다.
+  - train_inner_updates_used(inner optimizer.step)는 별도 추적/보고하며 train_max_updates로 직접 제한하지 않는다.
+  - train_updates_used는 backward-compat alias로 train_outer_updates_used와 동일하게 기록한다.
+- WHY: 메타러닝은 inner/outer loop가 분리되어 있어, 모든 optimizer.step을 단일 cap에 강제하면 기존 실험 의미와 크게 달라질 수 있다.
 - HOW TO VERIFY:
-  - 어댑터에서 optimizer.step 래핑 또는 카운팅 훅 설치 가능 여부 확인(키워드: optimizer.step().
-  - bench/bench/runners/run_suite.py에서 예산 초과 시 실패 처리 로직 확인/추가(키워드: train_max_updates, BudgetLedger).
+  - bench/models/maml_knet.py의 ledger 필드(train_outer_updates_used, train_inner_updates_used) 확인.
+  - bench/runners/run_suite.py의 train_max_updates 검증이 train_outer_updates_used 기준인지 확인.
 
 ## D17. Checkpoint + model_cache_dir 정책(표준 경로/캐시 키 포함)
 

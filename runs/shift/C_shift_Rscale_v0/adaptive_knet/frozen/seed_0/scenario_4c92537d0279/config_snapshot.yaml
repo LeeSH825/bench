@@ -62,32 +62,23 @@ model:
 scenario_settings:
   shift.post_shift.R_scale: 3.0
 scenario_cfg_basis:
-  pre_shift:
-    Q:
-      type: scaled_identity
-      q2: 0.001
-    R:
-      type: scaled_identity
-      r2: 0.001
-    obs_distribution:
-      name: gaussian
   shift:
-    t0: 100
     post_shift:
-      obs_distribution:
-        name: gaussian
       R_scale: 3.0
 scenario_id: 4c92537d0279
-scenario_id_resolved_from_cache: true
+scenario_id_resolved_from_cache: false
 seed: 0
 track_id: frozen
 track_cfg:
   track_id: frozen
   adaptation_enabled: false
+init_id: untrained
 runner_overrides:
   device: cpu
   precision: fp32
 data:
-  cache_root: /home/xynus/bench_data_cache
-  test_npz: /home/xynus/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/test.npz
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_4c92537d0279/seed_0/test.npz
   canonical_layout: NTD

@@ -1,0 +1,10 @@
+{
+  "suite_name": "all_simple_tiny",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_tiny.yaml",
+  "created_at_unix": 1772170487.1599133,
+  "run_count": 2,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/kalmannet_tsp/frozen/seed_0/scenario_21440eb42dca/init_untrained",
+    "/home/xynus/bench/runs/all_simple_tiny/D_nclt_v0/kalmannet_tsp/frozen/seed_0/scenario_21440eb42dca/init_trained"
+  ]
+}

@@ -1,0 +1,16 @@
+# requirements.lock (snapshot)
+#
+# Purpose:
+# - A human-readable "pip freeze" snapshot for reproducibility.
+# - Step 3 rule: each run should copy a snapshot into run_dir (pip_freeze.txt + env.json).
+#
+# How to generate/update:
+#   cd /mnt/data/bench
+#   python -m pip freeze > requirements.lock
+#
+# NOTE:
+# - Keep this file under version control once the environment stabilizes.
+# - Torch/CUDA wheel pins can be heavy; if needed, keep a separate note in docker/README.md.
+
+# (initial placeholder; replace with real pip-freeze output)
+

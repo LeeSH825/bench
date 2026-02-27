@@ -35,6 +35,8 @@ def run_report_smoke(
         str(runs_root),
         "--out-dir",
         str(out_dir),
+        "--input-scope",
+        "all_runs",
     ]
     cp = subprocess.run(cmd, cwd=str(bench_root), capture_output=True, text=True)
     out = (cp.stdout or "") + (cp.stderr or "")

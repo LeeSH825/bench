@@ -32,6 +32,8 @@ from .test_failure_type_compat import run_failure_type_compat
 from .test_split_train_smoke_plan import run_split_train_smoke_route_b
 from .test_maml_train_smoke_plan import run_maml_train_smoke_route_b
 from .test_kf_baseline_smoke_plan import run_kf_baseline_smoke_plan
+from .test_reporting_repro_fixes import run_reporting_repro_fixes
+from .test_sweep_tuple_spec import run_sweep_tuple_spec
 
 
 def _bench_root() -> Path:
@@ -243,6 +245,14 @@ def main() -> None:
     # 18) legacy failure.json compatibility mapping (category -> failure_type on read)
     compat = run_failure_type_compat()
     step("test_failure_type_compat", compat.ok, compat.note)
+
+    # 19) manifest scope + stale failure precedence + scenario-id basis + severity grouping fixes
+    report_fix = run_reporting_repro_fixes()
+    step("test_reporting_repro_fixes", report_fix.ok, report_fix.note)
+
+    # 20) sweep tuple spec shorthand parsing
+    sweep_tuple = run_sweep_tuple_spec()
+    step("test_sweep_tuple_spec", sweep_tuple.ok, sweep_tuple.note)
 
     print("=== ALL TESTS PASSED ===")
 

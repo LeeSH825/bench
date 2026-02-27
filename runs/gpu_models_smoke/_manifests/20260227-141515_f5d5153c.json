@@ -1,0 +1,11 @@
+{
+  "suite_name": "gpu_models_smoke",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_gpu_models_smoke.yaml",
+  "created_at_unix": 1772169315.4258068,
+  "run_count": 3,
+  "run_dirs": [
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/mb_kf_oracle/frozen/seed_0/scenario_6a9b5fd1ec79",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/mb_kf_oracle/frozen/seed_0/scenario_02e09f43363c",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/mb_kf_oracle/frozen/seed_0/scenario_10ca6cb9975e"
+  ]
+}

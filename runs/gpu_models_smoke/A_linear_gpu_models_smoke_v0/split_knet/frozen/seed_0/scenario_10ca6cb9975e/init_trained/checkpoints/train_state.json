@@ -1,0 +1,18 @@
+{
+  "status": "ok",
+  "best_step": 4,
+  "best_val_mse": 0.053060746751725674,
+  "last_train_loss": 0.27497559785842896,
+  "updates_used": 4,
+  "max_updates": 4,
+  "val_history": [
+    {
+      "step": 2.0,
+      "val_mse": 0.05456073395907879
+    },
+    {
+      "step": 4.0,
+      "val_mse": 0.053060746751725674
+    }
+  ]
+}

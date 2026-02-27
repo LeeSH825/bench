@@ -1,0 +1,10 @@
+{
+  "suite_name": "all_simple",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple.yaml",
+  "created_at_unix": 1772160943.192441,
+  "run_count": 2,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple/B_lorenz_dt_v0/maml_knet/frozen/seed_0/scenario_0fbaa5175893/init_untrained",
+    "/home/xynus/bench/runs/all_simple/B_lorenz_dt_v0/maml_knet/frozen/seed_0/scenario_0fbaa5175893/init_trained"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "suite_name": "all_simple",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple.yaml",
+  "created_at_unix": 1772158618.3376713,
+  "run_count": 3,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_f46f1dd56990",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_339fdebda713",
+    "/home/xynus/bench/runs/all_simple/C_shift_Rscale_v0/mb_kf_oracle/frozen/seed_0/scenario_b82eac38c3a2"
+  ]
+}

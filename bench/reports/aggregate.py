@@ -14,6 +14,8 @@ try:
 except Exception:
     yaml = None
 
+from bench.utils.sweep import expand_sweep_grid
+
 
 # -----------------------------
 # Data structures
@@ -57,6 +59,8 @@ class RunRecord:
 
     # budget/ledger
     train_updates_used: Optional[int] = None
+    train_outer_updates_used: Optional[int] = None
+    train_inner_updates_used: Optional[int] = None
     adapt_updates_used: Optional[int] = None
     adapt_updates_per_step_max: Optional[int] = None
     train_max_updates: Optional[int] = None
@@ -183,17 +187,51 @@ def _dotted_set(d: Dict[str, Any], dotted_key: str, value: Any) -> None:
     cur[parts[-1]] = value
 
 
+def _is_inv_r2_db_sweep_key(key: str) -> bool:
+    kk = str(key).strip()
+    return kk in {"inv_r2_db", "noise.inv_r2_db"}
+
+
+def _resolve_r2_basis_key(noise_cfg: Dict[str, Any]) -> Optional[str]:
+    pre = noise_cfg.get("pre_shift", {})
+    if isinstance(pre, dict):
+        pre_r = pre.get("R", {})
+        if isinstance(pre_r, dict) and ("r2" in pre_r):
+            return "pre_shift.R.r2"
+
+    r_map = noise_cfg.get("R", {})
+    if isinstance(r_map, dict) and ("r2" in r_map):
+        return "R.r2"
+    # Fallback: allow alias sweep even when task omits explicit noise.R.r2.
+    return "R.r2"
+
+
+def _inv_r2_db_to_r2(value: Any) -> float:
+    db = float(value)
+    return float(pow(10.0, -db / 10.0))
+
+
 def build_scenario_cfg_basis(task: Dict[str, Any], scenario_settings: Dict[str, Any]) -> Dict[str, Any]:
     """
     Basis used for stable scenario_id:
       scenario_cfg_basis = deep copy of task.noise + sweep overrides applied.
     """
     noise = copy.deepcopy(task.get("noise", {}) or {})
+    r2_basis_key = _resolve_r2_basis_key(noise)
     for k, v in (scenario_settings or {}).items():
-        if k.startswith("noise."):
-            _dotted_set(noise, k[len("noise."):], v)
+        kk = str(k)
+        if _is_inv_r2_db_sweep_key(kk):
+            if r2_basis_key is None:
+                raise ValueError(
+                    "inv_r2_db sweep requires task noise config with either "
+                    "noise.pre_shift.R.r2 or noise.R.r2"
+                )
+            _dotted_set(noise, r2_basis_key, _inv_r2_db_to_r2(v))
+            continue
+        if kk.startswith("noise."):
+            _dotted_set(noise, kk[len("noise."):], v)
         else:
-            _dotted_set(noise, k, v)
+            _dotted_set(noise, kk, v)
     return noise
 
 
@@ -212,28 +250,7 @@ def canonicalize_scenario_id(task_id: str, scenario_cfg_basis: Dict[str, Any]) -
 
 
 def expand_sweep(sweep: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    if not sweep:
-        return [{}]
-    keys = sorted(sweep.keys())
-    vals: List[List[Any]] = []
-    for k in keys:
-        v = sweep[k]
-        vals.append(v if isinstance(v, list) else [v])
-
-    out: List[Dict[str, Any]] = []
-
-    def rec(i: int, cur: Dict[str, Any]) -> None:
-        if i >= len(keys):
-            out.append(dict(cur))
-            return
-        k = keys[i]
-        for vv in vals[i]:
-            cur[k] = vv
-            rec(i + 1, cur)
-        cur.pop(k, None)
-
-    rec(0, {})
-    return out
+    return expand_sweep_grid(sweep, sort_keys=True)
 
 
 # -----------------------------
@@ -414,7 +431,55 @@ def _extract_q2_r2(
     return _first_float(q2_candidates), _first_float(r2_candidates)
 
 
-def scan_runs(runs_root: Path, suite_name: Optional[str] = None) -> List[RunRecord]:
+def _manifest_dir(runs_root: Path, suite_name: Optional[str]) -> Optional[Path]:
+    if not suite_name:
+        return None
+    return runs_root / str(suite_name) / "_manifests"
+
+
+def _latest_manifest_path(runs_root: Path, suite_name: Optional[str]) -> Optional[Path]:
+    mdir = _manifest_dir(runs_root, suite_name)
+    if mdir is None or not mdir.exists():
+        return None
+    cands = sorted([p for p in mdir.glob("*.json") if p.is_file()], key=lambda p: p.stat().st_mtime)
+    if not cands:
+        return None
+    return cands[-1]
+
+
+def _run_dirs_from_manifest(runs_root: Path, suite_name: Optional[str]) -> List[Path]:
+    mp = _latest_manifest_path(runs_root, suite_name)
+    if mp is None:
+        return []
+    try:
+        obj = load_json(mp)
+    except Exception:
+        return []
+    raw = obj.get("run_dirs", [])
+    if not isinstance(raw, list):
+        return []
+    out: List[Path] = []
+    for rp in raw:
+        if rp in (None, ""):
+            continue
+        try:
+            p = Path(str(rp)).expanduser()
+            if not p.is_absolute():
+                p = (runs_root / p).resolve()
+            else:
+                p = p.resolve()
+            out.append(p)
+        except Exception:
+            continue
+    uniq = sorted(set(out))
+    return [p for p in uniq if p.exists() and p.is_dir()]
+
+
+def scan_runs(
+    runs_root: Path,
+    suite_name: Optional[str] = None,
+    input_scope: str = "all_runs",
+) -> List[RunRecord]:
     """
     Scan run_dir folders by looking for config_snapshot.yaml / metrics.json / failure.json.
     """
@@ -423,15 +488,17 @@ def scan_runs(runs_root: Path, suite_name: Optional[str] = None) -> List[RunReco
         cand = runs_root / suite_name
         base = cand if cand.exists() else runs_root
 
-    candidates: List[Path] = []
-    for p in base.rglob("metrics.json"):
-        candidates.append(p.parent)
-    for p in base.rglob("failure.json"):
-        candidates.append(p.parent)
-    for p in base.rglob("config_snapshot.yaml"):
-        candidates.append(p.parent)
-
-    uniq = sorted(set(candidates))
+    if str(input_scope) == "latest_manifest":
+        uniq = _run_dirs_from_manifest(runs_root=runs_root, suite_name=suite_name)
+    else:
+        candidates: List[Path] = []
+        for p in base.rglob("metrics.json"):
+            candidates.append(p.parent)
+        for p in base.rglob("failure.json"):
+            candidates.append(p.parent)
+        for p in base.rglob("config_snapshot.yaml"):
+            candidates.append(p.parent)
+        uniq = sorted(set(candidates))
     records: List[RunRecord] = []
 
     for rd in uniq:
@@ -526,6 +593,7 @@ def scan_runs(runs_root: Path, suite_name: Optional[str] = None) -> List[RunReco
             status = met.get("status", "ok") or "ok"
         elif fail:
             status = fail.get("status", "failed") or "failed"
+        metrics_success = bool(met and str(status).strip().lower() in {"ok", "success"})
 
         rec = RunRecord(
             suite=str(suite),
@@ -608,7 +676,19 @@ def scan_runs(runs_root: Path, suite_name: Optional[str] = None) -> List[RunReco
                 if parts:
                     rec.total_time_s = float(sum(parts))
 
-            rec.train_updates_used = _first_int([(ledger or {}).get("train_updates_used")])
+            rec.train_updates_used = _first_int(
+                [
+                    (ledger or {}).get("train_updates_used"),
+                    (ledger or {}).get("train_outer_updates_used"),
+                ]
+            )
+            rec.train_outer_updates_used = _first_int(
+                [
+                    (ledger or {}).get("train_outer_updates_used"),
+                    (ledger or {}).get("train_updates_used"),
+                ]
+            )
+            rec.train_inner_updates_used = _first_int([(ledger or {}).get("train_inner_updates_used")])
             rec.adapt_updates_used = _first_int([(ledger or {}).get("adapt_updates_used")])
             rec.train_max_updates = _first_int(
                 [
@@ -665,7 +745,7 @@ def scan_runs(runs_root: Path, suite_name: Optional[str] = None) -> List[RunReco
                 )
             _ = dims  # keep for future extensions without lint churn
 
-        if fail:
+        if fail and not metrics_success:
             failure_type = fail.get("failure_type")
             if failure_type is not None:
                 rec.failure_type = str(failure_type)
@@ -875,6 +955,8 @@ SUMMARY_FIELDS = [
     "adapt_time_s",
     "total_time_s",
     "train_updates_used",
+    "train_outer_updates_used",
+    "train_inner_updates_used",
     "adapt_updates_used",
     "adapt_updates_per_step_max",
     "train_max_updates",
@@ -927,6 +1009,12 @@ def write_summary_csv(records: List[RunRecord], out_csv: Path) -> None:
                     "adapt_time_s": "" if r.adapt_time_s is None else r.adapt_time_s,
                     "total_time_s": "" if r.total_time_s is None else r.total_time_s,
                     "train_updates_used": "" if r.train_updates_used is None else r.train_updates_used,
+                    "train_outer_updates_used": (
+                        "" if r.train_outer_updates_used is None else r.train_outer_updates_used
+                    ),
+                    "train_inner_updates_used": (
+                        "" if r.train_inner_updates_used is None else r.train_inner_updates_used
+                    ),
                     "adapt_updates_used": "" if r.adapt_updates_used is None else r.adapt_updates_used,
                     "adapt_updates_per_step_max": (
                         "" if r.adapt_updates_per_step_max is None else r.adapt_updates_per_step_max
@@ -1034,6 +1122,10 @@ AGG_FIELDS = [
     "total_time_s_median",
     "train_updates_used_mean",
     "train_updates_used_median",
+    "train_outer_updates_used_mean",
+    "train_outer_updates_used_median",
+    "train_inner_updates_used_mean",
+    "train_inner_updates_used_median",
     "adapt_updates_used_mean",
     "adapt_updates_used_median",
     "adapt_updates_per_step_max_mean",
@@ -1104,6 +1196,8 @@ def aggregate_by_seed(records: List[RunRecord]) -> List[Dict[str, Any]]:
         total_time = collect_any(lambda r: r.total_time_s)
 
         train_updates = collect_any(lambda r: r.train_updates_used)
+        train_outer_updates = collect_any(lambda r: r.train_outer_updates_used)
+        train_inner_updates = collect_any(lambda r: r.train_inner_updates_used)
         adapt_updates = collect_any(lambda r: r.adapt_updates_used)
         adapt_per_step = collect_any(lambda r: r.adapt_updates_per_step_max)
         sev = collect_any(lambda r: r.severity_r_scale)
@@ -1200,6 +1294,8 @@ def aggregate_by_seed(records: List[RunRecord]) -> List[Dict[str, Any]]:
         row.update(pack_mean_median("adapt_time_s", adapt_time))
         row.update(pack_mean_median("total_time_s", total_time))
         row.update(pack_mean_median("train_updates_used", train_updates))
+        row.update(pack_mean_median("train_outer_updates_used", train_outer_updates))
+        row.update(pack_mean_median("train_inner_updates_used", train_inner_updates))
         row.update(pack_mean_median("adapt_updates_used", adapt_updates))
         row.update(pack_mean_median("adapt_updates_per_step_max", adapt_per_step))
 
@@ -1265,6 +1361,8 @@ def build_plan_comparison_rows(records: List[RunRecord]) -> Tuple[List[Dict[str,
         "mse_db",
         "recovery_k",
         "train_updates_used",
+        "train_outer_updates_used",
+        "train_inner_updates_used",
         "adapt_updates_used",
         "total_time_s",
         "cache_hit",
@@ -1299,6 +1397,12 @@ def build_plan_comparison_rows(records: List[RunRecord]) -> Tuple[List[Dict[str,
             row[f"mse_db__{pid}"] = "" if rr.mse_db is None else rr.mse_db
             row[f"recovery_k__{pid}"] = "" if rr.recovery_k is None else rr.recovery_k
             row[f"train_updates_used__{pid}"] = "" if rr.train_updates_used is None else rr.train_updates_used
+            row[f"train_outer_updates_used__{pid}"] = (
+                "" if rr.train_outer_updates_used is None else rr.train_outer_updates_used
+            )
+            row[f"train_inner_updates_used__{pid}"] = (
+                "" if rr.train_inner_updates_used is None else rr.train_inner_updates_used
+            )
             row[f"adapt_updates_used__{pid}"] = "" if rr.adapt_updates_used is None else rr.adapt_updates_used
             row[f"total_time_s__{pid}"] = "" if rr.total_time_s is None else rr.total_time_s
             row[f"cache_hit__{pid}"] = "" if rr.cache_hit is None else rr.cache_hit
@@ -1403,6 +1507,10 @@ def summarize_ops_by_plan(records: List[RunRecord], group_by: str = "init_id,tra
         "total_time_s_median",
         "train_updates_used_mean",
         "train_updates_used_median",
+        "train_outer_updates_used_mean",
+        "train_outer_updates_used_median",
+        "train_inner_updates_used_mean",
+        "train_inner_updates_used_median",
         "adapt_updates_used_mean",
         "adapt_updates_used_median",
         "adapt_updates_per_step_max_mean",
@@ -1446,6 +1554,8 @@ def summarize_ops_by_plan(records: List[RunRecord], group_by: str = "init_id,tra
         row.update(_pack("adapt_time_s", _vals(rs, lambda r: r.adapt_time_s)))
         row.update(_pack("total_time_s", _vals(rs, lambda r: r.total_time_s)))
         row.update(_pack("train_updates_used", _vals(rs, lambda r: r.train_updates_used)))
+        row.update(_pack("train_outer_updates_used", _vals(rs, lambda r: r.train_outer_updates_used)))
+        row.update(_pack("train_inner_updates_used", _vals(rs, lambda r: r.train_inner_updates_used)))
         row.update(_pack("adapt_updates_used", _vals(rs, lambda r: r.adapt_updates_used)))
         row.update(_pack("adapt_updates_per_step_max", _vals(rs, lambda r: r.adapt_updates_per_step_max)))
         row["cache_enabled_rate"] = (

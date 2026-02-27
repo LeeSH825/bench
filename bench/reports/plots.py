@@ -101,18 +101,36 @@ def plot_shift_recovery_curves(
     plt.close()
 
 
-def plot_severity_sweep(
-    task_id: str,
+def _build_severity_sweep_series(
+    *,
     records: List[RunRecord],
-    out_path: Path,
-    severity_key: str = "shift.post_shift.R_scale",
-) -> None:
-    """
-    Plot mean scalar MSE vs severity parameter for shift tasks.
-    Requires that scenario_id maps to severity levels; we approximate by reading config_snapshot.yaml if available.
-    """
-    # severity extraction: from config_snapshot.yaml if present
+    severity_key: str,
+    x_field: str,
+    y_field: str,
+) -> Dict[Tuple[str, str, str], List[Tuple[float, float]]]:
+    allowed_x = {
+        "severity_key",
+        "mse_mean",
+        "mse_db_mean",
+        "rmse_mean",
+        "inv_r2_db",
+        "severity_r_scale_mean",
+    }
+    allowed_y = {
+        "mse_mean",
+        "mse_db_mean",
+        "rmse_mean",
+        "severity_key",
+        "severity_r_scale_mean",
+    }
+    if x_field not in allowed_x:
+        raise ValueError(f"unsupported severity x_field={x_field}")
+    if y_field not in allowed_y:
+        raise ValueError(f"unsupported severity y_field={y_field}")
+
     def get_severity(r: RunRecord) -> Optional[float]:
+        if r.severity_r_scale is not None:
+            return float(r.severity_r_scale)
         cfg = r.run_dir / "config_snapshot.yaml"
         if not cfg.exists():
             return None
@@ -126,34 +144,78 @@ def plot_severity_sweep(
         except Exception:
             return None
 
-    # group by (model, track) => (severity -> list[mse])
-    groups: Dict[Tuple[str, str], Dict[float, List[float]]] = {}
+    scenario_groups: Dict[Tuple[str, str, str, str], Dict[str, List[float]]] = {}
     for r in records:
         if r.status != "ok":
             continue
-        sev = get_severity(r)
-        if sev is None:
+        vals = {
+            "severity_key": get_severity(r),
+            "mse_mean": (None if r.mse is None else float(r.mse)),
+            "mse_db_mean": (None if r.mse_db is None else float(r.mse_db)),
+            "rmse_mean": (None if r.rmse is None else float(r.rmse)),
+            "inv_r2_db": (None if r.inv_r2_db is None else float(r.inv_r2_db)),
+            "severity_r_scale_mean": (None if r.severity_r_scale is None else float(r.severity_r_scale)),
+        }
+        if vals.get(x_field) is None or vals.get(y_field) is None:
             continue
-        if r.mse is None:
-            continue
-        groups.setdefault((r.model_id, r.track_id), {}).setdefault(float(sev), []).append(float(r.mse))
+        sk = (str(r.model_id), str(r.track_id), str(r.init_id), str(r.scenario_id))
+        bucket = scenario_groups.setdefault(sk, {})
+        for k, v in vals.items():
+            if v is None:
+                continue
+            bucket.setdefault(k, []).append(float(v))
 
-    if not groups:
+    def _mean(xs: List[float]) -> Optional[float]:
+        if not xs:
+            return None
+        return float(sum(xs) / float(len(xs)))
+
+    # group by (model_id, track_id, init_id)
+    series: Dict[Tuple[str, str, str], List[Tuple[float, float]]] = {}
+    for (model_id, track_id, init_id, _scenario_id), metrics in sorted(scenario_groups.items()):
+        x = _mean(metrics.get(x_field, []))
+        y = _mean(metrics.get(y_field, []))
+        if x is None or y is None:
+            continue
+        series.setdefault((model_id, track_id, init_id), []).append((float(x), float(y)))
+    return series
+
+
+def plot_severity_sweep(
+    task_id: str,
+    records: List[RunRecord],
+    out_path: Path,
+    severity_key: str = "shift.post_shift.R_scale",
+    x_field: str = "severity_key",
+    y_field: str = "mse_mean",
+) -> None:
+    """
+    Plot configurable scalar-vs-scalar sweep for shift tasks.
+    Default: x=severity_key, y=mse_mean.
+    """
+    series = _build_severity_sweep_series(
+        records=records,
+        severity_key=severity_key,
+        x_field=x_field,
+        y_field=y_field,
+    )
+
+    if not series:
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     plt.figure()
 
-    for (model_id, track_id), sev_map in sorted(groups.items()):
-        xs = sorted(sev_map.keys())
-        ys = []
-        for x in xs:
-            vals = sev_map[x]
-            ys.append(sum(vals) / float(len(vals)))
-        plt.plot(xs, ys, marker="o", label=f"{model_id} | {track_id}")
+    for (model_id, track_id, init_id), points in sorted(series.items()):
+        pts = sorted(points, key=lambda p: p[0])
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        plt.plot(xs, ys, marker="o", label=f"{model_id} | {track_id} | {init_id}")
 
-    plt.xlabel(severity_key)
-    plt.ylabel("mse (mean over seeds)")
+    x_label = severity_key if x_field == "severity_key" else x_field
+    y_label = severity_key if y_field == "severity_key" else y_field
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.title(f"Mismatch severity sweep: {task_id}")
     plt.legend(fontsize=8)
     plt.tight_layout()

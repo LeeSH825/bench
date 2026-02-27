@@ -1,0 +1,11 @@
+{
+  "suite_name": "shift",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_shift.yaml",
+  "created_at_unix": 1772159524.647838,
+  "run_count": 3,
+  "run_dirs": [
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_d121a846d766",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_95884c87f654",
+    "/home/xynus/bench/runs/shift/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_99ef90b11e5f"
+  ]
+}

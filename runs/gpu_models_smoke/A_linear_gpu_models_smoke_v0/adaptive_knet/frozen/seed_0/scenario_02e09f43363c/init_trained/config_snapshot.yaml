@@ -1,0 +1,86 @@
+suite:
+  name: gpu_models_smoke
+  version: 0.1.0
+  description: 'Tiny GPU smoke suite to validate CUDA device handling across model
+    adapters. Includes a conservative inv_r2_db sweep around the stable operating
+    region.
+
+    '
+task:
+  task_id: A_linear_gpu_models_smoke_v0
+  task_name: Linear Canonical GPU Device Smoke
+  system_type: linear
+  x_dim: 2
+  y_dim: 2
+  sequence_length_T: 16
+  dataset_sizes:
+    N_train: 16
+    N_val: 4
+    N_test: 4
+  noise:
+    form: diag
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      start: 25
+      stop: 35
+      step: 5
+model:
+  model_id: adaptive_knet
+  display_name: Adaptive-KNet-ICASSP24
+  adapter: bench.models.adaptive_knet:AdaptiveKNetAdapter
+  repo:
+    path: third_party/Adaptive-KNet-ICASSP24
+    entrypoints:
+      A_linear_gpu_models_smoke_v0: main_linear_canonical.py
+  estimator_class_path: mnets.KNet_mnet.KalmanNetNN
+  input_layout: BTD
+  batch_size: 2
+  lr: 0.0001
+  weight_decay: 0.001
+  val_eval_interval_updates: 2
+  knet_trainable: true
+  capabilities:
+    supports_adaptation: true
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings:
+  inv_r2_db: 30
+scenario_cfg_basis:
+  form: diag
+  Q:
+    type: scaled_identity
+    q2: 0.001
+  R:
+    type: scaled_identity
+    r2: 0.001
+scenario_id: 02e09f43363c
+cache_scenario_id: 02e09f43363c
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/test.npz
+  canonical_layout: NTD

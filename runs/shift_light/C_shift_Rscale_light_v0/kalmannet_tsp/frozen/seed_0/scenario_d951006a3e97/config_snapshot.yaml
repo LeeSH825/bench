@@ -64,23 +64,11 @@ model:
 scenario_settings:
   shift.post_shift.R_scale: 10.0
 scenario_cfg_basis:
-  pre_shift:
-    Q:
-      type: scaled_identity
-      q2: 0.001
-    R:
-      type: scaled_identity
-      r2: 0.001
-    obs_distribution:
-      name: gaussian
   shift:
-    t0: 60
     post_shift:
-      obs_distribution:
-        name: gaussian
       R_scale: 10.0
 scenario_id: d951006a3e97
-scenario_id_resolved_from_cache: true
+scenario_id_resolved_from_cache: false
 seed: 0
 track_id: frozen
 track_cfg:

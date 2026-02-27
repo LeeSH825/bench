@@ -1,2 +1,3 @@
 status,suite,task_id,scenario_id,seed,model_id,track_id,init_id,mse,rmse,mse_db,timing_ms_per_step,recovery_k,run_dir,error
 ok,basic,A_linear_canonical_v0,0388b22d0885,0,kalmannet_tsp,frozen,untrained,1089155119448064.0,33002350.21097837,150.37089737168816,0.028142881730000225,,/home/xynus/bench/runs/basic/A_linear_canonical_v0/kalmannet_tsp/frozen/seed_0,
+ok,basic,A_linear_canonical_v0,fd75d1016844,0,kalmannet_tsp,frozen,untrained,1089155119448064.0,33002350.21097837,150.37089737168816,0.03206124223999723,,/home/xynus/bench/runs/basic/A_linear_canonical_v0/kalmannet_tsp/frozen/seed_0/init_untrained,

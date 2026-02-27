@@ -1,0 +1,148 @@
+{
+  "status": "ok",
+  "suite_name": "gpu_models_smoke",
+  "task_id": "A_linear_gpu_models_smoke_v0",
+  "scenario_id": "6a9b5fd1ec79",
+  "cache_scenario_id": "6a9b5fd1ec79",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "maml_knet",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 2,
+    "y_dim": 2,
+    "T": 16
+  },
+  "accuracy": {
+    "mse": 0.008019722066819668,
+    "rmse": 0.08955290094028036,
+    "mse_db": -20.958406824562502
+  },
+  "timing": {
+    "timing_ms_per_step": 0.8674358593907527,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 2
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": null,
+  "t0_used": null,
+  "scenario_settings": {
+    "inv_r2_db": 25
+  },
+  "scenario_cfg_basis": {
+    "form": "diag",
+    "Q": {
+      "type": "scaled_identity",
+      "q2": 0.001
+    },
+    "R": {
+      "type": "scaled_identity",
+      "r2": 0.0031622776601683794
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "BTD->BYT(stepwise_filter)",
+    "selected_class": "filter.Filter + state_dict_learner.Learner"
+  },
+  "adapter_meta": {
+    "adapter_id": "maml_knet",
+    "adapter_version": "s9_route_b_train_v1",
+    "runtime_device": "cuda",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BYT_stepwise_filter",
+    "class_path": "filter.Filter + state_dict_learner.Learner",
+    "integration_mode": "import_model_only",
+    "meta_train": {
+      "meta_task_num": 2,
+      "support_size": 4,
+      "query_size": 4,
+      "inner_steps": 1,
+      "inner_lr": 0.05,
+      "outer_lr": 0.001,
+      "first_order": true,
+      "budget_semantics": "train_max_updates counts outer optimizer.step() only"
+    },
+    "entrypoints": {
+      "filter": "filter.py::Filter",
+      "learner": "state_dict_learner.py::Learner",
+      "meta_ref": "meta.py::Meta",
+      "cli_ref": "main_linear.py::main"
+    },
+    "capabilities": {
+      "train_supported": true,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_input_layout": "Filter routines consume state/obs as [B,D,T]; adapter converts bench BTD internally.",
+      "B_task_semantics": "v0 shift t0 per-step adaptation semantics are not mapped to MAML episode adaptation in this adapter.",
+      "C_metrics_ownership": "third_party metrics are ignored; bench computes official metrics from adapter x_hat only."
+    },
+    "how_to_verify": {
+      "A_input_layout": "third_party/MAML_KalmanNet/MAML-KalmanNet/filter.py::compute_x_post/compute_x_post_qry",
+      "B_task_semantics": "third_party/MAML_KalmanNet/MAML-KalmanNet/meta.py::forward",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and this adapter eval()/predict()."
+    },
+    "selected_layout": "BTD->BYT(stepwise_filter)",
+    "selected_class": "filter.Filter + state_dict_learner.Learner"
+  },
+  "run_plan": {
+    "plan_id": "trained__frozen",
+    "init_id": "trained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": true,
+    "suite_name": "gpu_models_smoke",
+    "task_id": "A_linear_gpu_models_smoke_v0",
+    "scenario_id": "6a9b5fd1ec79",
+    "seed": 0,
+    "model_id": "maml_knet",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 4,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": null
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": false,
+      "model_cache_dir": null,
+      "cache_key": null,
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 4,
+    "train_outer_updates_used": 4,
+    "train_inner_updates_used": 8,
+    "adapt_updates_used": 0,
+    "train_max_updates": 4,
+    "train_skipped": false,
+    "cache_enabled": false,
+    "cache_hit": false,
+    "cache_key": null,
+    "track_id": "frozen",
+    "init_id": "trained",
+    "meta_tasks_seen": 8
+  },
+  "run_dir": "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/maml_knet/frozen/seed_0/scenario_6a9b5fd1ec79"
+}

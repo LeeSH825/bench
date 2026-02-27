@@ -1,0 +1,14 @@
+{
+  "suite_name": "gpu_models_smoke",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_gpu_models_smoke.yaml",
+  "created_at_unix": 1772169131.2101514,
+  "run_count": 6,
+  "run_dirs": [
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_6a9b5fd1ec79/init_untrained",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_6a9b5fd1ec79/init_trained",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_02e09f43363c/init_untrained",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_02e09f43363c/init_trained",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_10ca6cb9975e/init_untrained",
+    "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_10ca6cb9975e/init_trained"
+  ]
+}

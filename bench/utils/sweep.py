@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from itertools import product
+import re
 from typing import Any, Dict, List, Mapping, Optional
 
 
@@ -80,12 +81,59 @@ def _values_from_range_spec(spec: Mapping[str, Any]) -> List[Any]:
     return vals
 
 
+_TUPLE_SWEEP_RE = re.compile(r"^\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*\)$")
+
+
+def _values_from_tuple_spec(raw: Any) -> List[Any]:
+    start_raw: Any
+    stop_raw: Any
+    steps_raw: Any
+
+    if isinstance(raw, str):
+        m = _TUPLE_SWEEP_RE.match(raw.strip())
+        if m is None:
+            raise TypeError(
+                "tuple sweep string must match '(start, stop, steps)'"
+            )
+        start_raw, stop_raw, steps_raw = m.group(1), m.group(2), m.group(3)
+    elif isinstance(raw, (list, tuple)):
+        if len(raw) != 3:
+            raise TypeError("tuple sweep spec must have exactly 3 values: [start, stop, steps]")
+        start_raw, stop_raw, steps_raw = raw[0], raw[1], raw[2]
+    else:
+        raise TypeError("tuple sweep spec must be a string '(start, stop, steps)' or list/tuple of length 3")
+
+    start = _as_number(start_raw)
+    stop = _as_number(stop_raw)
+    steps_f = _as_number(steps_raw)
+    steps_i = int(round(float(steps_f)))
+    if abs(float(steps_f) - float(steps_i)) > 1.0e-9:
+        raise ValueError(f"tuple sweep 'steps' must be an integer, got {steps_raw!r}")
+    if steps_i <= 0:
+        raise ValueError(f"tuple sweep 'steps' must be > 0, got {steps_i}")
+
+    return _values_from_range_spec(
+        {
+            "start": float(start),
+            "stop": float(stop),
+            "num": int(steps_i),
+        }
+    )
+
+
 def _axis_values(raw: Any) -> List[Any]:
+    if isinstance(raw, str):
+        text = raw.strip()
+        if text.startswith("(") and text.endswith(")"):
+            return _values_from_tuple_spec(text)
+        return [raw]
     if isinstance(raw, list):
         if not raw:
             raise ValueError("sweep axis list must not be empty")
         return list(raw)
     if isinstance(raw, Mapping):
+        if "tuple" in raw:
+            return _values_from_tuple_spec(raw.get("tuple"))
         if "range" in raw:
             nested = raw.get("range")
             if not isinstance(nested, Mapping):

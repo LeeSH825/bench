@@ -13,12 +13,12 @@
     "T": 200
   },
   "accuracy": {
-    "mse": 1280919503634432.0,
-    "rmse": 35789935.786955975,
-    "mse_db": 151.07521838389636
+    "mse": 1280919906287616.0,
+    "rmse": 35789941.41218474,
+    "mse_db": 151.07521974908775
   },
   "timing": {
-    "timing_ms_per_step": 0.03008442495000054,
+    "timing_ms_per_step": 0.02732274163000511,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 32

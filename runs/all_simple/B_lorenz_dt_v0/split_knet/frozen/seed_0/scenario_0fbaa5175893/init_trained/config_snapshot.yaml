@@ -1,0 +1,93 @@
+suite:
+  name: all_simple
+  version: 0.1.0
+  description: 'Simple all-in-one suite covering linear, shift, lorenz, and NCLT-style
+    tasks. Designed for broad model coverage with explicit budget caps.
+
+    '
+task:
+  task_id: B_lorenz_dt_v0
+  task_name: Lorenz Attractor (DT, partial obs)
+  task_family: lorenz_v0
+  system_type: nonlinear
+  x_dim: 3
+  y_dim: 2
+  sequence_length_T: 400
+  dataset_sizes:
+    N_train: 2000
+    N_val: 500
+    N_test: 500
+  lorenz:
+    sigma: 10.0
+    rho: 28.0
+    beta: 2.6666666667
+    J_true: 5
+    J_assumed: 5
+    delta_tau_true: 0.02
+    delta_tau_assumed: 0.02
+    obs_mode: partial
+    state_clip: 100.0
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 0.0001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: partial
+    h_type: partial
+    mode: partial
+  mismatch:
+    enabled: false
+    kind: none
+    params: {}
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep: {}
+model:
+  model_id: split_knet
+  display_name: Split-KalmanNet
+  adapter: bench.models.split_knet:SplitKNetAdapter
+  enabled: true
+  repo:
+    path: third_party/Split_KalmanNet
+    entrypoints:
+      A_linear_canonical_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      C_shift_Rscale_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      B_lorenz_dt_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+      D_nclt_v0: GSSFiltering/filtering.py::Split_KalmanNet_Filter
+  estimator_class_path: GSSFiltering.filtering.Split_KalmanNet_Filter
+  lr: 0.0001
+  max_grad_norm: 1.0
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: false
+scenario_settings: {}
+scenario_cfg_basis:
+  Q:
+    type: scaled_identity
+    q2: 0.0001
+  R:
+    type: scaled_identity
+    r2: 0.001
+scenario_id: 0fbaa5175893
+cache_scenario_id: 7353ceee899f
+scenario_id_resolved_from_cache: true
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: trained
+runner_overrides:
+  device: cpu
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple/B_lorenz_dt_v0/scenario_7353ceee899f/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple/B_lorenz_dt_v0/scenario_7353ceee899f/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple/B_lorenz_dt_v0/scenario_7353ceee899f/seed_0/test.npz
+  canonical_layout: NTD

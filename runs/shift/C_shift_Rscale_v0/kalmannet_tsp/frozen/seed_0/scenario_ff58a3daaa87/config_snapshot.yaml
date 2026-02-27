@@ -77,8 +77,8 @@ runner_overrides:
   device: cpu
   precision: fp32
 data:
-  cache_root: /tmp/bench_data_cache_userguide
-  train_npz: /tmp/bench_data_cache_userguide/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/train.npz
-  val_npz: /tmp/bench_data_cache_userguide/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/val.npz
-  test_npz: /tmp/bench_data_cache_userguide/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/test.npz
+  cache_root: /home/xynus/bench/bench_data_cache
+  train_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/train.npz
+  val_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/val.npz
+  test_npz: /home/xynus/bench/bench_data_cache/shift/C_shift_Rscale_v0/scenario_ff58a3daaa87/seed_0/test.npz
   canonical_layout: NTD

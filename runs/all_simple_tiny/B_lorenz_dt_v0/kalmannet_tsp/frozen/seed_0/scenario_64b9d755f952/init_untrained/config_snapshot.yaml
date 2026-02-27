@@ -1,0 +1,100 @@
+suite:
+  name: all_simple_tiny
+  version: 0.1.0
+  description: 'Really small version of all_simple for fast debugging. Every task
+    uses total dataset size < 100 and update budgets < 10.
+
+    '
+task:
+  task_id: B_lorenz_dt_v0
+  task_name: Lorenz Attractor (DT, partial obs, tiny)
+  task_family: lorenz_v0
+  system_type: nonlinear
+  x_dim: 3
+  y_dim: 2
+  sequence_length_T: 80
+  dataset_sizes:
+    N_train: 48
+    N_val: 24
+    N_test: 24
+  lorenz:
+    sigma: 10.0
+    rho: 28.0
+    beta: 2.6666666667
+    J_true: 5
+    J_assumed: 5
+    delta_tau_true: 0.02
+    delta_tau_assumed: 0.02
+    obs_mode: partial
+    state_clip: 50.0
+  noise:
+    Q:
+      type: scaled_identity
+      q2: 0.0001
+    R:
+      type: scaled_identity
+      r2: 0.001
+  observation:
+    type: partial
+    h_type: partial
+    mode: partial
+  mismatch:
+    enabled: false
+    kind: none
+    params: {}
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      values:
+      - -10
+      - 0
+      - 10
+      - 20
+      - 30
+model:
+  model_id: kalmannet_tsp
+  display_name: KalmanNet_TSP
+  adapter: bench.models.kalmannet_tsp:KalmanNetTSPAdapter
+  enabled: true
+  repo:
+    path: third_party/KalmanNet_TSP
+    entrypoints:
+      A_linear_canonical_v0: main_linear_canonical.py
+      C_shift_Rscale_v0: main_linear_canonical.py
+      B_lorenz_dt_v0: main_lor_DT.py
+      D_nclt_v0: main_linear_canonical.py
+  lr: 5.0e-05
+  max_grad_norm: 1.0
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+scenario_settings:
+  inv_r2_db: 20
+scenario_cfg_basis:
+  Q:
+    type: scaled_identity
+    q2: 0.0001
+  R:
+    type: scaled_identity
+    r2: 0.01
+scenario_id: 64b9d755f952
+cache_scenario_id: 64b9d755f952
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: untrained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple_tiny/B_lorenz_dt_v0/scenario_64b9d755f952/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple_tiny/B_lorenz_dt_v0/scenario_64b9d755f952/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple_tiny/B_lorenz_dt_v0/scenario_64b9d755f952/seed_0/test.npz
+  canonical_layout: NTD

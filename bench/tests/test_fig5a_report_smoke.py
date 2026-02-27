@@ -127,6 +127,8 @@ def run_fig5a_report_smoke(suite_yaml: Path) -> Fig5aReportSmokeResult:
         str(bench_root / "runs"),
         "--out-dir",
         str(bench_root / "reports"),
+        "--input-scope",
+        "all_runs",
         "--group-by",
         "init_id,track_id",
         "--plan-views",

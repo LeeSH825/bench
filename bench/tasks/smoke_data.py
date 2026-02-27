@@ -105,16 +105,33 @@ def main() -> int:
         loaded = load_npz_split_v0(art.train.path)
         meta = loaded.meta
 
-        # --- Meta echo: interpretability for R_scale ratio ---
+        # --- Meta echo: shift diagnostics only for shift tasks ---
+        t0 = None
+        r_scale = None
         try:
-            t0 = int(meta["noise"]["shift"]["t0"])
-            r_scale = float(meta["noise"]["shift"]["post_shift"]["R_scale"])
-            print(f"    meta.noise.shift.t0 = {t0}")
-            print(f"    meta.noise.shift.post_shift.R_scale(applied) = {r_scale}")
+            noise_meta = meta.get("noise", {}) if isinstance(meta, dict) else {}
+            shift_meta = noise_meta.get("shift", {}) if isinstance(noise_meta, dict) else {}
+            if isinstance(shift_meta, dict) and ("t0" in shift_meta):
+                t0 = int(shift_meta["t0"])
+                post_shift = shift_meta.get("post_shift", {}) if isinstance(shift_meta.get("post_shift", {}), dict) else {}
+                if "R_scale" in post_shift:
+                    r_scale = float(post_shift["R_scale"])
+                elif "R_scale(applied)" in post_shift:
+                    r_scale = float(post_shift["R_scale(applied)"])
+                print(f"    meta.noise.shift.t0 = {t0}")
+                if r_scale is not None:
+                    print(f"    meta.noise.shift.post_shift.R_scale(applied) = {r_scale}")
+            else:
+                # Non-shift task: show base R.r2 if present, without warning noise.
+                base_r2 = None
+                if isinstance(noise_meta, dict):
+                    r_meta = noise_meta.get("R", {})
+                    if isinstance(r_meta, dict) and ("r2" in r_meta):
+                        base_r2 = float(r_meta["r2"])
+                if base_r2 is not None:
+                    print(f"    meta.noise.R.r2 = {base_r2}")
         except Exception as e:
-            print(f"    [WARN] cannot read shift meta (t0/R_scale): {e}")
-            t0 = None
-            r_scale = None
+            print(f"    [WARN] failed to parse meta noise diagnostics: {e}")
 
         # --- Canonical F/H match check (for canonical_inverse tasks) ---
         if loaded.F is not None and loaded.H is not None:

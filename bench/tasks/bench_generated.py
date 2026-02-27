@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -64,6 +65,70 @@ def canonicalize_scenario_id(task_id: str, scenario_cfg: Dict[str, Any]) -> str:
     return h[:12]
 
 
+def _dotted_set(d: Dict[str, Any], dotted_key: str, val: Any) -> None:
+    cur = d
+    parts = dotted_key.split(".")
+    for p in parts[:-1]:
+        if p not in cur or not isinstance(cur[p], dict):
+            cur[p] = {}
+        cur = cur[p]
+    cur[parts[-1]] = val
+
+
+def _deep_merge_dicts(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
+    out = dict(a)
+    for k, v in b.items():
+        if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+            out[k] = _deep_merge_dicts(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def _is_inv_r2_db_sweep_key(key: str) -> bool:
+    kk = str(key).strip()
+    return kk in {"inv_r2_db", "noise.inv_r2_db"}
+
+
+def _resolve_r2_sweep_target_key(task_cfg: Dict[str, Any]) -> Optional[str]:
+    noise = task_cfg.get("noise", {})
+    if not isinstance(noise, Mapping):
+        return None
+
+    pre = noise.get("pre_shift", {})
+    if isinstance(pre, Mapping):
+        pre_r = pre.get("R", {})
+        if isinstance(pre_r, Mapping) and ("r2" in pre_r):
+            return "noise.pre_shift.R.r2"
+
+    r_map = noise.get("R", {})
+    if isinstance(r_map, Mapping) and ("r2" in r_map):
+        return "noise.R.r2"
+    # Fallback: allow alias sweep even when task omits explicit noise.R.r2.
+    return "noise.R.r2"
+
+
+def _inv_r2_db_to_r2(value: Any) -> float:
+    db = float(value)
+    return float(np.power(10.0, -db / 10.0))
+
+
+def _scenario_cfg_basis_for_id(task_cfg: Dict[str, Any], scenario_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Canonical scenario basis for dataset-cache scenario_id:
+      deep_copy(task.noise) + scenario overrides.
+    """
+    basis: Dict[str, Any] = copy.deepcopy(task_cfg.get("noise", {}) or {})
+    for k, v in (scenario_cfg or {}).items():
+        if str(k) == "noise" and isinstance(v, dict):
+            basis = _deep_merge_dicts(basis, dict(v))
+        elif k in basis and isinstance(basis[k], dict) and isinstance(v, dict):
+            basis[k] = _deep_merge_dicts(basis[k], v)
+        else:
+            basis[k] = v
+    return basis
+
+
 def expand_scenarios_from_sweep(task_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     Supports flat sweep keys like:
@@ -73,24 +138,30 @@ def expand_scenarios_from_sweep(task_cfg: Dict[str, Any]) -> List[Dict[str, Any]
           start: 0.0
           stop: 30.0
           step: 1.0
+        inv_r2_db:
+          start: -10
+          stop: 40
+          step: 5
+    where inv_r2_db means r2 = 10^(-inv_r2_db/10).
     Returns list of nested dict scenario_cfg.
     """
     scenarios: List[Dict[str, Any]] = []
     grid = expand_sweep_grid(task_cfg.get("sweep"), sort_keys=False)
-
-    def set_deep(d: Dict[str, Any], dotted_key: str, val: Any) -> None:
-        cur = d
-        parts = dotted_key.split(".")
-        for p in parts[:-1]:
-            if p not in cur or not isinstance(cur[p], dict):
-                cur[p] = {}
-            cur = cur[p]
-        cur[parts[-1]] = val
+    r2_target_key = _resolve_r2_sweep_target_key(task_cfg)
 
     for flat in grid:
         nested: Dict[str, Any] = {}
         for k, v in flat.items():
-            set_deep(nested, str(k), v)
+            kk = str(k)
+            if _is_inv_r2_db_sweep_key(kk):
+                if r2_target_key is None:
+                    raise ValueError(
+                        "inv_r2_db sweep requires task noise config with either "
+                        "noise.pre_shift.R.r2 or noise.R.r2"
+                    )
+                _dotted_set(nested, r2_target_key, _inv_r2_db_to_r2(v))
+                continue
+            _dotted_set(nested, kk, v)
         scenarios.append(nested)
     return scenarios
 
@@ -714,7 +785,8 @@ def _maybe_generate_and_cache_one(
     Create (train/val/test).npz if missing; otherwise load.
     Deterministic for (suite_name, task_id, scenario_cfg, seed).
     """
-    scenario_id = canonicalize_scenario_id(task_id, scenario_cfg)
+    scenario_cfg_basis = _scenario_cfg_basis_for_id(task_cfg, scenario_cfg)
+    scenario_id = canonicalize_scenario_id(task_id, scenario_cfg_basis)
     out_dir = _task_cache_dir(cache_root, suite_name, task_id, scenario_id, seed)
     ensure_dir(out_dir)
 

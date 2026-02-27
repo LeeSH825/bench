@@ -18,7 +18,7 @@
     "mse_db": 150.7877459377261
   },
   "timing": {
-    "timing_ms_per_step": 0.02880469727000218,
+    "timing_ms_per_step": 0.02793555758000366,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 32

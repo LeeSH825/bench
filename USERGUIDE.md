@@ -38,13 +38,12 @@
 
   - Present:
   - DECISIONS.md
-  - bench/configs/suite_basic.yaml
-  - bench/configs/suite_shift.yaml
-  - Missing in current repo state (UNVERIFIED):
   - FAIRNESS.md
   - METRICS.md
-  - STEP0_CHECKLIST.md
-  - How to verify missing files: run rg --files | rg 'FAIRNESS\\.md|METRICS\\.md|STEP0_CHECKLIST\\.md|DECISIONS\\.md|suite_basic\\.yaml|suite_shift\\.yaml'.
+  - bench/configs/suite_basic.yaml
+  - bench/configs/suite_shift.yaml
+  - STEP0_CHECKLIST.md is optional and may be absent in some checkouts.
+  - How to verify files: run rg --files | rg 'FAIRNESS\\.md|METRICS\\.md|DECISIONS\\.md|suite_basic\\.yaml|suite_shift\\.yaml'.
   - Verified in: repository file scan from repo root.
 
   ## 2. Mental Model (Concepts)
@@ -187,8 +186,8 @@
 
   - Allowed frozen plans in runner: pretrained:frozen, trained:frozen, untrained:frozen.
   - Enforced rule: if adapt_updates_used != 0, run fails with budget_overflow.
-  - UNVERIFIED: additional fairness constraints (for example BN-stat updates or info-visibility rules) from FAIRNESS.md because file is missing.
-  - How to verify: add FAIRNESS.md and search for Frozen, BN, parameter update.
+  - Additional fairness constraints are specified in FAIRNESS.md.
+  - How to verify: inspect FAIRNESS.md sections on frozen/budgeted constraints and budget semantics.
   - Verified in: bench/runners/run_suite.py, DECISIONS.md.
 
   ### 6.2 Budgeted adaptation track
@@ -213,8 +212,8 @@
   - nll.value currently written as null with policy=NA_if_no_cov
   - shift_recovery when t0 exists
   - Shift recovery implementation currently uses fixed W=20, eps=0.05, failure_policy="cap" in runner.
-  - UNVERIFIED: canonical metric policy in METRICS.md (file missing).
-  - How to verify: provide METRICS.md and compare with bench/metrics/core.py.
+  - Canonical metric policy is documented in METRICS.md.
+  - How to verify: compare METRICS.md definitions with bench/metrics/core.py.
   - Verified in: bench/runners/run_suite.py, bench/metrics/core.py.
 
   ### 7.2 Time-series metrics
@@ -243,7 +242,41 @@
 
   .venv/bin/python -m bench.reports.make_report --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --plan-views --include-ops --budget-curves
 
+  - Input scope policy (reproducibility-critical):
+  - make_report default is --input-scope latest_manifest.
+  - latest_manifest reads runs/<suite>/_manifests/<latest>.json written by run_suite and only aggregates those run_dir entries.
+  - --input-scope all_runs keeps legacy recursive scan behavior over runs/<suite>/...
+  - Practical implication: latest_manifest avoids historical run pollution in overlays and tables.
+
+  - Severity sweep grouping/axes policy:
+  - severity sweep lines are grouped by (model_id, track_id, init_id); trained/untrained are never merged.
+  - default axes are x=severity_key and y=mse_mean.
+  - configurable axes: --severity-x-field and --severity-y-field.
+  - example Fig5a-like swap: --severity-x-field mse_db_mean --severity-y-field severity_key.
+
   - Verified in: bench/reports/make_report.py, bench/reports/aggregate.py, bench/reports/plots.py, bench/reports/README.md.
+
+  ### 7.4 MB-KF Q/R policy and modes
+
+  - MB-KF adapters use mode-specific R handling:
+  - nominal: uses nominal assumed Q/R only (no post-shift R scaling during runtime).
+  - oracle/oracle_shift: applies post-shift R_scale after t >= t0 when shift metadata is available.
+  - Q/R source precedence in adapter is:
+  - system_info (F/H/noise hints) -> meta_json noise/scenario_cfg -> model cfg -> default fallback constants.
+  - Reporting reads severity from scenario/meta fields; this does not force MB-KF runtime mode.
+  - Verified in: bench/models/mb_kf.py.
+
+  ### 7.5 Budget semantics for meta-learning models
+
+  - Benchmark budget semantics for MAML-KNet are explicit:
+  - train_max_updates enforces outer optimizer.step() count only.
+  - train_inner_updates_used is tracked separately and reported, but not budget-capped by train_max_updates.
+  - train_updates_used is retained as a backward-compatible alias of train_outer_updates_used.
+  - Ledger/report fields:
+  - train_outer_updates_used
+  - train_inner_updates_used
+  - train_updates_used (alias)
+  - Verified in: bench/models/maml_knet.py, bench/runners/run_suite.py, bench/reports/aggregate.py.
 
   ## 8. Run Directory Artifacts (What files you get per run)
 
@@ -433,5 +466,3 @@
   - Verify: run python3 -m pip install -e ., then run .venv/bin/python -m bench.runners.run_suite --help.
   - UNVERIFIED runtime AMP behavior behind --precision amp.
   - Verify: inspect bench/runners/run_suite.py for torch.autocast/GradScaler; run same config with --precision fp32 and --precision amp, compare run_plan.json plus logs.
-
-

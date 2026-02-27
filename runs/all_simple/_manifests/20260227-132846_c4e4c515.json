@@ -1,0 +1,30 @@
+{
+  "suite_name": "all_simple",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple.yaml",
+  "created_at_unix": 1772166526.7508345,
+  "run_count": 22,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_ebdd3128c726/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_ebdd3128c726/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_8d508046a042/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_8d508046a042/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_6342acad14a9/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_6342acad14a9/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_c216f8adbad4/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_c216f8adbad4/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_eb80d13a14d9/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_eb80d13a14d9/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_1ecac97e72d8/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_1ecac97e72d8/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_e430cbdcf2b5/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_e430cbdcf2b5/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_2a5fc6ce49c8/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_2a5fc6ce49c8/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_fd75d1016844/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_fd75d1016844/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_06209f282652/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_06209f282652/init_trained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_b24c25d48dde/init_untrained",
+    "/home/xynus/bench/runs/all_simple/A_linear_canonical_v0/maml_knet/frozen/seed_0/scenario_b24c25d48dde/init_trained"
+  ]
+}

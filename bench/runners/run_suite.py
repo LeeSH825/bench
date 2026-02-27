@@ -5,6 +5,7 @@ import copy
 import csv
 import hashlib
 import json
+import math
 import os
 import platform
 import shutil
@@ -12,6 +13,7 @@ import subprocess
 import sys
 import time
 import traceback
+import uuid
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -282,18 +284,51 @@ def _dotted_set(d: Dict[str, Any], dotted_key: str, value: Any) -> None:
     cur[parts[-1]] = _to_jsonable(value)
 
 
+def _is_inv_r2_db_sweep_key(key: str) -> bool:
+    kk = str(key).strip()
+    return kk in {"inv_r2_db", "noise.inv_r2_db"}
+
+
+def _resolve_r2_basis_key(noise_cfg: Dict[str, Any]) -> Optional[str]:
+    pre = noise_cfg.get("pre_shift", {})
+    if isinstance(pre, dict):
+        pre_r = pre.get("R", {})
+        if isinstance(pre_r, dict) and ("r2" in pre_r):
+            return "pre_shift.R.r2"
+
+    r_map = noise_cfg.get("R", {})
+    if isinstance(r_map, dict) and ("r2" in r_map):
+        return "R.r2"
+    # Fallback: allow alias sweep even when task omits explicit noise.R.r2.
+    return "R.r2"
+
+
+def _inv_r2_db_to_r2(value: Any) -> float:
+    db = float(value)
+    return float(np.power(10.0, -db / 10.0))
+
+
 def _build_scenario_cfg_basis(task: Dict[str, Any], scenario_settings: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Step4(bench.tasks.bench_generated)와 동일하게 scenario_cfg를 만든다.
-    - sweep가 없으면 {}
-    - sweep가 있으면 dotted key를 nested dict로 구성한 값만 포함
-    즉, task.noise 전체를 섞지 않는다.
+    Canonical scenario basis:
+      deep_copy(task.noise) + sweep overrides.
+    This basis is used for scenario_id hashing and config snapshots.
     """
-    scenario_cfg = {}
+    scenario_cfg = copy.deepcopy(task.get("noise", {}) or {})
+    r2_basis_key = _resolve_r2_basis_key(scenario_cfg)
     for k, v in (scenario_settings or {}).items():
-        # sweep dotted keys are task-root relative in bench_generated
-        # e.g. "shift.post_shift.R_scale"
-        _dotted_set(scenario_cfg, k, v)
+        kk = str(k)
+        if _is_inv_r2_db_sweep_key(kk):
+            if r2_basis_key is None:
+                raise ValueError(
+                    "config_error: inv_r2_db sweep requires task noise config with "
+                    "either noise.pre_shift.R.r2 or noise.R.r2"
+                )
+            _dotted_set(scenario_cfg, r2_basis_key, _inv_r2_db_to_r2(v))
+            continue
+        if kk.startswith("noise."):
+            kk = kk[len("noise."):]
+        _dotted_set(scenario_cfg, kk, v)
 
     def _normalize(obj: Any) -> Any:
         if isinstance(obj, dict):
@@ -333,6 +368,29 @@ def _match_scenario_settings_from_meta(meta: Dict[str, Any], scenario_settings: 
     cache 스캔 fallback을 위한 meta_json 매칭.
     """
     for k, v in (scenario_settings or {}).items():
+        if _is_inv_r2_db_sweep_key(str(k)):
+            r2_candidates = [
+                _meta_get(meta, ("noise", "pre_shift", "R", "r2")),
+                _meta_get(meta, ("noise", "R", "r2")),
+                _meta_get(meta, ("pre_shift", "R", "r2")),
+                _meta_get(meta, ("R", "r2")),
+            ]
+            found_r2 = None
+            for rr in r2_candidates:
+                if rr is not None:
+                    found_r2 = rr
+                    break
+            if found_r2 is None:
+                return False
+            try:
+                vv = float(v)
+                inv_found = float(-10.0 * math.log10(max(float(found_r2), 1.0e-30)))
+            except Exception:
+                return False
+            if abs(float(vv) - float(inv_found)) > 1e-6:
+                return False
+            continue
+
         parts = tuple(k.split("."))
         candidates = [
             ("noise",) + parts,
@@ -431,6 +489,8 @@ def _coerce_to_btd(x_hat: torch.Tensor, B: int, T: int, D: int) -> torch.Tensor:
 
 def _classify_failure(exc: Exception) -> str:
     msg = f"{type(exc).__name__}: {exc}".lower()
+    if "eval_nonfinite" in msg:
+        return "runtime_error"
     if isinstance(exc, ImportError) or "import" in msg or "module" in msg:
         return "import_failure"
     if "policy_violation" in msg:
@@ -920,6 +980,28 @@ def _normalize_adapt_updates_per_step(raw: Any) -> Dict[int, int]:
     return out
 
 
+def _write_run_manifest(
+    *,
+    bench_root: Path,
+    suite_name: str,
+    suite_yaml: Path,
+    run_dirs: Sequence[str],
+) -> Path:
+    manifests_dir = bench_root / "runs" / str(suite_name) / "_manifests"
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y%m%d-%H%M%S", time.localtime())
+    manifest_path = manifests_dir / f"{ts}_{uuid.uuid4().hex[:8]}.json"
+    payload = {
+        "suite_name": str(suite_name),
+        "suite_yaml": str(suite_yaml),
+        "created_at_unix": float(time.time()),
+        "run_count": int(len(run_dirs)),
+        "run_dirs": [str(Path(p).expanduser().resolve()) for p in run_dirs],
+    }
+    _write_json(manifest_path, payload)
+    return manifest_path
+
+
 def run_one(
     suite: Dict[str, Any],
     task: Dict[str, Any],
@@ -942,18 +1024,19 @@ def run_one(
 
     scenario_cfg_basis = _build_scenario_cfg_basis(task, scenario_settings)
     scenario_id = _canonicalize_scenario_id(task_id, scenario_cfg_basis)
+    cache_scenario_id = str(scenario_id)
 
-    train_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "train")
-    val_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "val")
-    test_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "test")
+    train_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "train")
+    val_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "val")
+    test_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "test")
     resolved_from_cache = False
     if not test_path.exists():
         alt = _resolve_scenario_id_from_cache(cache_root, suite_name, task_id, int(seed), scenario_settings)
         if alt is not None:
-            scenario_id = alt
-            train_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "train")
-            val_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "val")
-            test_path = _npz_path(cache_root, suite_name, task_id, scenario_id, int(seed), "test")
+            cache_scenario_id = str(alt)
+            train_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "train")
+            val_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "val")
+            test_path = _npz_path(cache_root, suite_name, task_id, cache_scenario_id, int(seed), "test")
             resolved_from_cache = True
 
     out_tmpl = suite.get("reporting", {}).get(
@@ -1014,6 +1097,7 @@ def run_one(
             "suite_name": suite_name,
             "task_id": task_id,
             "scenario_id": scenario_id,
+            "cache_scenario_id": cache_scenario_id,
             "seed": int(seed),
             "model_id": model_id,
             "track_id": track_id,
@@ -1052,7 +1136,8 @@ def run_one(
 
     track_cfg = _track_cfg(runner_cfg, track_id)
     budget_cfg = dict(runner_cfg.get("budget", {}) or {})
-    train_max_updates = int(model.get("train_max_updates", budget_cfg.get("train_max_updates", 0)))
+    # Budget policy: train/update caps are managed at suite-level runner config.
+    train_max_updates = int(budget_cfg.get("train_max_updates", 0))
     eval_bs = int(model.get("eval_batch_size", budget_cfg.get("eval_batch_size", 32)))
     train_bs = int(model.get("batch_size", budget_cfg.get("train_batch_size", eval_bs)))
     adaptation_enabled = bool(track_cfg.get("adaptation_enabled", False))
@@ -1091,6 +1176,8 @@ def run_one(
         ledger_path,
         {
             "train_updates_used": 0,
+            "train_outer_updates_used": 0,
+            "train_inner_updates_used": 0,
             "adapt_updates_used": 0,
             "train_max_updates": int(train_max_updates),
             "train_skipped": False,
@@ -1109,6 +1196,7 @@ def run_one(
         "scenario_settings": scenario_settings,
         "scenario_cfg_basis": scenario_cfg_basis,
         "scenario_id": scenario_id,
+        "cache_scenario_id": cache_scenario_id,
         "scenario_id_resolved_from_cache": bool(resolved_from_cache),
         "seed": int(seed),
         "track_id": track_id,
@@ -1321,6 +1409,8 @@ def run_one(
                         ledger_path,
                         {
                             "train_updates_used": 0,
+                            "train_outer_updates_used": 0,
+                            "train_inner_updates_used": 0,
                             "train_max_updates": int(train_max_updates),
                             "train_skipped": True,
                             "cache_enabled": True,
@@ -1466,7 +1556,11 @@ def run_one(
             x_hat_full = _coerce_full_to_btd(x_hat_full, N=N, T=T, D=Dx)
 
         x_hat_np = x_hat_full.detach().cpu().numpy()
+        if not np.isfinite(x_hat_np).all():
+            raise FloatingPointError("eval_nonfinite: x_hat contains non-finite values.")
         mse_t_mean = mse_per_step(x_hat_np, x_gt)
+        if not np.isfinite(mse_t_mean).all():
+            raise FloatingPointError("eval_nonfinite: mse_t contains non-finite values.")
         mse_val = float(np.mean(mse_t_mean))
         rmse_val = float(np.sqrt(max(mse_val, 0.0)))
         mse_db_val = float(10.0 * np.log10(max(mse_val, 1e-30)))
@@ -1523,6 +1617,10 @@ def run_one(
         if not ledger_obj:
             ledger_obj = {
                 "train_updates_used": int(getattr(adapter, "train_updates_used", 0)),
+                "train_outer_updates_used": int(
+                    getattr(adapter, "train_outer_updates_used", getattr(adapter, "train_updates_used", 0))
+                ),
+                "train_inner_updates_used": int(getattr(adapter, "train_inner_updates_used", 0)),
                 "adapt_updates_used": int(getattr(adapter, "adapt_updates_used", 0)),
                 "train_max_updates": int(train_max_updates),
                 "track_id": str(track_id),
@@ -1530,9 +1628,20 @@ def run_one(
             }
             _write_json(ledger_path, ledger_obj)
 
-        train_updates_used = int(ledger_obj.get("train_updates_used", getattr(adapter, "train_updates_used", 0)))
+        train_outer_updates_used = int(
+            ledger_obj.get(
+                "train_outer_updates_used",
+                ledger_obj.get("train_updates_used", getattr(adapter, "train_updates_used", 0)),
+            )
+        )
+        train_inner_updates_used = int(
+            ledger_obj.get("train_inner_updates_used", getattr(adapter, "train_inner_updates_used", 0))
+        )
         train_skipped_flag = bool(ledger_obj.get("train_skipped", train_skipped))
-        ledger_obj["train_updates_used"] = int(train_updates_used)
+        ledger_obj["train_outer_updates_used"] = int(train_outer_updates_used)
+        ledger_obj["train_inner_updates_used"] = int(train_inner_updates_used)
+        # Backward-compatible alias: keep train_updates_used as outer updates.
+        ledger_obj["train_updates_used"] = int(train_outer_updates_used)
         ledger_obj["train_max_updates"] = int(train_max_updates)
         ledger_obj["train_skipped"] = bool(train_skipped_flag)
         ledger_obj["cache_enabled"] = bool(cache_enabled)
@@ -1540,14 +1649,14 @@ def run_one(
         ledger_obj["cache_key"] = (str(cache_key) if cache_key is not None else None)
 
         if str(init_id).lower() == "trained":
-            if train_updates_used > int(train_max_updates):
+            if train_outer_updates_used > int(train_max_updates):
                 raise RuntimeError(
-                    "budget_overflow: train_updates_used exceeded train_max_updates "
-                    f"({train_updates_used} > {train_max_updates})"
+                    "budget_overflow: train_outer_updates_used exceeded train_max_updates "
+                    f"({train_outer_updates_used} > {train_max_updates})"
                 )
-            if (not train_skipped_flag) and train_updates_used <= 0:
+            if (not train_skipped_flag) and train_outer_updates_used <= 0:
                 raise RuntimeError(
-                    "policy_violation: trained plan requires positive train_updates_used unless train_skipped=true."
+                    "policy_violation: trained plan requires positive train_outer_updates_used unless train_skipped=true."
                 )
 
         adapt_updates_used = int(ledger_obj.get("adapt_updates_used", getattr(adapter, "adapt_updates_used", 0)))
@@ -1592,6 +1701,7 @@ def run_one(
             "suite_name": suite_name,
             "task_id": task_id,
             "scenario_id": scenario_id,
+            "cache_scenario_id": cache_scenario_id,
             "scenario_id_resolved_from_cache": bool(resolved_from_cache),
             "seed": int(seed),
             "model_id": model_id,
@@ -1619,6 +1729,9 @@ def run_one(
             "run_dir": str(run_dir),
         }
         _write_json(run_dir / "metrics.json", metrics_obj)
+        stale_failure = run_dir / "failure.json"
+        if stale_failure.exists():
+            stale_failure.unlink()
 
         log_out(f"[OK] wrote metrics to {run_dir}")
 
@@ -1649,6 +1762,7 @@ def run_one(
             "suite_name": suite_name,
             "task_id": task_id,
             "scenario_id": scenario_id,
+            "cache_scenario_id": cache_scenario_id,
             "scenario_id_resolved_from_cache": bool(resolved_from_cache),
             "seed": int(seed),
             "model_id": model_id,
@@ -1713,6 +1827,7 @@ def main() -> None:
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
     suite = load_suite_yaml(suite_path)
+    suite_name = str((suite.get("suite", {}) or {}).get("name", "unknown"))
 
     runner_cfg = suite.get("runner", {}) or {}
     enabled_policy = runner_cfg.get("enabled_policy", {}) or {}
@@ -1756,6 +1871,7 @@ def main() -> None:
         total += len(scenarios) * len(seeds) * len(models) * len(plan_specs)
 
     print(f"[run_suite] plan: ~{total} runs (after enabled filtering)")
+    produced_run_dirs: List[str] = []
 
     for task in tasks:
         if skip_if_disabled and not _enabled(task, task_default):
@@ -1784,8 +1900,18 @@ def main() -> None:
                             plan_isolation=plan_isolation,
                         )
                         _append_summary_row(summary_csv, res, summary_fields)
+                        rd = res.get("run_dir")
+                        if isinstance(rd, str) and rd.strip():
+                            produced_run_dirs.append(rd)
 
+    manifest_path = _write_run_manifest(
+        bench_root=_bench_root(),
+        suite_name=suite_name,
+        suite_yaml=suite_path,
+        run_dirs=produced_run_dirs,
+    )
     print(f"[run_suite] done. summary_csv={summary_csv}")
+    print(f"[run_suite] manifest={manifest_path}")
 
 
 if __name__ == "__main__":

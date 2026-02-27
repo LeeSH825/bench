@@ -1,0 +1,150 @@
+{
+  "status": "ok",
+  "suite_name": "all_simple_tiny",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "77512cf2cc1f",
+  "cache_scenario_id": "77512cf2cc1f",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "split_knet",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 5,
+    "y_dim": 5,
+    "T": 60
+  },
+  "accuracy": {
+    "mse": 669415608141548.5,
+    "rmse": 25873067.234897923,
+    "mse_db": 148.2569583418059
+  },
+  "timing": {
+    "timing_ms_per_step": 2.378200530554548,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 16
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": {
+    "t0": 30,
+    "W": 20,
+    "eps": 0.05,
+    "E_pre": 17214231.62899751,
+    "recovery_k": 30,
+    "recovered": false,
+    "failure_policy": "cap"
+  },
+  "t0_used": 30,
+  "scenario_settings": {
+    "inv_r2_db": 20
+  },
+  "scenario_cfg_basis": {
+    "pre_shift": {
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 0.001
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 0.01
+      },
+      "obs_distribution": {
+        "name": "gaussian"
+      }
+    },
+    "shift": {
+      "t0": 30,
+      "post_shift": {
+        "obs_distribution": {
+          "name": "gaussian"
+        },
+        "R_scale": 3.0
+      }
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_stepwise_colvec",
+    "selected_class": "GSSFiltering.filtering.Split_KalmanNet_Filter"
+  },
+  "adapter_meta": {
+    "adapter_id": "split_knet",
+    "adapter_version": "s8_gpu_device_v1",
+    "runtime_device": "cuda",
+    "integration_mode": "import_model_only",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "stepwise_colvec",
+    "class_path": "GSSFiltering.filtering.Split_KalmanNet_Filter",
+    "entrypoints": {
+      "filter": "GSSFiltering/filtering.py::Split_KalmanNet_Filter",
+      "network": "GSSFiltering/dnn.py::DNN_SKalmanNet_GSS",
+      "script_train_ref": "(SyntheticNL) main.py",
+      "script_eval_ref": "GSSFiltering/tester.py::Tester"
+    },
+    "assumptions": {
+      "A_input_layout": "repo filtering is step-wise [Dy,1] per time step; adapter converts BTD->stepwise",
+      "B_cli_bias": "repo mains are config.ini/script-centric; bench uses import-mode class reuse",
+      "C_adapt_support": "no principled test-time adaptation exposed for FAIRNESS budgeted track in this adapter"
+    },
+    "how_to_verify": {
+      "A_input_layout": "third_party/Split_KalmanNet/GSSFiltering/filtering.py::Split_KalmanNet_Filter.filtering",
+      "B_cli_bias": "third_party/Split_KalmanNet/(SyntheticNL) main.py and config.ini",
+      "C_adapt_support": "search in third_party/Split_KalmanNet for online update/adapt routines beyond offline Trainer"
+    },
+    "selected_layout": "bench_BTD_to_repo_stepwise_colvec",
+    "selected_class": "GSSFiltering.filtering.Split_KalmanNet_Filter"
+  },
+  "run_plan": {
+    "plan_id": "untrained__frozen",
+    "init_id": "untrained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": false,
+    "suite_name": "all_simple_tiny",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "77512cf2cc1f",
+    "seed": 0,
+    "model_id": "split_knet",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 8,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": 30
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": false,
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "train_outer_updates_used": 0,
+    "train_inner_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 8,
+    "train_skipped": false,
+    "cache_enabled": false,
+    "cache_hit": false,
+    "cache_key": null,
+    "track_id": "frozen",
+    "init_id": "untrained"
+  },
+  "run_dir": "/home/xynus/bench/runs/all_simple_tiny/C_shift_Rscale_v0/split_knet/frozen/seed_0/scenario_77512cf2cc1f/init_untrained"
+}

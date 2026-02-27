@@ -1,0 +1,11 @@
+FloatingPointError: train_nan: non-finite training loss at update=0
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 1455, in run_one
+    ckpt_path = _execute_train_once()
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 1347, in _execute_train_once
+    train_res = _try_call_train(
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 910, in _try_call_train
+    return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore
+  File "/home/xynus/bench/bench/models/split_knet.py", line 602, in train
+    raise FloatingPointError(f"train_nan: non-finite training loss at update={updates_used}")
+FloatingPointError: train_nan: non-finite training loss at update=0

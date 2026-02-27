@@ -290,6 +290,8 @@ class MAMLKNetAdapter(ModelAdapter):
         self._T_setup: Optional[int] = None
 
         self.train_updates_used: int = 0
+        self.train_outer_updates_used: int = 0
+        self.train_inner_updates_used: int = 0
         self.adapt_updates_used: int = 0
 
         self.last_layout: Optional[str] = None
@@ -308,6 +310,8 @@ class MAMLKNetAdapter(ModelAdapter):
         repo_root_raw, self.entrypoints = _resolve_repo_spec(cfg)
         self.repo_root = _normalize_repo_root(repo_root_raw)
         self.train_updates_used = 0
+        self.train_outer_updates_used = 0
+        self.train_inner_updates_used = 0
         self.adapt_updates_used = 0
 
         requested_device = (
@@ -432,7 +436,10 @@ class MAMLKNetAdapter(ModelAdapter):
         if self._filter is None:
             raise RuntimeError("setup() must be called before checkpoint loading.")
 
-        state = torch.load(str(ckpt_path), map_location="cpu")
+        try:
+            state = torch.load(str(ckpt_path), map_location="cpu", weights_only=True)
+        except TypeError:
+            state = torch.load(str(ckpt_path), map_location="cpu")
         if isinstance(state, dict) and "state_dict" in state and isinstance(state["state_dict"], dict):
             state = state["state_dict"]
 
@@ -658,6 +665,8 @@ class MAMLKNetAdapter(ModelAdapter):
                 "best_step": int(best_step),
                 "best_val_mse": float(best_val),
                 "train_updates_used": int(updates_used),
+                "train_outer_updates_used": int(updates_used),
+                "train_inner_updates_used": int(inner_steps_total),
                 "inner_steps_total": int(inner_steps_total),
                 "meta_tasks_seen": int(meta_tasks_seen),
                 "class_path": "filter.Filter + state_dict_learner.Learner",
@@ -673,6 +682,8 @@ class MAMLKNetAdapter(ModelAdapter):
             "best_val_mse": float(best_val),
             "last_train_loss": float(last_train_loss) if last_train_loss is not None else None,
             "updates_used": int(updates_used),
+            "train_outer_updates_used": int(updates_used),
+            "train_inner_updates_used": int(inner_steps_total),
             "max_updates": int(max_updates),
             "val_history": val_history[-20:],
             "meta_train": {
@@ -689,13 +700,15 @@ class MAMLKNetAdapter(ModelAdapter):
         _write_json(train_state_path, train_state)
         self._train_state_path = train_state_path
 
+        self.train_outer_updates_used = int(updates_used)
+        self.train_inner_updates_used = int(inner_steps_total)
         self.train_updates_used = int(updates_used)
         self.adapt_updates_used = 0
         self._update_ledger(
-            train_updates_used=int(updates_used),
+            train_outer_updates_used=int(updates_used),
+            train_inner_updates_used=int(inner_steps_total),
             adapt_updates_used=0,
             train_max_updates=int(max_updates),
-            inner_steps_total=int(inner_steps_total),
             meta_tasks_seen=int(meta_tasks_seen),
         )
 
@@ -807,7 +820,8 @@ class MAMLKNetAdapter(ModelAdapter):
 
         self.adapt_updates_used = 0
         self._update_ledger(
-            train_updates_used=int(self.train_updates_used),
+            train_outer_updates_used=int(self.train_outer_updates_used),
+            train_inner_updates_used=int(self.train_inner_updates_used),
             adapt_updates_used=0,
         )
 
@@ -973,7 +987,8 @@ class MAMLKNetAdapter(ModelAdapter):
         # budgeted per-timestep adaptation is not mapped yet; keep explicit no-op.
         self.adapt_updates_used = 0
         self._update_ledger(
-            train_updates_used=int(self.train_updates_used),
+            train_outer_updates_used=int(self.train_outer_updates_used),
+            train_inner_updates_used=int(self.train_inner_updates_used),
             adapt_updates_used=0,
             supports_budgeted=False,
         )
@@ -1012,6 +1027,7 @@ class MAMLKNetAdapter(ModelAdapter):
                 "inner_lr": float(self._cfg.get("inner_lr", self._cfg.get("update_lr", 5e-2))),
                 "outer_lr": float(self._cfg.get("outer_lr", self._cfg.get("meta_lr", self._cfg.get("lr", 1e-3)))),
                 "first_order": True,
+                "budget_semantics": "train_max_updates counts outer optimizer.step() only",
             },
             "entrypoints": {
                 "filter": "filter.py::Filter",
@@ -1046,6 +1062,8 @@ class MAMLKNetAdapter(ModelAdapter):
             self._ledger_path,
             {
                 "train_updates_used": 0,
+                "train_outer_updates_used": 0,
+                "train_inner_updates_used": 0,
                 "adapt_updates_used": 0,
                 "track_id": self._run_ctx.get("track_id"),
                 "init_id": self._run_ctx.get("init_id"),
@@ -1056,10 +1074,10 @@ class MAMLKNetAdapter(ModelAdapter):
     def _update_ledger(
         self,
         *,
-        train_updates_used: int,
+        train_outer_updates_used: int,
+        train_inner_updates_used: int,
         adapt_updates_used: int,
         train_max_updates: Optional[int] = None,
-        inner_steps_total: Optional[int] = None,
         meta_tasks_seen: Optional[int] = None,
         supports_budgeted: Optional[bool] = None,
     ) -> None:
@@ -1074,12 +1092,13 @@ class MAMLKNetAdapter(ModelAdapter):
             except Exception:
                 current = {}
 
-        current["train_updates_used"] = int(train_updates_used)
+        current["train_outer_updates_used"] = int(train_outer_updates_used)
+        current["train_inner_updates_used"] = int(train_inner_updates_used)
+        # Backward-compatible alias for legacy consumers.
+        current["train_updates_used"] = int(train_outer_updates_used)
         current["adapt_updates_used"] = int(adapt_updates_used)
         if train_max_updates is not None:
             current["train_max_updates"] = int(train_max_updates)
-        if inner_steps_total is not None:
-            current["inner_steps_total"] = int(inner_steps_total)
         if meta_tasks_seen is not None:
             current["meta_tasks_seen"] = int(meta_tasks_seen)
         if supports_budgeted is not None:
