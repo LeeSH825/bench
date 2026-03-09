@@ -1,0 +1,58 @@
+{
+  "status": "missing_data",
+  "failure_type": "io_error",
+  "phase": "data_loading",
+  "failure_stage": "data_loading",
+  "message": "missing_data: expected test split at /home/xynus/bench/bench_data_cache/all_simple_tiny/C_shift_Rscale_v0/scenario_f6d0afa85860/seed_0/test.npz",
+  "context": {
+    "suite_name": "all_simple_tiny",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "f6d0afa85860",
+    "cache_scenario_id": "f6d0afa85860",
+    "seed": 0,
+    "model_id": "adaptive_knet",
+    "track_id": "budgeted",
+    "init_id": "trained",
+    "cache_root": "/home/xynus/bench/bench_data_cache",
+    "scenario_settings": {
+      "inv_r2_db": -10
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 10.0
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 30,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 3.0
+        }
+      }
+    },
+    "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+    "resolved_from_cache": false
+  },
+  "missing_path": "/home/xynus/bench/bench_data_cache/all_simple_tiny/C_shift_Rscale_v0/scenario_f6d0afa85860/seed_0/test.npz",
+  "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed."
+}
+RuntimeError: budget_overflow: adapt max_updates=8 exhausted before t=38 (allowed_after_t0_only=True, t0=30)
+Traceback (most recent call last):
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 1772, in run_one
+    _try_call_adapt(
+  File "/home/xynus/bench/bench/runners/run_suite.py", line 1108, in _try_call_adapt
+    return adapter.adapt(  # type: ignore
+  File "/home/xynus/bench/bench/models/adaptive_knet.py", line 832, in adapt
+    raise RuntimeError(
+RuntimeError: budget_overflow: adapt max_updates=8 exhausted before t=38 (allowed_after_t0_only=True, t0=30)

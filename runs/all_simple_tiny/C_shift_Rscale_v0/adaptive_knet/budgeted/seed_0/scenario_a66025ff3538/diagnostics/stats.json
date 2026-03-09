@@ -1,0 +1,72 @@
+{
+  "reason": "failure:train_nan",
+  "suite_name": "all_simple_tiny",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "a66025ff3538",
+  "model_id": "adaptive_knet",
+  "track_id": "budgeted",
+  "init_id": "trained",
+  "seed": 0,
+  "thresholds_hit": [
+    "train_nan"
+  ],
+  "shift": {
+    "t0": 30,
+    "pre_shift_r2": 0.001,
+    "post_shift_R_scale": 3.0,
+    "noise_schedule_keys": [
+      "SoW_hat_t",
+      "SoW_t",
+      "enabled",
+      "kind",
+      "params",
+      "q2_t",
+      "r2_t",
+      "sow",
+      "sow_hat",
+      "storage"
+    ],
+    "noise_schedule_kind": "step_change"
+  },
+  "metrics": {
+    "mse": null,
+    "mse_db": null
+  },
+  "x_stats": {
+    "shape": [
+      24,
+      60,
+      5
+    ],
+    "dtype": "float32",
+    "size": 7200,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -200.56753540039062,
+    "max": 136.9951171875,
+    "mean": -1.728633999824524,
+    "std": 22.896188735961914,
+    "norm": 1948.3353271484375
+  },
+  "y_stats": {
+    "shape": [
+      24,
+      60,
+      5
+    ],
+    "dtype": "float32",
+    "size": 7200,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -204.2249298095703,
+    "max": 139.16546630859375,
+    "mean": -3.485718250274658,
+    "std": 32.68958282470703,
+    "norm": 2789.52783203125
+  },
+  "x_hat_stats": null,
+  "adapter_meta": {},
+  "adapter_runtime_stats": {}
+}

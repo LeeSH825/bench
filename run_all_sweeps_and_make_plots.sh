@@ -12,9 +12,12 @@ SEEDS=${SEEDS:-"0"}
 RUNS_ROOT=${RUNS_ROOT:-"runs"}
 OUT_DIR=${OUT_DIR:-"reports"}
 CACHE_ROOT=${CACHE_ROOT:-"/tmp/bench_data_cache"}
-SUITES=${SUITES:-"bench/configs/suite_all_simple_tiny.yaml"}
+SUITES=${SUITES:-"bench/configs/suite_all_simple_paperlike.yaml"}
 PY=${PY:-".venv/bin/python"}
 NCLT_ROOT=${NCLT_ROOT:-""}
+LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+LOG_TO_FILE=${LOG_TO_FILE:-1}
+DEBUG_EVERY=${DEBUG_EVERY:-1}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -179,6 +182,9 @@ echo "[INFO] RUNS_ROOT=$RUNS_ROOT_ABS"
 echo "[INFO] OUT_DIR=$OUT_DIR_ABS"
 echo "[INFO] CACHE_ROOT=$CACHE_ROOT_ABS"
 echo "[INFO] SUITES=${SUITE_ARR[*]}"
+echo "[INFO] LOG_LEVEL=$LOG_LEVEL"
+echo "[INFO] LOG_TO_FILE=$LOG_TO_FILE"
+echo "[INFO] DEBUG_EVERY=$DEBUG_EVERY"
 if [[ "$NCLT_DATA_READY" -eq 1 ]]; then
   echo "[INFO] NCLT_ROOT=$NCLT_ROOT_ABS"
 else
@@ -368,7 +374,11 @@ PY
         --suite-yaml "$SUITE"
         --task "$TASK"
         --seed "$SEED"
+        --log-level "$LOG_LEVEL"
       )
+      if [[ "$LOG_TO_FILE" == "1" ]]; then
+        DATA_CMD+=(--log-to-file)
+      fi
       if [[ "$SMOKE_HAS_SWEEP_ALL" -eq 1 ]]; then
         DATA_CMD+=(--sweep-all)
       else
@@ -422,7 +432,12 @@ PY
           --seeds "$SEED"
           --plans "$PLANS_CSV"
           --device "$DEVICE"
+          --log-level "$LOG_LEVEL"
+          --debug-every "$DEBUG_EVERY"
         )
+        if [[ "$LOG_TO_FILE" == "1" ]]; then
+          RUN_CMD+=(--log-to-file)
+        fi
         if [[ "$RUN_SUITE_HAS_RUNS_ROOT" -eq 1 ]]; then
           RUN_CMD+=(--runs-root "$RUNS_ROOT_ABS")
         fi
@@ -539,7 +554,11 @@ PY
         --out-dir "$OUT_DIR_ABS"
         --input-scope latest_manifest
         --fig5a-plot
+        --log-level "$LOG_LEVEL"
       )
+      if [[ "$LOG_TO_FILE" == "1" ]]; then
+        REPORT_CMD+=(--log-to-file)
+      fi
       "${REPORT_CMD[@]}"
 
       echo "[STEP] custom plot x=inv_r2_db y=mse_db_mean"

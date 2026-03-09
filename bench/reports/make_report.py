@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import math
 import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from bench.utils.logging import configure_logging, get_logger
 
 from .aggregate import (
     RunRecord,
@@ -21,6 +24,9 @@ from .aggregate import (
     write_rows_csv,
     write_summary_csv,
 )
+
+
+logger = get_logger(__name__)
 from .plots import (
     plot_fig5a_mse_vs_inv_r2,
     plot_budget_curve,
@@ -326,11 +332,26 @@ def main() -> None:
         default=None,
         help="optional fixed stamp for organized folders (e.g., 20260223-091500).",
     )
+    ap.add_argument(
+        "--log-level",
+        type=str,
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        default="INFO",
+    )
+    ap.add_argument("--log-to-file", action="store_true")
+    ap.add_argument("--log-file", type=str, default=None)
     args = ap.parse_args()
+    configure_logging(
+        str(args.log_level),
+        run_dir=None,
+        log_to_file=bool(args.log_file or args.log_to_file),
+        log_file=(Path(str(args.log_file)) if args.log_file else None),
+    )
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
     suite = load_yaml(suite_path)
     suite_name = _suite_name(suite)
+    logger.info("make_report suite=%s input_scope=%s", suite_name, args.input_scope)
 
     bench_root = _bench_root()
     runs_root = Path(args.runs_root).expanduser().resolve() if args.runs_root else (bench_root / "runs")
@@ -363,6 +384,24 @@ def main() -> None:
     expected = expected_plan_from_suite(suite)
     records = merge_records_with_expected(scanned, expected)
     agg_rows = aggregate_by_seed(records)
+    suspicious = [
+        r for r in records
+        if r.status == "ok"
+        and r.mse_db is not None
+        and ((not math.isfinite(float(r.mse_db))) or float(r.mse_db) > 100.0)
+    ]
+    for rec in suspicious[:10]:
+        logger.warning(
+            "Suspicious mse_db in report model=%s task=%s scenario=%s seed=%s init=%s track=%s mse_db=%s run_dir=%s",
+            rec.model_id,
+            rec.task_id,
+            rec.scenario_id,
+            rec.seed,
+            rec.init_id,
+            rec.track_id,
+            rec.mse_db,
+            rec.run_dir,
+        )
 
     if args.dry_run:
         print("[dry-run] suite:", suite_name)

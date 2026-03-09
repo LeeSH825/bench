@@ -1,0 +1,112 @@
+{
+  "reason": "debug",
+  "suite_name": "all_simple_paperlike",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "ebdd3128c726",
+  "model_id": "kalmannet_tsp",
+  "track_id": "frozen",
+  "init_id": "untrained",
+  "seed": 0,
+  "thresholds_hit": [],
+  "shift": {
+    "noise_schedule_keys": [
+      "SoW_hat_t",
+      "SoW_t",
+      "enabled",
+      "kind",
+      "params",
+      "q2_t",
+      "r2_t",
+      "sow",
+      "sow_hat",
+      "storage"
+    ],
+    "noise_schedule_kind": "step_change"
+  },
+  "metrics": {
+    "mse": 301954.8511217426,
+    "mse_db": 54.79942011253427
+  },
+  "x_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -615.8641967773438,
+    "max": 772.1596069335938,
+    "mean": -1.9762529134750366,
+    "std": 53.54887390136719,
+    "norm": 16945.138671875
+  },
+  "y_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -620.186279296875,
+    "max": 778.4631958007812,
+    "mean": -3.946939468383789,
+    "std": 76.30451965332031,
+    "norm": 24161.8515625
+  },
+  "x_hat_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -9012.736328125,
+    "max": 8954.9697265625,
+    "mean": -10.509008407592773,
+    "std": 552.4700317382812,
+    "norm": 174737.75
+  },
+  "adapter_meta": {
+    "adapter_id": "kalmannet_tsp",
+    "adapter_version": "s2_route_b_v1",
+    "runtime_device": "cuda",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BDT_stepwise",
+    "entrypoints": {
+      "config": "Simulations/config.py::general_settings",
+      "system_model": "Simulations/Linear_sysmdl.py::SystemModel",
+      "model": "KNet/KalmanNet_nn.py::KalmanNetNN",
+      "pipeline_candidate": "Pipelines/Pipeline_EKF.py::Pipeline_EKF"
+    }
+  },
+  "adapter_runtime_stats": {
+    "adapter_runtime.x_norm_t": {
+      "shape": [
+        100
+      ],
+      "dtype": "float32",
+      "size": 100,
+      "finite": true,
+      "nan_count": 0,
+      "inf_count": 0,
+      "min": 2.7063026428222656,
+      "max": 10930.6630859375,
+      "mean": 1435.2694091796875,
+      "std": 2411.101318359375,
+      "norm": 28059.59375
+    }
+  }
+}

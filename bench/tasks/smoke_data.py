@@ -7,6 +7,8 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 import yaml
 
+from bench.utils.logging import configure_logging, get_logger
+
 from .bench_generated import (
     default_cache_root,
     make_dataloaders_v0,
@@ -14,6 +16,9 @@ from .bench_generated import (
     prepare_bench_generated_v0,
     LoaderCfgV0,
 )
+
+
+logger = get_logger(__name__)
 from .data_format import load_npz_split_v0
 from .generator.datasets.common import DatasetMissingError
 from .generators.linear import (
@@ -63,10 +68,25 @@ def main() -> int:
     p.add_argument("--pin-memory", action="store_true")
     p.add_argument("--no-shuffle", action="store_true")
     p.add_argument("--sweep-all", action="store_true", help="Generate all scenarios in task sweep grid")
+    p.add_argument(
+        "--log-level",
+        type=str,
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        default="INFO",
+    )
+    p.add_argument("--log-to-file", action="store_true")
+    p.add_argument("--log-file", type=str, default=None)
     args = p.parse_args()
+    configure_logging(
+        str(args.log_level),
+        run_dir=None,
+        log_to_file=bool(args.log_file or args.log_to_file),
+        log_file=(Path(str(args.log_file)) if args.log_file else None),
+    )
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
     suite = _load_yaml(suite_path)
+    logger.info("smoke_data suite_yaml=%s task=%s seed=%s", suite_path, args.task, args.seed)
 
     suite_name = str(suite["suite"]["name"])
     task_cfg = _find_task_cfg(suite, args.task)

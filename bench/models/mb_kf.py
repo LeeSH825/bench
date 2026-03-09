@@ -8,9 +8,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
+from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
+from bench.utils.logging import get_logger
 
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 try:
@@ -257,6 +258,8 @@ class ModelBasedKFAdapter(ModelAdapter):
 
         self.last_layout: Optional[str] = None
         self.last_class: Optional[str] = None
+        self._debug_every: int = 0
+        self._runtime_diag: Dict[str, Any] = {}
 
     def setup(
         self,
@@ -271,6 +274,8 @@ class ModelBasedKFAdapter(ModelAdapter):
         self._run_ctx = dict(run_ctx)
         self.train_updates_used = 0
         self.adapt_updates_used = 0
+        self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
+        self._runtime_diag = {}
 
         mode = str(cfg.get("baseline_mode", "")).strip().lower()
         if not mode:
@@ -354,6 +359,16 @@ class ModelBasedKFAdapter(ModelAdapter):
 
         self.last_layout = "bench_BTD_to_repo_BTD"
         self.last_class = "bench.models.mb_kf:ModelBasedKFAdapter"
+        logger.info(
+            "setup mode=%s device=%s x_dim=%s y_dim=%s t0_shift=%s R_scale=%s layout=%s",
+            self._mode,
+            self.device,
+            self._x_dim,
+            self._y_dim,
+            self._t0_shift,
+            self._R_scale,
+            self.last_layout,
+        )
 
     def train(
         self,
@@ -421,6 +436,7 @@ class ModelBasedKFAdapter(ModelAdapter):
         bsz, _t, dy = y.shape
         if int(dy) != self._y_dim:
             raise ValueError(f"shape_mismatch: got y_dim={dy}, expected {self._y_dim}")
+        logger.debug("predict input shape=%s mode=%s layout=%s", tuple(y.shape), self._mode, self.last_layout)
 
         ctx = dict(context or {})
         if state0 is None:
@@ -435,6 +451,13 @@ class ModelBasedKFAdapter(ModelAdapter):
 
         want_cov = bool(return_cov and self._outputs_covariance)
         x_hat, cov = self._rollout_kf(y_btd=y, x0_batch=x0_batch, return_cov=want_cov)
+        validate_exact_layout(
+            x_hat,
+            expected=(int(bsz), int(_t), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        logger.debug("predict output %s", format_array_stats("x_hat", x_hat))
         if return_cov:
             return x_hat, cov
         return x_hat
@@ -450,8 +473,9 @@ class ModelBasedKFAdapter(ModelAdapter):
 
         preds: List[torch.Tensor] = []
         covs: List[torch.Tensor] = []
+        total_n = 0
         with torch.no_grad():
-            for batch in test_dl:
+            for bi, batch in enumerate(test_dl):
                 _x_raw, y_raw = _extract_batch_xy(batch)
                 y = _to_tensor(y_raw, device=self.device, dtype=self.dtype)
                 pred = self.predict(y, context=None, return_cov=self._outputs_covariance)
@@ -463,6 +487,15 @@ class ModelBasedKFAdapter(ModelAdapter):
                     cov_b = None
                 if not isinstance(x_hat_b, torch.Tensor):
                     raise TypeError(f"runtime_error: predict() must return Tensor, got {type(x_hat_b)}")
+                validate_exact_layout(
+                    x_hat_b,
+                    expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+                    axis_names=("B", "T", "D"),
+                    label="x_hat",
+                )
+                total_n += int(y.shape[0])
+                if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(x_hat_b)):
+                    logger.debug("eval batch=%s %s", bi, format_array_stats("x_hat", x_hat_b))
                 preds.append(x_hat_b.detach().cpu())
                 if isinstance(cov_b, torch.Tensor):
                     covs.append(cov_b.detach().cpu())
@@ -470,6 +503,12 @@ class ModelBasedKFAdapter(ModelAdapter):
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
         x_hat = torch.cat(preds, dim=0).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(total_n), int(x_hat.shape[1]), int(self._x_dim)),
+            axis_names=("N", "T", "D"),
+            label="x_hat",
+        )
 
         cov_cat = None
         if covs:
@@ -516,6 +555,9 @@ class ModelBasedKFAdapter(ModelAdapter):
             "adapt_updates_used": 0,
             "adapt_updates_per_step": {},
         }
+
+    def get_runtime_diagnostics(self) -> Dict[str, Any]:
+        return dict(self._runtime_diag)
 
     def save(self, ckpt_dir: Union[str, Path]) -> Dict[str, Any]:
         if self._F is None or self._H is None or self._Q is None or self._R_nominal is None or self._R_shift is None:
@@ -650,6 +692,8 @@ class ModelBasedKFAdapter(ModelAdapter):
         x_post = x0_batch.clone()
         x_hist = torch.empty((B, T, self._x_dim), device=self.device, dtype=self.dtype)
         cov_hist = torch.empty((B, T, self._x_dim, self._x_dim), device=self.device, dtype=self.dtype) if return_cov else None
+        innov_norm_t: List[float] = []
+        k_norm_t: List[float] = []
 
         for t in range(T):
             R_t = self._R_nominal
@@ -673,6 +717,8 @@ class ModelBasedKFAdapter(ModelAdapter):
             except RuntimeError:
                 S_inv = torch.linalg.pinv(S)
                 K = torch.bmm(PHt, S_inv)
+            innov_norm_t.append(float(torch.linalg.norm(innov).detach().cpu().item()))
+            k_norm_t.append(float(torch.linalg.norm(K).detach().cpu().item()))
 
             x_post = x_pred + torch.bmm(K, innov)
             I_KH = I_x - torch.bmm(K, H_b)
@@ -685,7 +731,25 @@ class ModelBasedKFAdapter(ModelAdapter):
             x_hist[:, t, :] = x_post[:, :, 0]
             if cov_hist is not None:
                 cov_hist[:, t, :, :] = P_post
+            if self._debug_every > 0 and ((t % self._debug_every) == 0 or has_nonfinite(x_post)):
+                logger.debug(
+                    "kf t=%s %s innov_norm=%s K_norm=%s",
+                    t,
+                    format_array_stats("x_post", x_post),
+                    innov_norm_t[-1],
+                    k_norm_t[-1],
+                )
 
+        self._runtime_diag = {
+            "innovation_norm_t": np.asarray(innov_norm_t, dtype=np.float32),
+            "k_norm_t": np.asarray(k_norm_t, dtype=np.float32),
+        }
+        validate_exact_layout(
+            x_hist,
+            expected=(int(B), int(T), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
         return x_hist.contiguous(), cov_hist
 
     def _init_ledger(self) -> None:

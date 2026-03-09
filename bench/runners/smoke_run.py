@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 
 from bench.runners.run_suite import load_suite_yaml, run_one, _expand_sweep
+from bench.utils.logging import configure_logging, get_logger
+
+
+logger = get_logger(__name__)
 
 
 def _try_read_text(p: Path, max_bytes: int = 20000) -> str:
@@ -54,10 +58,34 @@ def main() -> None:
     ap.add_argument("--init-id", type=str, default="untrained")
     ap.add_argument("--device", type=str, default="cpu")
     ap.add_argument("--precision", type=str, default="fp32")
+    ap.add_argument(
+        "--log-level",
+        type=str,
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        default="INFO",
+    )
+    ap.add_argument("--log-to-file", action="store_true")
+    ap.add_argument("--log-file", type=str, default=None)
+    ap.add_argument("--debug-every", type=int, default=0)
     args = ap.parse_args()
+    configure_logging(
+        str(args.log_level),
+        run_dir=None,
+        log_to_file=bool(args.log_file),
+        log_file=(Path(str(args.log_file)) if args.log_file else None),
+    )
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
     suite = load_suite_yaml(suite_path)
+    logger.info(
+        "smoke_run task=%s model=%s track=%s init_id=%s seed=%s device=%s",
+        args.task_id,
+        args.model_id,
+        args.track,
+        args.init_id,
+        args.seed,
+        args.device,
+    )
 
     task = None
     for t in suite.get("tasks", []) or []:
@@ -88,6 +116,10 @@ def main() -> None:
         device_str=str(args.device),
         precision=str(args.precision),
         init_id=str(args.init_id),
+        log_level=str(args.log_level),
+        log_to_file=bool(args.log_to_file),
+        log_file=args.log_file,
+        debug_every=int(args.debug_every),
     )
 
     print("[smoke_run] result:")

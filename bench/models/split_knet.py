@@ -14,9 +14,10 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
+from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
+from bench.utils.logging import get_logger
 
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 try:
@@ -431,6 +432,8 @@ class SplitKNetAdapter(ModelAdapter):
 
         self.last_layout: Optional[str] = None
         self.last_class: Optional[str] = None
+        self._debug_every: int = 0
+        self._runtime_diag: Dict[str, Any] = {}
 
     def setup(
         self,
@@ -442,6 +445,8 @@ class SplitKNetAdapter(ModelAdapter):
         run_ctx = run_ctx or {}
         self._cfg = dict(cfg)
         self._run_ctx = dict(run_ctx)
+        self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
+        self._runtime_diag = {}
 
         repo_raw, self.entrypoints = _resolve_repo_spec(cfg)
         self.repo_root = _normalize_repo_root(repo_raw)
@@ -524,6 +529,16 @@ class SplitKNetAdapter(ModelAdapter):
         self._filter_obj.kf_net.eval()
 
         self.last_class = self._filter_class_path
+        logger.info(
+            "setup repo=%s class=%s device=%s x_dim=%s y_dim=%s T=%s layout=%s",
+            self.repo_root,
+            self.last_class,
+            self.device,
+            self._x_dim,
+            self._y_dim,
+            self._T_setup,
+            self.last_layout,
+        )
 
     def train(
         self,
@@ -694,19 +709,35 @@ class SplitKNetAdapter(ModelAdapter):
 
         eval_init_from_gt = bool(self._cfg.get("eval_init_from_gt", False))
         preds: List[torch.Tensor] = []
+        total_n = 0
         self._filter_obj.kf_net.eval()
         with torch.no_grad():
-            for batch in test_dl:
+            for bi, batch in enumerate(test_dl):
                 x_raw, y_raw = _extract_batch_xy(batch)
                 y = _to_tensor(y_raw, device=self.device, dtype=self.dtype)
                 x = _to_tensor(x_raw, device=self.device, dtype=self.dtype)
                 x0_batch = x[:, 0, :] if eval_init_from_gt else None
                 pred = self._forward_batch(y_btd=y, x0_batch=x0_batch)
+                validate_exact_layout(
+                    pred,
+                    expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+                    axis_names=("B", "T", "D"),
+                    label="x_hat",
+                )
+                total_n += int(y.shape[0])
+                if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred)):
+                    logger.debug("eval batch=%s %s", bi, format_array_stats("x_hat", pred))
                 preds.append(pred.detach().cpu())
 
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
         x_hat = torch.cat(preds, dim=0).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(total_n), int(self._T_setup or x_hat.shape[1]), int(self._x_dim)),
+            axis_names=("N", "T", "D"),
+            label="x_hat",
+        )
 
         preds_path = None
         if self._artifacts_dir is not None:
@@ -745,7 +776,15 @@ class SplitKNetAdapter(ModelAdapter):
         ctx = dict(context or {})
         if state0 is None:
             state0 = ctx.get("x0", None)
+        logger.debug("predict input shape=%s layout=%s", tuple(y.shape), self.last_layout)
         x_hat = self._forward_batch(y_btd=y, x0_batch=state0)
+        validate_exact_layout(
+            x_hat,
+            expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        logger.debug("predict output %s", format_array_stats("x_hat", x_hat))
         if return_cov:
             return x_hat, None
         return x_hat
@@ -841,12 +880,24 @@ class SplitKNetAdapter(ModelAdapter):
             )
 
         preds: List[torch.Tensor] = []
+        seq_norms: List[float] = []
         for bi in range(int(bsz)):
             y_seq = y_btd[bi]  # [T,Dy]
             x0_col = x0[bi]    # [Dx,1]
             pred_seq = self._rollout_one(y_td=y_seq, x0_col=x0_col)
+            seq_norms.append(float(torch.linalg.norm(pred_seq).detach().cpu().item()))
+            if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred_seq)):
+                logger.debug("forward batch_item=%s %s", bi, format_array_stats("pred_seq", pred_seq))
             preds.append(pred_seq)
-        return torch.stack(preds, dim=0).contiguous()  # [B,T,Dx]
+        self._runtime_diag = {"seq_norms": np.asarray(seq_norms, dtype=np.float32)}
+        x_hat = torch.stack(preds, dim=0).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(bsz), int(t_len), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        return x_hat  # [B,T,Dx]
 
     def _rollout_one(self, *, y_td: torch.Tensor, x0_col: torch.Tensor) -> torch.Tensor:
         if self._filter_obj is None or self._x_dim is None or self._y_dim is None:
@@ -880,6 +931,9 @@ class SplitKNetAdapter(ModelAdapter):
                 f"shape_mismatch: state_history too short. got={x_hist.shape[1]} expected_at_least={t_len}"
             )
         return x_hist[:, -t_len:].transpose(0, 1).contiguous()  # [T,Dx]
+
+    def get_runtime_diagnostics(self) -> Dict[str, Any]:
+        return dict(self._runtime_diag)
 
     @torch.no_grad()
     def _compute_validation_loss(

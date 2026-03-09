@@ -38,7 +38,26 @@ from bench.metrics.core import (
     mse_per_step,
     compute_shift_recovery_k,
 )
+from bench.utils.diagnostics import (
+    array_stats,
+    format_array_stats,
+    has_nonfinite,
+    short_window,
+    summarize_mapping_arrays,
+    validate_exact_layout,
+    write_diagnostic_dump,
+)
+from bench.utils.logging import (
+    clear_logging_context,
+    configure_logging,
+    get_logger,
+    is_debug_enabled,
+    set_logging_context,
+)
 from bench.utils.sweep import expand_sweep_grid
+
+
+logger = get_logger(__name__)
 
 
 # Optional: use existing bench utils if available
@@ -68,6 +87,23 @@ def _bench_root() -> Path:
 
 def _ensure_dir(p: Path) -> None:
     p.mkdir(parents=True, exist_ok=True)
+
+
+def _runner_logging_cfg(
+    runner_cfg: Dict[str, Any],
+    *,
+    log_level: Optional[str] = None,
+    log_to_file: Optional[bool] = None,
+    log_file: Optional[str] = None,
+    debug_every: Optional[int] = None,
+) -> Dict[str, Any]:
+    cfg = dict(runner_cfg.get("logging", {}) or {})
+    return {
+        "level": str(log_level or cfg.get("level", "INFO")).strip().upper(),
+        "log_to_file": bool(cfg.get("log_to_file", False) if log_to_file is None else log_to_file),
+        "log_file": (str(log_file) if log_file else (str(cfg.get("log_file")) if cfg.get("log_file") else None)),
+        "debug_every": int(cfg.get("debug_every", 0) if debug_every is None else debug_every),
+    }
 
 
 def _fix_yaml_block_scalar_indentation(text: str) -> str:
@@ -145,6 +181,139 @@ def _tensorize(x: np.ndarray, device: torch.device) -> torch.Tensor:
     # canonical layout: [B,T,D]
     t = torch.from_numpy(x).float()
     return t.to(device)
+
+
+def _split_batch_stats(split_name: str, x: np.ndarray, y: np.ndarray, batch_size: int) -> List[str]:
+    bs = max(1, int(batch_size))
+    x_b = x[:bs]
+    y_b = y[:bs]
+    return [
+        f"{split_name} first batch",
+        format_array_stats("x", x_b),
+        format_array_stats("y", y_b),
+    ]
+
+
+def _extract_shift_debug(meta: Optional[Dict[str, Any]], task: Dict[str, Any]) -> Dict[str, Any]:
+    info: Dict[str, Any] = {}
+    noise_meta = meta.get("noise", {}) if isinstance(meta, dict) else {}
+    shift_meta = noise_meta.get("shift", {}) if isinstance(noise_meta, dict) else {}
+    pre_shift = noise_meta.get("pre_shift", {}) if isinstance(noise_meta, dict) else {}
+    post_shift = shift_meta.get("post_shift", {}) if isinstance(shift_meta, dict) else {}
+    noise_schedule = meta.get("noise_schedule", {}) if isinstance(meta, dict) else {}
+
+    t0 = _extract_t0(task, meta)
+    if t0 is not None:
+        info["t0"] = int(t0)
+    pre_r2 = None
+    if isinstance(pre_shift, dict):
+        pre_r = pre_shift.get("R", {})
+        if isinstance(pre_r, dict) and "r2" in pre_r:
+            try:
+                pre_r2 = float(pre_r["r2"])
+            except Exception:
+                pre_r2 = None
+    if pre_r2 is not None:
+        info["pre_shift_r2"] = pre_r2
+    if isinstance(post_shift, dict):
+        for key in ("R_scale", "R_scale(applied)", "R_scale_applied"):
+            if key in post_shift:
+                try:
+                    info["post_shift_R_scale"] = float(post_shift[key])
+                    break
+                except Exception:
+                    break
+    if isinstance(noise_schedule, dict) and noise_schedule:
+        info["noise_schedule_keys"] = sorted(str(k) for k in noise_schedule.keys())
+        kind = noise_schedule.get("kind")
+        if kind is not None:
+            info["noise_schedule_kind"] = str(kind)
+    return info
+
+
+def _log_split_debug(
+    split_name: str,
+    split: Dict[str, Any],
+    *,
+    batch_size: int,
+) -> None:
+    for line in _split_batch_stats(split_name, split["x"], split["y"], batch_size):
+        logger.debug(line)
+
+
+def _capture_first_batch(
+    *,
+    split: Dict[str, Any],
+    eval_bs: int,
+    x_hat_full: Optional[torch.Tensor],
+    mse_t_mean: Optional[np.ndarray] = None,
+) -> Dict[str, Any]:
+    bs = max(1, int(eval_bs))
+    x = short_window(split["x"][:bs], batch_limit=bs)
+    y = short_window(split["y"][:bs], batch_limit=bs)
+    payload: Dict[str, Any] = {"x": x, "y": y}
+    if x_hat_full is not None:
+        payload["x_hat"] = short_window(x_hat_full[:bs], batch_limit=bs)
+    if mse_t_mean is not None:
+        payload["mse_t"] = np.array(mse_t_mean[: min(len(mse_t_mean), 64)], copy=True)
+    return payload
+
+
+def _write_run_diagnostics(
+    *,
+    run_dir: Path,
+    suite_name: str,
+    task_id: str,
+    scenario_id: str,
+    model_id: str,
+    track_id: str,
+    init_id: str,
+    seed: int,
+    split_test: Dict[str, Any],
+    x_hat_full: Optional[torch.Tensor],
+    mse_val: Optional[float],
+    mse_db_val: Optional[float],
+    mse_t_mean: Optional[np.ndarray],
+    thresholds_hit: Sequence[str],
+    shift_info: Dict[str, Any],
+    adapter_meta: Dict[str, Any],
+    adapter_runtime: Optional[Dict[str, Any]],
+    reason: str,
+) -> Dict[str, str]:
+    stats_obj: Dict[str, Any] = {
+        "reason": str(reason),
+        "suite_name": str(suite_name),
+        "task_id": str(task_id),
+        "scenario_id": str(scenario_id),
+        "model_id": str(model_id),
+        "track_id": str(track_id),
+        "init_id": str(init_id),
+        "seed": int(seed),
+        "thresholds_hit": list(str(x) for x in thresholds_hit),
+        "shift": shift_info,
+        "metrics": {"mse": mse_val, "mse_db": mse_db_val},
+        "x_stats": array_stats(split_test["x"]),
+        "y_stats": array_stats(split_test["y"]),
+        "x_hat_stats": (array_stats(x_hat_full) if x_hat_full is not None else None),
+        "adapter_meta": adapter_meta,
+        "adapter_runtime_stats": summarize_mapping_arrays("adapter_runtime", adapter_runtime),
+    }
+    arrays = _capture_first_batch(
+        split=split_test,
+        eval_bs=int(min(max(1, split_test["x"].shape[0]), 8)),
+        x_hat_full=x_hat_full,
+        mse_t_mean=mse_t_mean,
+    )
+    extra_arrays: Dict[str, Any] = {}
+    if adapter_runtime:
+        for key, value in adapter_runtime.items():
+            try:
+                arr = np.asarray(value)
+            except Exception:
+                continue
+            if arr.ndim >= 1:
+                extra_arrays[f"adapter_{key}"] = arr
+    return write_diagnostic_dump(run_dir=run_dir, stats=stats_obj, arrays=arrays, extra_arrays=extra_arrays)
 
 
 def _extract_t0(task: Dict[str, Any], meta: Optional[Dict[str, Any]]) -> Optional[int]:
@@ -462,29 +631,23 @@ def _resolve_scenario_id_from_cache(
     return None
 
 
-def _coerce_to_btd(x_hat: torch.Tensor, B: int, T: int, D: int) -> torch.Tensor:
-    """
-    repo별 output layout 차이로 인한 크래시를 줄이기 위한 최소 보정.
-    허용:
-      - [B,T,D]
-      - [T,B,D]
-      - [B,D,T]
-    그 외는 에러로 상세 shape를 남긴다.
-    """
-    if x_hat.ndim != 3:
-        raise ValueError(f"x_hat must be 3D. got shape={tuple(x_hat.shape)}")
-
-    if tuple(x_hat.shape) == (B, T, D):
-        return x_hat
-    if tuple(x_hat.shape) == (T, B, D):
-        return x_hat.permute(1, 0, 2).contiguous()
-    if tuple(x_hat.shape) == (B, D, T):
-        return x_hat.permute(0, 2, 1).contiguous()
-
-    raise ValueError(
-        f"Unsupported x_hat shape={tuple(x_hat.shape)}; expected one of "
-        f"[(B,T,D)=({B},{T},{D}), (T,B,D)=({T},{B},{D}), (B,D,T)=({B},{D},{T})]"
-    )
+def _validate_batch_x_hat(x_hat: Any, B: int, T: int, D: int) -> torch.Tensor:
+    if isinstance(x_hat, np.ndarray):
+        x_hat = torch.from_numpy(x_hat)
+    if not isinstance(x_hat, torch.Tensor):
+        raise TypeError(f"adapter.predict must return Tensor/tuple/dict. Got {type(x_hat)}")
+    x_hat = x_hat.detach().cpu().float()
+    try:
+        validate_exact_layout(
+            x_hat,
+            expected=(int(B), int(T), int(D)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+    except ValueError as exc:
+        logger.error("Adapter output contract violation: %s", exc)
+        raise
+    return x_hat.contiguous()
 
 
 def _classify_failure(exc: Exception) -> str:
@@ -738,7 +901,7 @@ def _extract_x_hat_from_pred(pred: Any) -> Any:
     return x_hat
 
 
-def _coerce_full_to_btd(x_hat: Any, N: int, T: int, D: int) -> torch.Tensor:
+def _validate_full_x_hat(x_hat: Any, N: int, T: int, D: int) -> torch.Tensor:
     if isinstance(x_hat, list):
         tensors = []
         for item in x_hat:
@@ -757,20 +920,17 @@ def _coerce_full_to_btd(x_hat: Any, N: int, T: int, D: int) -> torch.Tensor:
         raise TypeError(f"x_hat must be Tensor/ndarray/list, got {type(x_hat)}")
 
     x_hat = x_hat.detach().cpu().float()
-    if x_hat.ndim != 3:
-        raise ValueError(f"x_hat must be rank-3, got shape={tuple(x_hat.shape)}")
-
-    shape = tuple(x_hat.shape)
-    if shape == (N, T, D):
-        return x_hat.contiguous()
-    if shape == (T, N, D):
-        return x_hat.permute(1, 0, 2).contiguous()
-    if shape == (N, D, T):
-        return x_hat.permute(0, 2, 1).contiguous()
-
-    raise ValueError(
-        f"Unsupported full x_hat shape={shape}; expected [(N,T,D)=({N},{T},{D}), (T,N,D)=({T},{N},{D}), (N,D,T)=({N},{D},{T})]"
-    )
+    try:
+        validate_exact_layout(
+            x_hat,
+            expected=(int(N), int(T), int(D)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+    except ValueError as exc:
+        logger.error("Adapter eval output contract violation: %s", exc)
+        raise
+    return x_hat.contiguous()
 
 
 def _load_split_npz(npz_path: Path) -> Dict[str, Any]:
@@ -856,6 +1016,7 @@ def _predict_batches(
     num_batches = (N + eval_bs - 1) // eval_bs
     out_batches: List[torch.Tensor] = []
     batch_times_ms: List[float] = []
+    debug_every = int(context.get("debug_every", 0) or 0)
 
     with torch.no_grad():
         for bi in range(num_batches):
@@ -873,12 +1034,14 @@ def _predict_batches(
             batch_times_ms.append((t1 - t0) * 1000.0)
 
             x_hat = _extract_x_hat_from_pred(pred)
-            if isinstance(x_hat, np.ndarray):
-                x_hat = torch.from_numpy(x_hat)
-            if not isinstance(x_hat, torch.Tensor):
-                raise TypeError(f"adapter.predict must return Tensor/tuple/dict. Got {type(x_hat)}")
-
-            x_hat = _coerce_to_btd(x_hat, B=(e - s), T=T, D=x_dim)
+            x_hat = _validate_batch_x_hat(x_hat, B=(e - s), T=T, D=x_dim)
+            if debug_every > 0 and ((bi % debug_every) == 0 or bi == (num_batches - 1)):
+                logger.debug(
+                    "predict batch=%s/%s %s",
+                    bi + 1,
+                    num_batches,
+                    format_array_stats("x_hat", x_hat),
+                )
             out_batches.append(x_hat.detach().cpu())
 
     if not out_batches:
@@ -1013,10 +1176,21 @@ def run_one(
     precision: str,
     init_id: str = "untrained",
     plan_isolation: bool = False,
+    log_level: Optional[str] = None,
+    log_to_file: Optional[bool] = None,
+    log_file: Optional[str] = None,
+    debug_every: Optional[int] = None,
 ) -> Dict[str, Any]:
     bench_root = _bench_root()
     cache_root = _cache_root(bench_root)
     runner_cfg = suite.get("runner", {}) or {}
+    log_cfg = _runner_logging_cfg(
+        runner_cfg,
+        log_level=log_level,
+        log_to_file=log_to_file,
+        log_file=log_file,
+        debug_every=debug_every,
+    )
 
     suite_name = suite["suite"]["name"]
     task_id = task["task_id"]
@@ -1058,6 +1232,20 @@ def run_one(
     _ensure_dir(run_dir)
     _ensure_dir(run_dir / "checkpoints")
     _ensure_dir(run_dir / "artifacts")
+    configure_logging(
+        log_cfg["level"],
+        run_dir=run_dir,
+        log_to_file=bool(log_cfg["log_to_file"]),
+        log_file=(Path(str(log_cfg["log_file"])) if log_cfg["log_file"] else None),
+    )
+    set_logging_context(
+        task_id=str(task_id),
+        scenario_id=str(scenario_id),
+        model_id=str(model_id),
+        track_id=str(track_id),
+        init_id=str(init_id),
+        seed=int(seed),
+    )
 
     stdout_log = run_dir / "stdout.log"
     stderr_log = run_dir / "stderr.log"
@@ -1072,6 +1260,13 @@ def run_one(
             f.write(msg.rstrip() + "\n")
 
     deterministic = bool(runner_cfg.get("deterministic", True))
+    logger.info(
+        "Starting run device=%s precision=%s deterministic=%s resolved_from_cache=%s",
+        device_str,
+        precision,
+        deterministic,
+        resolved_from_cache,
+    )
     if seed_mod and hasattr(seed_mod, "set_seed"):
         seed_mod.set_seed(int(seed), deterministic=deterministic)  # type: ignore
     else:
@@ -1085,11 +1280,13 @@ def run_one(
     device = _resolve_device(device_str)
     if device.type == "cpu" and device_str.startswith("cuda"):
         log_out(f"[WARN] requested device={device_str} but cuda not available -> using cpu")
+        logger.warning("Requested device=%s but CUDA is unavailable; falling back to cpu", device_str)
     if deterministic and device.type == "cuda":
         if not str(os.environ.get("CUBLAS_WORKSPACE_CONFIG", "")).strip():
             # Required by CUDA deterministic mode for cuBLAS-backed ops (e.g., batched matmul/bmm).
             os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
             log_out("[INFO] set CUBLAS_WORKSPACE_CONFIG=:4096:8 (deterministic CUDA)")
+            logger.info("Set CUBLAS_WORKSPACE_CONFIG=:4096:8 for deterministic CUDA")
 
     # Early missing_data
     if not test_path.exists():
@@ -1120,6 +1317,8 @@ def run_one(
         }
         _write_json(run_dir / "failure.json", failure)
         log_err(json.dumps(failure, indent=2, ensure_ascii=False))
+        logger.error("Missing test split: %s", test_path)
+        clear_logging_context()
         return {
             "status": "missing_data",
             "run_dir": str(run_dir),
@@ -1160,6 +1359,12 @@ def run_one(
         "device_requested": str(device_str),
         "device_resolved": str(device),
         "precision": str(precision),
+        "logging": {
+            "level": str(log_cfg["level"]),
+            "log_to_file": bool(log_cfg["log_to_file"]),
+            "log_file": log_cfg["log_file"],
+            "debug_every": int(log_cfg["debug_every"]),
+        },
         "budgets": {
             "train_max_updates": int(train_max_updates),
             "adapt_max_updates": int(adapt_max_updates) if adaptation_enabled else 0,
@@ -1202,7 +1407,16 @@ def run_one(
         "track_id": track_id,
         "track_cfg": track_cfg,
         "init_id": str(init_id),
-        "runner_overrides": {"device": device_str, "precision": precision},
+        "runner_overrides": {
+            "device": device_str,
+            "precision": precision,
+            "logging": {
+                "level": str(log_cfg["level"]),
+                "log_to_file": bool(log_cfg["log_to_file"]),
+                "log_file": log_cfg["log_file"],
+                "debug_every": int(log_cfg["debug_every"]),
+            },
+        },
         "data": {
             "cache_root": str(cache_root),
             "train_npz": str(train_path),
@@ -1230,6 +1444,15 @@ def run_one(
     ]
     _write_text(run_dir / "env.txt", "\n".join(env_txt_lines) + "\n")
 
+    split_test: Optional[Dict[str, Any]] = None
+    x_hat_full: Optional[torch.Tensor] = None
+    mse_t_mean: Optional[np.ndarray] = None
+    mse_val: Optional[float] = None
+    mse_db_val: Optional[float] = None
+    shift_info: Dict[str, Any] = {}
+    adapter_meta: Dict[str, Any] = {}
+    adapter_runtime: Optional[Dict[str, Any]] = None
+
     try:
         if adaptation_enabled and adapt_max_updates > 200:
             raise RuntimeError(
@@ -1256,9 +1479,21 @@ def run_one(
         F = split_test.get("F")
         H = split_test.get("H")
         t0_shift = _extract_t0(task, meta)
+        shift_info = _extract_shift_debug(meta, task)
 
         N, T, Dx = x_gt.shape
         _, _, Dy = y_test.shape
+        logger.info(
+            "Loaded test split shapes x=%s y=%s dims=(N=%s,T=%s,Dx=%s,Dy=%s)",
+            tuple(x_gt.shape),
+            tuple(y_test.shape),
+            N,
+            T,
+            Dx,
+            Dy,
+        )
+        if shift_info:
+            logger.info("Shift/noise metadata: %s", json.dumps(shift_info, sort_keys=True))
 
         run_plan["shift"] = {"t0": int(t0_shift) if t0_shift is not None else None}
         run_plan["adaptation"] = {
@@ -1273,6 +1508,10 @@ def run_one(
             split_train = split_test
         if split_val is None:
             split_val = split_test
+
+        _log_split_debug("train", split_train, batch_size=train_bs)
+        _log_split_debug("val", split_val, batch_size=eval_bs)
+        _log_split_debug("test", split_test, batch_size=eval_bs)
 
         train_loader = _make_loader(
             x=split_train["x"],
@@ -1312,6 +1551,8 @@ def run_one(
             "task_id": task_id,
             "suite_name": suite_name,
             "scenario_settings": scenario_settings,
+            "debug_every": int(log_cfg["debug_every"]),
+            "log_level": str(log_cfg["level"]),
         }
         run_ctx = {
             "run_dir": str(run_dir),
@@ -1324,11 +1565,20 @@ def run_one(
             "track_id": str(track_id),
             "init_id": str(init_id),
             "device": str(device),
+            "debug_every": int(log_cfg["debug_every"]),
+            "log_level": str(log_cfg["level"]),
+            "log_to_file": bool(log_cfg["log_to_file"]),
         }
         _try_call_setup(adapter, model, system_info, run_ctx)
 
         adapter_meta_seed = _read_adapter_meta(adapter)
         adapter_version_for_cache = str(adapter_meta_seed.get("adapter_version", "unknown"))
+        logger.info(
+            "Adapter ready class=%s layout=%s version=%s",
+            getattr(adapter, "last_class", None),
+            getattr(adapter, "last_layout", None),
+            adapter_version_for_cache,
+        )
         model_cache_dir = _resolve_model_cache_dir(bench_root, runner_cfg, model)
         cache_enabled = bool(model_cache_dir is not None and str(init_id).lower() == "trained")
         train_skipped = False
@@ -1402,6 +1652,7 @@ def run_one(
                 if cache_paths["ckpt_path"].exists():
                     train_skipped = True
                     cache_hit = True
+                    logger.info("Training cache hit cache_key=%s", cache_key)
                     ckpt_path = (run_dir / "checkpoints" / "model.pt").resolve()
                     _copy_if_exists(cache_paths["ckpt_path"], ckpt_path)
                     _copy_if_exists(cache_paths["train_state_path"], run_dir / "checkpoints" / "train_state.json")
@@ -1419,6 +1670,7 @@ def run_one(
                         },
                     )
                 else:
+                    logger.info("Training cache miss cache_key=%s", cache_key)
                     ckpt_path = _execute_train_once()
                     _update_ledger_file(
                         ledger_path,
@@ -1452,6 +1704,7 @@ def run_one(
                             },
                         )
             else:
+                logger.info("Running train phase without cache")
                 ckpt_path = _execute_train_once()
                 _update_ledger_file(
                     ledger_path,
@@ -1506,6 +1759,13 @@ def run_one(
             _write_json(run_dir / "run_plan.json", run_plan)
 
             if should_run_adapt:
+                logger.info(
+                    "Running adapt phase t0=%s max_updates=%s max_updates_per_step=%s allowed_after_t0_only=%s",
+                    t0_shift,
+                    adapt_max_updates,
+                    adapt_max_updates_per_step,
+                    allowed_after_t0_only,
+                )
                 adapt_context = dict(system_info)
                 adapt_context["track_id"] = str(track_id)
                 adapt_context["init_id"] = str(init_id)
@@ -1524,8 +1784,8 @@ def run_one(
                     "[INFO] budgeted track requested but no shift t0 detected; "
                     "adapt stage skipped by plan rule."
                 )
+                logger.info("Adapt stage skipped because no shift t0 was detected")
 
-        x_hat_full: Optional[torch.Tensor] = None
         batch_times_ms: List[float] = []
 
         if hasattr(adapter, "eval"):
@@ -1539,7 +1799,7 @@ def run_one(
             batch_times_ms = [(t_eval1 - t_eval0) * 1000.0]
 
             if isinstance(eval_res, dict) and "x_hat" in eval_res:
-                x_hat_full = _coerce_full_to_btd(eval_res["x_hat"], N=N, T=T, D=Dx)
+                x_hat_full = _validate_full_x_hat(eval_res["x_hat"], N=N, T=T, D=Dx)
 
         if x_hat_full is None:
             x_hat_full, batch_times_ms = _predict_batches(
@@ -1549,21 +1809,116 @@ def run_one(
                 T=T,
                 eval_bs=eval_bs,
                 device=device,
-                context=system_info,
+                context=dict(system_info, debug_every=int(log_cfg["debug_every"])),
             )
 
         if tuple(x_hat_full.shape) != (N, T, Dx):
-            x_hat_full = _coerce_full_to_btd(x_hat_full, N=N, T=T, D=Dx)
+            x_hat_full = _validate_full_x_hat(x_hat_full, N=N, T=T, D=Dx)
 
         x_hat_np = x_hat_full.detach().cpu().numpy()
+        if log_cfg["debug_every"] and int(log_cfg["debug_every"]) > 0:
+            logger.debug("Eval output %s", format_array_stats("x_hat_full", x_hat_np))
         if not np.isfinite(x_hat_np).all():
+            if split_test is not None:
+                adapter_runtime = (
+                    adapter.get_runtime_diagnostics()  # type: ignore[attr-defined]
+                    if hasattr(adapter, "get_runtime_diagnostics")
+                    else None
+                )
+                _write_run_diagnostics(
+                    run_dir=run_dir,
+                    suite_name=str(suite_name),
+                    task_id=str(task_id),
+                    scenario_id=str(scenario_id),
+                    model_id=str(model_id),
+                    track_id=str(track_id),
+                    init_id=str(init_id),
+                    seed=int(seed),
+                    split_test=split_test,
+                    x_hat_full=x_hat_full,
+                    mse_val=None,
+                    mse_db_val=None,
+                    mse_t_mean=None,
+                    thresholds_hit=["x_hat_nonfinite"],
+                    shift_info=shift_info,
+                    adapter_meta=adapter_meta_seed,
+                    adapter_runtime=adapter_runtime,
+                    reason="x_hat_nonfinite",
+                )
             raise FloatingPointError("eval_nonfinite: x_hat contains non-finite values.")
         mse_t_mean = mse_per_step(x_hat_np, x_gt)
         if not np.isfinite(mse_t_mean).all():
+            if split_test is not None:
+                adapter_runtime = (
+                    adapter.get_runtime_diagnostics()  # type: ignore[attr-defined]
+                    if hasattr(adapter, "get_runtime_diagnostics")
+                    else None
+                )
+                _write_run_diagnostics(
+                    run_dir=run_dir,
+                    suite_name=str(suite_name),
+                    task_id=str(task_id),
+                    scenario_id=str(scenario_id),
+                    model_id=str(model_id),
+                    track_id=str(track_id),
+                    init_id=str(init_id),
+                    seed=int(seed),
+                    split_test=split_test,
+                    x_hat_full=x_hat_full,
+                    mse_val=None,
+                    mse_db_val=None,
+                    mse_t_mean=mse_t_mean,
+                    thresholds_hit=["mse_t_nonfinite"],
+                    shift_info=shift_info,
+                    adapter_meta=adapter_meta_seed,
+                    adapter_runtime=adapter_runtime,
+                    reason="mse_t_nonfinite",
+                )
             raise FloatingPointError("eval_nonfinite: mse_t contains non-finite values.")
         mse_val = float(np.mean(mse_t_mean))
         rmse_val = float(np.sqrt(max(mse_val, 0.0)))
         mse_db_val = float(10.0 * np.log10(max(mse_val, 1e-30)))
+        thresholds_hit: List[str] = []
+        if not np.isfinite(np.array([mse_val, mse_db_val], dtype=np.float64)).all():
+            thresholds_hit.append("metric_nonfinite")
+        if mse_db_val > 100.0:
+            thresholds_hit.append("mse_db_gt_100")
+
+        adapter_runtime = (
+            adapter.get_runtime_diagnostics()  # type: ignore[attr-defined]
+            if hasattr(adapter, "get_runtime_diagnostics")
+            else None
+        )
+        if is_debug_enabled(__name__) or thresholds_hit:
+            dump_paths = _write_run_diagnostics(
+                run_dir=run_dir,
+                suite_name=str(suite_name),
+                task_id=str(task_id),
+                scenario_id=str(scenario_id),
+                model_id=str(model_id),
+                track_id=str(track_id),
+                init_id=str(init_id),
+                seed=int(seed),
+                split_test=split_test,
+                x_hat_full=x_hat_full,
+                mse_val=mse_val,
+                mse_db_val=mse_db_val,
+                mse_t_mean=mse_t_mean,
+                thresholds_hit=thresholds_hit,
+                shift_info=shift_info,
+                adapter_meta=adapter_meta_seed,
+                adapter_runtime=adapter_runtime,
+                reason=("anomaly" if thresholds_hit else "debug"),
+            )
+            logger.debug("Wrote diagnostics: %s", dump_paths)
+            if thresholds_hit:
+                logger.warning(
+                    "Metric anomaly detected mse=%s mse_db=%s thresholds=%s diagnostics=%s",
+                    mse_val,
+                    mse_db_val,
+                    thresholds_hit,
+                    dump_paths.get("diagnostics_dir"),
+                )
 
         warmup_batches = 1
         times_used = batch_times_ms[warmup_batches:] if len(batch_times_ms) > warmup_batches else batch_times_ms
@@ -1612,6 +1967,13 @@ def run_one(
                 adapter_meta = {}
         adapter_meta["selected_layout"] = getattr(adapter, "last_layout", None)
         adapter_meta["selected_class"] = getattr(adapter, "last_class", None)
+        logger.info(
+            "Eval complete mse=%s rmse=%s mse_db=%s recovery_k=%s",
+            mse_val,
+            rmse_val,
+            mse_db_val,
+            (recovery or {}).get("recovery_k", None),
+        )
 
         ledger_obj = _read_json_if_exists(ledger_path)
         if not ledger_obj:
@@ -1734,6 +2096,7 @@ def run_one(
             stale_failure.unlink()
 
         log_out(f"[OK] wrote metrics to {run_dir}")
+        clear_logging_context()
 
         return {
             "status": "ok",
@@ -1786,6 +2149,33 @@ def run_one(
         _write_json(run_dir / "failure.json", failure)
         log_err(err_msg)
         log_err(tb)
+        logger.error("Run failed phase=%s failure_type=%s error=%s", phase, failure_type, err_msg)
+        if split_test is not None and (is_debug_enabled(__name__) or failure_type in {"shape_mismatch", "runtime_error", "train_nan"}):
+            try:
+                dump_paths = _write_run_diagnostics(
+                    run_dir=run_dir,
+                    suite_name=str(suite_name),
+                    task_id=str(task_id),
+                    scenario_id=str(scenario_id),
+                    model_id=str(model_id),
+                    track_id=str(track_id),
+                    init_id=str(init_id),
+                    seed=int(seed),
+                    split_test=split_test,
+                    x_hat_full=x_hat_full,
+                    mse_val=mse_val,
+                    mse_db_val=mse_db_val,
+                    mse_t_mean=mse_t_mean,
+                    thresholds_hit=[failure_type],
+                    shift_info=shift_info,
+                    adapter_meta=adapter_meta,
+                    adapter_runtime=adapter_runtime,
+                    reason=f"failure:{failure_type}",
+                )
+                logger.debug("Failure diagnostics written: %s", dump_paths)
+            except Exception as dump_exc:
+                logger.error("Failed to write diagnostics after error: %s", dump_exc)
+        clear_logging_context()
 
         return {
             "status": status,
@@ -1823,6 +2213,16 @@ def main() -> None:
         help="compatibility flag (run_suite already continues across run combinations).",
     )
     ap.add_argument("--tasks", nargs="*", default=None, help="task_id allowlist (optional)")
+    ap.add_argument(
+        "--log-level",
+        type=str,
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        default=None,
+        help="log level (default from suite.runner.logging.level or INFO)",
+    )
+    ap.add_argument("--log-to-file", action="store_true", help="also write per-run bench.log files")
+    ap.add_argument("--log-file", type=str, default=None, help="optional explicit log file path")
+    ap.add_argument("--debug-every", type=int, default=None, help="periodic debug summary interval")
     args = ap.parse_args()
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
@@ -1830,6 +2230,19 @@ def main() -> None:
     suite_name = str((suite.get("suite", {}) or {}).get("name", "unknown"))
 
     runner_cfg = suite.get("runner", {}) or {}
+    log_cfg = _runner_logging_cfg(
+        runner_cfg,
+        log_level=args.log_level,
+        log_to_file=(True if args.log_to_file else None),
+        log_file=args.log_file,
+        debug_every=args.debug_every,
+    )
+    configure_logging(
+        log_cfg["level"],
+        run_dir=None,
+        log_to_file=bool(log_cfg["log_file"]),
+        log_file=(Path(str(log_cfg["log_file"])) if log_cfg["log_file"] else None),
+    )
     enabled_policy = runner_cfg.get("enabled_policy", {}) or {}
     task_default = bool(enabled_policy.get("task_default", True))
     model_default = bool(enabled_policy.get("model_default", True))
@@ -1871,6 +2284,14 @@ def main() -> None:
         total += len(scenarios) * len(seeds) * len(models) * len(plan_specs)
 
     print(f"[run_suite] plan: ~{total} runs (after enabled filtering)")
+    logger.info(
+        "Suite plan suite=%s total_runs_estimate=%s log_level=%s log_to_file=%s debug_every=%s",
+        suite_name,
+        total,
+        log_cfg["level"],
+        bool(log_cfg["log_to_file"] or log_cfg["log_file"]),
+        log_cfg["debug_every"],
+    )
     produced_run_dirs: List[str] = []
 
     for task in tasks:
@@ -1898,6 +2319,10 @@ def main() -> None:
                             precision=str(precision),
                             init_id=str(init_id),
                             plan_isolation=plan_isolation,
+                            log_level=str(log_cfg["level"]),
+                            log_to_file=bool(log_cfg["log_to_file"]),
+                            log_file=log_cfg["log_file"],
+                            debug_every=int(log_cfg["debug_every"]),
                         )
                         _append_summary_row(summary_csv, res, summary_fields)
                         rd = res.get("run_dir")
@@ -1910,6 +2335,7 @@ def main() -> None:
         suite_yaml=suite_path,
         run_dirs=produced_run_dirs,
     )
+    logger.info("Suite complete summary_csv=%s manifest=%s", summary_csv, manifest_path)
     print(f"[run_suite] done. summary_csv={summary_csv}")
     print(f"[run_suite] manifest={manifest_path}")
 

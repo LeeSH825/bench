@@ -1,0 +1,142 @@
+{
+  "reason": "debug",
+  "suite_name": "all_simple_paperlike",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "e430cbdcf2b5",
+  "model_id": "mb_kf_oracle",
+  "track_id": "frozen",
+  "init_id": "untrained",
+  "seed": 0,
+  "thresholds_hit": [],
+  "shift": {
+    "noise_schedule_keys": [
+      "SoW_hat_t",
+      "SoW_t",
+      "enabled",
+      "kind",
+      "params",
+      "q2_t",
+      "r2_t",
+      "sow",
+      "sow_hat",
+      "storage"
+    ],
+    "noise_schedule_kind": "step_change"
+  },
+  "metrics": {
+    "mse": 0.003151533275355321,
+    "mse_db": -25.014781030308594
+  },
+  "x_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -580.1368408203125,
+    "max": 631.9785766601562,
+    "mean": -1.6060378551483154,
+    "std": 51.811790466308594,
+    "norm": 16392.171875
+  },
+  "y_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -586.5721435546875,
+    "max": 638.4972534179688,
+    "mean": -3.2165956497192383,
+    "std": 73.7976303100586,
+    "norm": 23358.978515625
+  },
+  "x_hat_stats": {
+    "shape": [
+      200,
+      100,
+      5
+    ],
+    "dtype": "float32",
+    "size": 100000,
+    "finite": true,
+    "nan_count": 0,
+    "inf_count": 0,
+    "min": -580.0965576171875,
+    "max": 632.0405883789062,
+    "mean": -1.605979323387146,
+    "std": 51.81135559082031,
+    "norm": 16392.029296875
+  },
+  "adapter_meta": {
+    "adapter_id": "mb_kf",
+    "adapter_version": "s10_kf_baseline_v1",
+    "runtime_device": "cuda",
+    "baseline": "mb_kf",
+    "mode": "oracle",
+    "uses_shift_meta": false,
+    "t0_shift": null,
+    "R_scale": 1.0,
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BTD_batched_linear_kf",
+    "capabilities": {
+      "train_supported": false,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_linear_system": "F/H are linear system matrices from bench-generated NPZ/system_info.",
+      "B_oracle_shift_info": "oracle_shift mode uses shift meta (t0,R_scale) from D15 meta_json.",
+      "C_metrics_ownership": "official metrics are computed by bench layer only."
+    },
+    "how_to_verify": {
+      "A_linear_system": "bench/tasks/bench_generated.py (save_npz_split_v0 includes F/H/meta_json).",
+      "B_oracle_shift_info": "bench/tasks/bench_generated.py noise_meta['shift']['post_shift']['R_scale'] and t0.",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and adapter eval()/predict() outputs."
+    }
+  },
+  "adapter_runtime_stats": {
+    "adapter_runtime.innovation_norm_t": {
+      "shape": [
+        100
+      ],
+      "dtype": "float32",
+      "size": 100,
+      "finite": true,
+      "nan_count": 0,
+      "inf_count": 0,
+      "min": 0.6261794567108154,
+      "max": 7.448953151702881,
+      "mean": 0.8864319324493408,
+      "std": 0.667103111743927,
+      "norm": 11.09408950805664
+    },
+    "adapter_runtime.k_norm_t": {
+      "shape": [
+        100
+      ],
+      "dtype": "float32",
+      "size": 100,
+      "finite": true,
+      "nan_count": 0,
+      "inf_count": 0,
+      "min": 1.759317398071289,
+      "max": 8.068596839904785,
+      "mean": 1.8704432249069214,
+      "std": 0.6698508858680725,
+      "norm": 19.867708206176758
+    }
+  }
+}

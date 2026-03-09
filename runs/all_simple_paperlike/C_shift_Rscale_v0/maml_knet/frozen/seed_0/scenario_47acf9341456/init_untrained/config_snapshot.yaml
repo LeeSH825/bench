@@ -1,0 +1,125 @@
+suite:
+  name: all_simple_paperlike
+  version: 0.1.0
+  description: 'Repo-scale, paper-oriented version of all_simple. This suite uses
+    dataset sizes and sequence lengths closer to the bundled third-party repositories,
+    but it is still an approximation: exact paper reproduction remains model-specific
+    because KalmanNet_TSP, Adaptive-KNet, MAML-KalmanNet, and Split-KalmanNet do not
+    share one identical protocol.
+
+    '
+task:
+  task_id: C_shift_Rscale_v0
+  task_name: 'Noise Shift: R scale (paper-like)'
+  task_family: linear_gaussian_v0
+  system_type: linear
+  x_dim: 5
+  y_dim: 5
+  sequence_length_T: 100
+  dataset_sizes:
+    N_train: 1000
+    N_val: 100
+    N_test: 200
+  noise:
+    pre_shift:
+      Q:
+        type: scaled_identity
+        q2: 0.001
+      R:
+        type: scaled_identity
+        r2: 0.001
+      obs_distribution:
+        name: gaussian
+    shift:
+      t0: 50
+      post_shift:
+        obs_distribution:
+          name: gaussian
+        R_scale: 10.0
+  observation:
+    type: full
+    h_type: linear
+    H: canonical_inverse
+  control_input_u: false
+  ground_truth:
+    has_gt: true
+  sweep:
+    inv_r2_db:
+      values:
+      - -10
+      - 0
+      - 10
+      - 20
+      - 30
+model:
+  model_id: maml_knet
+  display_name: MAML-KalmanNet
+  adapter: bench.models.maml_knet:MAMLKNetAdapter
+  enabled: true
+  repo:
+    path: third_party/MAML_KalmanNet
+    entrypoints:
+      A_linear_canonical_v0: main_linear.py
+      C_shift_Rscale_v0: main_linear.py
+      B_lorenz_dt_v0: main_nonlinear.py
+      D_nclt_v0: main_linear.py
+  batch_size: 4
+  outer_lr: 0.001
+  inner_lr: 0.05
+  inner_steps: 4
+  meta_task_num: 16
+  support_size: 6
+  query_size: 15
+  max_grad_norm: 1.0
+  val_eval_interval_updates: 100
+  capabilities:
+    supports_adaptation: false
+    outputs_covariance: false
+    needs_system_model: true
+  notes:
+    data_generation_use_cuda: false
+    repo_defaults:
+      epoch_linear: 20001
+      epoch_nonlinear: 30001
+      task_num: 16
+      k_spt: 6
+      q_qry: 15
+      meta_lr: 0.001
+      update_lr: 0.05
+      update_step: 4
+scenario_settings:
+  inv_r2_db: 20
+scenario_cfg_basis:
+  pre_shift:
+    Q:
+      type: scaled_identity
+      q2: 0.001
+    R:
+      type: scaled_identity
+      r2: 0.01
+    obs_distribution:
+      name: gaussian
+  shift:
+    t0: 50
+    post_shift:
+      obs_distribution:
+        name: gaussian
+      R_scale: 10.0
+scenario_id: 47acf9341456
+cache_scenario_id: 47acf9341456
+scenario_id_resolved_from_cache: false
+seed: 0
+track_id: frozen
+track_cfg:
+  track_id: frozen
+  adaptation_enabled: false
+init_id: untrained
+runner_overrides:
+  device: cuda
+  precision: fp32
+data:
+  cache_root: /tmp/bench_data_cache
+  train_npz: /tmp/bench_data_cache/all_simple_paperlike/C_shift_Rscale_v0/scenario_47acf9341456/seed_0/train.npz
+  val_npz: /tmp/bench_data_cache/all_simple_paperlike/C_shift_Rscale_v0/scenario_47acf9341456/seed_0/val.npz
+  test_npz: /tmp/bench_data_cache/all_simple_paperlike/C_shift_Rscale_v0/scenario_47acf9341456/seed_0/test.npz
+  canonical_layout: NTD

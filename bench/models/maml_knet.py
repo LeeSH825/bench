@@ -12,8 +12,10 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch
+from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
+from bench.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 try:
@@ -296,6 +298,8 @@ class MAMLKNetAdapter(ModelAdapter):
 
         self.last_layout: Optional[str] = None
         self.last_class: Optional[str] = None
+        self._debug_every: int = 0
+        self._runtime_diag: Dict[str, Any] = {}
 
     def setup(
         self,
@@ -307,6 +311,8 @@ class MAMLKNetAdapter(ModelAdapter):
         run_ctx = run_ctx or {}
         self._cfg = dict(cfg)
         self._run_ctx = dict(run_ctx)
+        self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
+        self._runtime_diag = {}
         repo_root_raw, self.entrypoints = _resolve_repo_spec(cfg)
         self.repo_root = _normalize_repo_root(repo_root_raw)
         self.train_updates_used = 0
@@ -403,6 +409,24 @@ class MAMLKNetAdapter(ModelAdapter):
 
         self.last_class = "filter.Filter + state_dict_learner.Learner"
         self.last_layout = "bench_BTD_to_repo_BYT_stepwise_filter"
+        logger.info(
+            "setup repo=%s class=%s device=%s x_dim=%s y_dim=%s T=%s layout=%s",
+            self.repo_root,
+            self.last_class,
+            self.device,
+            self._x_dim,
+            self._y_dim,
+            self._T_setup,
+            self.last_layout,
+        )
+        logger.debug(
+            "MAML-KNet hyperparams batch_size=%s q_qry=%s update_lr=%s meta_lr=%s update_step=%s",
+            self._args.batch_size,
+            self._args.q_qry,
+            self._args.update_lr,
+            self._args.meta_lr,
+            self._args.update_step,
+        )
 
     def _resolve_default_checkpoint(self, cfg: Dict[str, Any]) -> Optional[Path]:
         candidates: List[Any] = []
@@ -800,18 +824,34 @@ class MAMLKNetAdapter(ModelAdapter):
             self.load(str(self._saved_ckpt_path))
 
         preds: List[torch.Tensor] = []
+        total_n = 0
         with torch.no_grad():
-            for batch in test_loader:
+            for bi, batch in enumerate(test_loader):
                 _x_raw, y_raw = _extract_batch_xy(batch)
                 y = _to_tensor(y_raw, device=self.device, dtype=self.dtype)
                 pred = self.predict(y, context=None, return_cov=False)
                 if not isinstance(pred, torch.Tensor):
                     raise TypeError(f"runtime_error: predict() must return Tensor for eval, got {type(pred)}")
+                validate_exact_layout(
+                    pred,
+                    expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+                    axis_names=("B", "T", "D"),
+                    label="x_hat",
+                )
+                total_n += int(y.shape[0])
+                if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred)):
+                    logger.debug("eval batch=%s %s", bi, format_array_stats("x_hat", pred))
                 preds.append(pred.detach().cpu())
 
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
         x_hat = torch.cat(preds, dim=0).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(total_n), int(self._T_setup or x_hat.shape[1]), int(self._x_dim)),
+            axis_names=("N", "T", "D"),
+            label="x_hat",
+        )
 
         preds_path = None
         if self._artifacts_dir is not None:
@@ -851,6 +891,7 @@ class MAMLKNetAdapter(ModelAdapter):
         y = _to_tensor(y_seq, device=self.device, dtype=self.dtype)
         if y.ndim != 3:
             raise ValueError(f"Expected y_seq with rank 3, got {tuple(y.shape)}")
+        logger.debug("predict input shape=%s layout_candidates=%s", tuple(y.shape), self.last_layout)
 
         ctx = context or {}
         expected_T = ctx.get("T", self._T_setup)
@@ -863,6 +904,13 @@ class MAMLKNetAdapter(ModelAdapter):
             try:
                 x_hat = self._predict_stepwise(y_byt, batch_size=batch_size, seq_len=seq_len, context=ctx)
                 self.last_layout = f"{layout_name}->BYT(stepwise_filter)"
+                validate_exact_layout(
+                    x_hat,
+                    expected=(int(batch_size), int(seq_len), int(self._x_dim)),
+                    axis_names=("B", "T", "D"),
+                    label="x_hat",
+                )
+                logger.debug("predict layout=%s output=%s", self.last_layout, format_array_stats("x_hat", x_hat))
                 if return_cov:
                     return x_hat, None
                 return x_hat
@@ -924,10 +972,17 @@ class MAMLKNetAdapter(ModelAdapter):
         self._filter.state_post = x0_batch.clone()
         self._filter.state_history = x0_batch.clone()
         self._filter.y_predict_history = torch.zeros((batch_size, self._y_dim, 1), device=self.device, dtype=self.dtype)
+        x_norm_t: List[float] = []
 
         for t in range(seq_len):
             y_t = y_byt[:, :, t].unsqueeze(2)  # [B,y,1]
             self._filter.filtering(y_t, self._filter.train_net)
+            state_hist = self._filter.state_history
+            if isinstance(state_hist, torch.Tensor) and state_hist.ndim == 3 and state_hist.shape[2] >= 1:
+                x_curr = state_hist[:, :, -1:]
+                x_norm_t.append(float(torch.linalg.norm(x_curr).detach().cpu().item()))
+                if self._debug_every > 0 and ((t % self._debug_every) == 0 or has_nonfinite(x_curr)):
+                    logger.debug("forward t=%s %s", t, format_array_stats("x_t", x_curr))
 
         x_hist = self._filter.state_history  # [B,x,T+1] or [B,x,T]
         if x_hist.ndim != 3:
@@ -941,7 +996,15 @@ class MAMLKNetAdapter(ModelAdapter):
                 f"Unexpected state_history length: {x_hist.shape[2]} (expected {seq_len} or {seq_len + 1})"
             )
 
-        return x_repo.permute(0, 2, 1).contiguous()
+        self._runtime_diag = {"x_norm_t": np.asarray(x_norm_t, dtype=np.float32)}
+        x_hat = x_repo.permute(0, 2, 1).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(batch_size), int(seq_len), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        return x_hat
 
     @torch.no_grad()
     def _compute_validation_loss(
@@ -998,6 +1061,9 @@ class MAMLKNetAdapter(ModelAdapter):
             "adapt_updates_used": 0,
             "adapt_updates_per_step": {},
         }
+
+    def get_runtime_diagnostics(self) -> Dict[str, Any]:
+        return dict(self._runtime_diag)
 
     def save(self, out_dir: str) -> Dict[str, Any]:
         if self._filter is None:

@@ -11,8 +11,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
+from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
+from bench.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 try:
@@ -307,6 +309,8 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         self.train_updates_used: int = 0
         self.adapt_updates_used: int = 0
+        self._debug_every: int = 0
+        self._runtime_diag: Dict[str, Any] = {}
 
     def setup(
         self,
@@ -319,6 +323,8 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         self._cfg = dict(cfg)
         self._run_ctx = dict(run_ctx)
+        self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
+        self._runtime_diag = {}
         self.repo_root, self.entrypoints = _resolve_repo_spec(cfg)
         self._imports = _load_kalmannet_tsp(self.repo_root)
 
@@ -407,6 +413,17 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         self.last_class = type(self.model).__name__
         self.last_layout = "bench_BTD_to_repo_BDT_stepwise"
+        logger.info(
+            "setup repo=%s class=%s device=%s x_dim=%s y_dim=%s T=%s layout=%s",
+            self.repo_root,
+            self.last_class,
+            self.device,
+            self._x_dim,
+            self._y_dim,
+            self._T_setup,
+            self.last_layout,
+        )
+        logger.debug("KalmanNet_TSP hyperparams batch_size=%s lr=%s wd=%s", args.n_batch, args.lr, args.wd)
 
     def train(
         self,
@@ -571,16 +588,32 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         self.model.eval()
         preds: List[torch.Tensor] = []
+        total_n = 0
         with torch.no_grad():
-            for batch in test_dl:
+            for bi, batch in enumerate(test_dl):
                 _, y_raw = _extract_batch_xy(batch)
                 y = _to_tensor(y_raw, device=self.device, dtype=self.dtype)
                 pred = self._forward_sequence(y, context=None)
+                validate_exact_layout(
+                    pred,
+                    expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+                    axis_names=("B", "T", "D"),
+                    label="x_hat",
+                )
+                total_n += int(y.shape[0])
+                if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred)):
+                    logger.debug("eval batch=%s %s", bi, format_array_stats("x_hat", pred))
                 preds.append(pred.detach().cpu())
 
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
         x_hat = torch.cat(preds, dim=0).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(total_n), int(self._T_setup or x_hat.shape[1]), int(self._x_dim)),
+            axis_names=("N", "T", "D"),
+            label="x_hat",
+        )
 
         preds_path = None
         if self._artifacts_dir is not None:
@@ -623,7 +656,15 @@ class KalmanNetTSPAdapter(ModelAdapter):
             ctx["x0"] = state0
 
         y = _to_tensor(y_batch, device=self.device, dtype=self.dtype)
+        logger.debug("predict input shape=%s layout=%s", tuple(y.shape), self.last_layout)
         x_hat = self._forward_sequence(y, context=ctx)
+        validate_exact_layout(
+            x_hat,
+            expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        logger.debug("predict output %s", format_array_stats("x_hat", x_hat))
         if return_cov:
             return x_hat, None
         return x_hat
@@ -721,6 +762,7 @@ class KalmanNetTSPAdapter(ModelAdapter):
         self.model.InitSequence(m1_0_batch, int(T))  # type: ignore[attr-defined]
 
         x_repo = torch.empty((B, self._x_dim, T), device=self.device, dtype=self.dtype)
+        x_norm_t: List[float] = []
         for t in range(T):
             y_t = y_repo[:, :, t].unsqueeze(2)  # [B,Dy,1]
             x_t = self.model(y_t)
@@ -736,8 +778,22 @@ class KalmanNetTSPAdapter(ModelAdapter):
                     f"(expected {(B, self._x_dim, 1)})"
                 )
             x_repo[:, :, t] = x_t[:, :, 0]
+            x_norm_t.append(float(torch.linalg.norm(x_t).detach().cpu().item()))
+            if self._debug_every > 0 and ((t % self._debug_every) == 0 or has_nonfinite(x_t)):
+                logger.debug("forward t=%s %s", t, format_array_stats("x_t", x_t))
 
-        return x_repo.permute(0, 2, 1).contiguous()  # [B,T,Dx]
+        self._runtime_diag = {"x_norm_t": np.asarray(x_norm_t, dtype=np.float32)}
+        x_hat = x_repo.permute(0, 2, 1).contiguous()
+        validate_exact_layout(
+            x_hat,
+            expected=(int(B), int(T), int(self._x_dim)),
+            axis_names=("B", "T", "D"),
+            label="x_hat",
+        )
+        return x_hat  # [B,T,Dx]
+
+    def get_runtime_diagnostics(self) -> Dict[str, Any]:
+        return dict(self._runtime_diag)
 
     @torch.no_grad()
     def _compute_validation_loss(

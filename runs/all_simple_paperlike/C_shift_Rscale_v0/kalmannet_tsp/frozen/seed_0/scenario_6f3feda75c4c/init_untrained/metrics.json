@@ -1,0 +1,138 @@
+{
+  "status": "ok",
+  "suite_name": "all_simple_paperlike",
+  "task_id": "C_shift_Rscale_v0",
+  "scenario_id": "6f3feda75c4c",
+  "cache_scenario_id": "6f3feda75c4c",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "kalmannet_tsp",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 5,
+    "y_dim": 5,
+    "T": 100
+  },
+  "accuracy": {
+    "mse": 237787.50498475507,
+    "rmse": 487.6346019149534,
+    "mse_db": 53.76189030018824
+  },
+  "timing": {
+    "timing_ms_per_step": 0.09960044220024429,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": {
+    "t0": 50,
+    "W": 20,
+    "eps": 0.05,
+    "E_pre": 281.29022528806206,
+    "recovery_k": 50,
+    "recovered": false,
+    "failure_policy": "cap"
+  },
+  "t0_used": 50,
+  "scenario_settings": {
+    "inv_r2_db": 0
+  },
+  "scenario_cfg_basis": {
+    "pre_shift": {
+      "Q": {
+        "type": "scaled_identity",
+        "q2": 0.001
+      },
+      "R": {
+        "type": "scaled_identity",
+        "r2": 1.0
+      },
+      "obs_distribution": {
+        "name": "gaussian"
+      }
+    },
+    "shift": {
+      "t0": 50,
+      "post_shift": {
+        "obs_distribution": {
+          "name": "gaussian"
+        },
+        "R_scale": 10.0
+      }
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "KalmanNetNN"
+  },
+  "adapter_meta": {
+    "adapter_id": "kalmannet_tsp",
+    "adapter_version": "s2_route_b_v1",
+    "runtime_device": "cuda",
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BDT_stepwise",
+    "entrypoints": {
+      "config": "Simulations/config.py::general_settings",
+      "system_model": "Simulations/Linear_sysmdl.py::SystemModel",
+      "model": "KNet/KalmanNet_nn.py::KalmanNetNN",
+      "pipeline_candidate": "Pipelines/Pipeline_EKF.py::Pipeline_EKF"
+    },
+    "selected_layout": "bench_BTD_to_repo_BDT_stepwise",
+    "selected_class": "KalmanNetNN"
+  },
+  "run_plan": {
+    "plan_id": "untrained__frozen",
+    "init_id": "untrained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": false,
+    "suite_name": "all_simple_paperlike",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "6f3feda75c4c",
+    "seed": 0,
+    "model_id": "kalmannet_tsp",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "budgets": {
+      "train_max_updates": 2000,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": 50
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": false,
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "train_outer_updates_used": 0,
+    "train_inner_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 2000,
+    "train_skipped": false,
+    "cache_enabled": false,
+    "cache_hit": false,
+    "cache_key": null,
+    "track_id": "frozen",
+    "init_id": "untrained"
+  },
+  "run_dir": "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/kalmannet_tsp/frozen/seed_0/scenario_6f3feda75c4c/init_untrained"
+}

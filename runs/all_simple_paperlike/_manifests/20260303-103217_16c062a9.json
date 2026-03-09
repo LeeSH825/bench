@@ -1,0 +1,13 @@
+{
+  "suite_name": "all_simple_paperlike",
+  "suite_yaml": "/home/xynus/bench/bench/configs/suite_all_simple_paperlike.yaml",
+  "created_at_unix": 1772501537.3549647,
+  "run_count": 5,
+  "run_dirs": [
+    "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_25d3454ba59f",
+    "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_6f3feda75c4c",
+    "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_9619ede896e9",
+    "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_47acf9341456",
+    "/home/xynus/bench/runs/all_simple_paperlike/C_shift_Rscale_v0/mb_kf_nominal/frozen/seed_0/scenario_415cd608d7d0"
+  ]
+}

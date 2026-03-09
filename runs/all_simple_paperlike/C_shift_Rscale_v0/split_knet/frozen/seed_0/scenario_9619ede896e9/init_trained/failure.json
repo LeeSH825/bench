@@ -1,0 +1,47 @@
+{
+  "status": "failed",
+  "failure_type": "policy_violation",
+  "phase": "runner",
+  "failure_stage": "runner",
+  "message": "RuntimeError: policy_violation: trained plan requires positive train_outer_updates_used unless train_skipped=true.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/xynus/bench/bench/runners/run_suite.py\", line 1658, in run_one\n    raise RuntimeError(\nRuntimeError: policy_violation: trained plan requires positive train_outer_updates_used unless train_skipped=true.\n",
+  "context": {
+    "suite_name": "all_simple_paperlike",
+    "task_id": "C_shift_Rscale_v0",
+    "scenario_id": "9619ede896e9",
+    "cache_scenario_id": "9619ede896e9",
+    "scenario_id_resolved_from_cache": false,
+    "seed": 0,
+    "model_id": "split_knet",
+    "track_id": "frozen",
+    "init_id": "trained",
+    "scenario_settings": {
+      "inv_r2_db": 10
+    },
+    "scenario_cfg_basis": {
+      "pre_shift": {
+        "Q": {
+          "type": "scaled_identity",
+          "q2": 0.001
+        },
+        "R": {
+          "type": "scaled_identity",
+          "r2": 0.1
+        },
+        "obs_distribution": {
+          "name": "gaussian"
+        }
+      },
+      "shift": {
+        "t0": 50,
+        "post_shift": {
+          "obs_distribution": {
+            "name": "gaussian"
+          },
+          "R_scale": 10.0
+        }
+      }
+    }
+  },
+  "error": "RuntimeError: policy_violation: trained plan requires positive train_outer_updates_used unless train_skipped=true."
+}

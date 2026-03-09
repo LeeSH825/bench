@@ -1,0 +1,138 @@
+{
+  "status": "ok",
+  "suite_name": "all_simple_paperlike",
+  "task_id": "A_linear_canonical_v0",
+  "scenario_id": "e430cbdcf2b5",
+  "cache_scenario_id": "e430cbdcf2b5",
+  "scenario_id_resolved_from_cache": false,
+  "seed": 0,
+  "model_id": "mb_kf_nominal",
+  "track_id": "frozen",
+  "dims": {
+    "x_dim": 5,
+    "y_dim": 5,
+    "T": 100
+  },
+  "accuracy": {
+    "mse": 0.003151533275355321,
+    "rmse": 0.056138518642330784,
+    "mse_db": -25.014781030308594
+  },
+  "timing": {
+    "timing_ms_per_step": 0.07222209430001385,
+    "timing_std_ms_per_step": 0.0,
+    "warmup_batches_excluded": 1,
+    "eval_batch_size": 32
+  },
+  "nll": {
+    "value": null,
+    "policy": "NA_if_no_cov"
+  },
+  "shift_recovery": null,
+  "t0_used": null,
+  "scenario_settings": {
+    "inv_r2_db": 20
+  },
+  "scenario_cfg_basis": {
+    "form": "diag",
+    "Q": {
+      "type": "scaled_identity",
+      "q2": 0.001
+    },
+    "R": {
+      "type": "scaled_identity",
+      "r2": 0.01
+    }
+  },
+  "adapter_info": {
+    "selected_layout": "bench_BTD_to_repo_BTD",
+    "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
+  },
+  "adapter_meta": {
+    "adapter_id": "mb_kf",
+    "adapter_version": "s10_kf_baseline_v1",
+    "runtime_device": "cuda",
+    "baseline": "mb_kf",
+    "mode": "nominal",
+    "uses_shift_meta": false,
+    "t0_shift": null,
+    "R_scale": 1.0,
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BTD_batched_linear_kf",
+    "capabilities": {
+      "train_supported": false,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_linear_system": "F/H are linear system matrices from bench-generated NPZ/system_info.",
+      "B_oracle_shift_info": "oracle_shift mode uses shift meta (t0,R_scale) from D15 meta_json.",
+      "C_metrics_ownership": "official metrics are computed by bench layer only."
+    },
+    "how_to_verify": {
+      "A_linear_system": "bench/tasks/bench_generated.py (save_npz_split_v0 includes F/H/meta_json).",
+      "B_oracle_shift_info": "bench/tasks/bench_generated.py noise_meta['shift']['post_shift']['R_scale'] and t0.",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and adapter eval()/predict() outputs."
+    },
+    "selected_layout": "bench_BTD_to_repo_BTD",
+    "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
+  },
+  "run_plan": {
+    "plan_id": "untrained__frozen",
+    "init_id": "untrained",
+    "track_id": "frozen",
+    "official_benchmark_eligible": false,
+    "suite_name": "all_simple_paperlike",
+    "task_id": "A_linear_canonical_v0",
+    "scenario_id": "e430cbdcf2b5",
+    "seed": 0,
+    "model_id": "mb_kf_nominal",
+    "deterministic": true,
+    "device_requested": "cuda",
+    "device_resolved": "cuda",
+    "precision": "fp32",
+    "logging": {
+      "level": "DEBUG",
+      "log_to_file": true,
+      "log_file": null,
+      "debug_every": 1
+    },
+    "budgets": {
+      "train_max_updates": 2000,
+      "adapt_max_updates": 0,
+      "adapt_max_updates_per_step": 0,
+      "t0_gate_enabled": false,
+      "adaptation_budget": {}
+    },
+    "shift": {
+      "t0": null
+    },
+    "adaptation": {
+      "enabled": false,
+      "allowed_after_t0_only": false,
+      "max_updates": 0,
+      "max_updates_per_step": 0
+    },
+    "cache": {
+      "enabled": false,
+      "cache_hit": false,
+      "train_skipped": false
+    }
+  },
+  "budgets": {
+    "train_updates_used": 0,
+    "train_outer_updates_used": 0,
+    "train_inner_updates_used": 0,
+    "adapt_updates_used": 0,
+    "train_max_updates": 2000,
+    "train_skipped": false,
+    "cache_enabled": false,
+    "cache_hit": false,
+    "cache_key": null,
+    "track_id": "frozen",
+    "init_id": "untrained"
+  },
+  "run_dir": "/home/xynus/bench/runs/all_simple_paperlike/A_linear_canonical_v0/mb_kf_nominal/frozen/seed_0/scenario_e430cbdcf2b5"
+}
