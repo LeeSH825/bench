@@ -2,4 +2,74 @@
 external_data/
 mock_external_data/
 bench_data_raw/
+bench_data_cache/
 
+# Benchmark, training, and reporting outputs.
+runs/
+reports/
+plots/
+logs/
+*.log
+*.pid
+*.start_time
+
+# Python bytecode, test caches, and local tooling state.
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+.ipynb_checkpoints/
+
+# Python packaging/build artifacts.
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+pip-wheel-metadata/
+
+# Local environments and vendored runtime dependencies.
+.venv/
+venv/
+env/
+.basilisk_deps/
+
+# Native compiler/linker outputs.
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.asm
+*.ll
+*.bc
+*.d
+
+# Large generated ML/data artifacts.
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# OS/editor noise.
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo

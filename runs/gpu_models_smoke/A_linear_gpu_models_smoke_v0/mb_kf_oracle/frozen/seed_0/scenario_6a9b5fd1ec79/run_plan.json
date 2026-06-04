@@ -1,17 +1,23 @@
 {
-  "plan_id": "untrained__frozen",
-  "init_id": "untrained",
+  "plan_id": "pretrained__frozen",
+  "init_id": "pretrained",
   "track_id": "frozen",
-  "official_benchmark_eligible": false,
+  "official_benchmark_eligible": true,
   "suite_name": "gpu_models_smoke",
   "task_id": "A_linear_gpu_models_smoke_v0",
   "scenario_id": "6a9b5fd1ec79",
   "seed": 0,
   "model_id": "mb_kf_oracle",
   "deterministic": true,
-  "device_requested": "cuda",
-  "device_resolved": "cuda",
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
   "precision": "fp32",
+  "logging": {
+    "level": "DEBUG",
+    "log_to_file": true,
+    "log_file": null,
+    "debug_every": 8
+  },
   "budgets": {
     "train_max_updates": 4,
     "adapt_max_updates": 0,

@@ -42,6 +42,8 @@ from bench.utils.diagnostics import (
     array_stats,
     format_array_stats,
     has_nonfinite,
+    residual_array,
+    residual_stats,
     short_window,
     summarize_mapping_arrays,
     validate_exact_layout,
@@ -253,7 +255,13 @@ def _capture_first_batch(
     y = short_window(split["y"][:bs], batch_limit=bs)
     payload: Dict[str, Any] = {"x": x, "y": y}
     if x_hat_full is not None:
-        payload["x_hat"] = short_window(x_hat_full[:bs], batch_limit=bs)
+        x_hat = short_window(x_hat_full[:bs], batch_limit=bs)
+        payload["x_hat"] = x_hat
+        resid = residual_array(x_hat, x)
+        if resid is not None:
+            payload["residual"] = resid
+            if resid.ndim == 3:
+                payload["residual_norm_t"] = np.linalg.norm(resid, axis=(0, 2))
     if mse_t_mean is not None:
         payload["mse_t"] = np.array(mse_t_mean[: min(len(mse_t_mean), 64)], copy=True)
     return payload
@@ -295,6 +303,7 @@ def _write_run_diagnostics(
         "x_stats": array_stats(split_test["x"]),
         "y_stats": array_stats(split_test["y"]),
         "x_hat_stats": (array_stats(x_hat_full) if x_hat_full is not None else None),
+        "residual_stats": (residual_stats(x_hat_full, split_test["x"]) if x_hat_full is not None else None),
         "adapter_meta": adapter_meta,
         "adapter_runtime_stats": summarize_mapping_arrays("adapter_runtime", adapter_runtime),
     }
@@ -520,6 +529,11 @@ def _canonicalize_scenario_id(task_id: str, scenario_cfg_basis: Dict[str, Any]) 
         payload = {"task_id": task_id, "scenario": scenario_cfg_basis}
         s = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
         return hashlib.sha1(s.encode("utf-8")).hexdigest()[:12]
+
+
+def _scenario_id_for_settings(task: Dict[str, Any], scenario_settings: Dict[str, Any]) -> str:
+    task_id = str(task.get("task_id", ""))
+    return _canonicalize_scenario_id(task_id, _build_scenario_cfg_basis(task, scenario_settings))
 
 
 def _meta_get(meta: Dict[str, Any], path: Tuple[str, ...]) -> Any:
@@ -790,6 +804,49 @@ def _update_ledger_file(ledger_path: Path, patch: Dict[str, Any]) -> Dict[str, A
     return obj
 
 
+def _normalize_train_update_accounting(
+    *,
+    ledger_obj: Dict[str, Any],
+    adapter: Any,
+    train_max_updates: int,
+    train_skipped: bool,
+) -> Dict[str, Any]:
+    """
+    Normalize training update counters before policy checks.
+
+    Convention: train_updates_used is the backward-compatible alias for
+    train_outer_updates_used. Single-level training adapters may only fill the
+    alias; keep that valid while preserving budget checks.
+    """
+    raw_train_updates = int(ledger_obj.get("train_updates_used", getattr(adapter, "train_updates_used", 0)) or 0)
+    raw_outer_updates = int(
+        ledger_obj.get(
+            "train_outer_updates_used",
+            getattr(adapter, "train_outer_updates_used", raw_train_updates),
+        )
+        or 0
+    )
+    train_inner_updates_used = int(
+        ledger_obj.get("train_inner_updates_used", getattr(adapter, "train_inner_updates_used", 0)) or 0
+    )
+    train_skipped_flag = bool(ledger_obj.get("train_skipped", train_skipped))
+
+    normalized_from_alias = False
+    train_outer_updates_used = int(raw_outer_updates)
+    if train_outer_updates_used <= 0 and raw_train_updates > 0:
+        train_outer_updates_used = int(raw_train_updates)
+        normalized_from_alias = True
+
+    ledger_obj["train_outer_updates_used"] = int(train_outer_updates_used)
+    ledger_obj["train_inner_updates_used"] = int(train_inner_updates_used)
+    ledger_obj["train_updates_used"] = int(train_outer_updates_used)
+    ledger_obj["train_max_updates"] = int(train_max_updates)
+    ledger_obj["train_skipped"] = bool(train_skipped_flag)
+    if normalized_from_alias:
+        ledger_obj["train_update_accounting_normalized_from_alias"] = True
+    return ledger_obj
+
+
 def _read_adapter_meta(adapter: Any) -> Dict[str, Any]:
     if not hasattr(adapter, "get_adapter_meta"):
         return {}
@@ -940,20 +997,36 @@ def _load_split_npz(npz_path: Path) -> Dict[str, Any]:
         u = z["u"].astype(np.float32, copy=False) if "u" in z.files else None
         F = z["F"] if "F" in z.files else None
         H = z["H"] if "H" in z.files else None
+        extras: Dict[str, np.ndarray] = {}
+        core_keys = {"x", "y", "u", "F", "H", "meta_json"}
+        n = int(x.shape[0])
+        for key in z.files:
+            if key in core_keys:
+                continue
+            arr = z[key]
+            if getattr(arr, "ndim", 0) >= 1 and int(arr.shape[0]) == n and np.issubdtype(arr.dtype, np.number):
+                extras[str(key)] = arr.astype(np.float32, copy=False)
         meta = None
         if "meta_json" in z.files:
             try:
                 meta = json.loads(z["meta_json"].item())
             except Exception:
                 meta = None
-    return {"x": x, "y": y, "u": u, "F": F, "H": H, "meta": meta}
+    return {"x": x, "y": y, "u": u, "F": F, "H": H, "meta": meta, "extras": extras}
 
 
 class _SeqDataset(Dataset):
-    def __init__(self, x: np.ndarray, y: np.ndarray, u: Optional[np.ndarray] = None):
+    def __init__(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        u: Optional[np.ndarray] = None,
+        extras: Optional[Dict[str, np.ndarray]] = None,
+    ):
         self._x = x
         self._y = y
         self._u = u
+        self._extras = dict(extras or {})
 
     def __len__(self) -> int:
         return int(self._x.shape[0])
@@ -961,10 +1034,12 @@ class _SeqDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         x = torch.from_numpy(self._x[idx])
         y = torch.from_numpy(self._y[idx])
-        if self._u is None:
-            return {"x": x, "y": y}
-        u = torch.from_numpy(self._u[idx])
-        return {"x": x, "y": y, "u": u}
+        sample: Dict[str, torch.Tensor] = {"x": x, "y": y}
+        if self._u is not None:
+            sample["u"] = torch.from_numpy(self._u[idx])
+        for key, arr in self._extras.items():
+            sample[key] = torch.from_numpy(arr[idx])
+        return sample
 
 
 def _make_loader(
@@ -972,11 +1047,12 @@ def _make_loader(
     x: np.ndarray,
     y: np.ndarray,
     u: Optional[np.ndarray],
+    extras: Optional[Dict[str, np.ndarray]] = None,
     batch_size: int,
     shuffle: bool,
     seed: int,
 ) -> DataLoader:
-    ds = _SeqDataset(x=x, y=y, u=u)
+    ds = _SeqDataset(x=x, y=y, u=u, extras=extras)
     g = torch.Generator()
     g.manual_seed(int(seed))
     return DataLoader(
@@ -1517,6 +1593,7 @@ def run_one(
             x=split_train["x"],
             y=split_train["y"],
             u=split_train.get("u"),
+            extras=split_train.get("extras"),
             batch_size=train_bs,
             shuffle=True,
             seed=int(seed),
@@ -1525,6 +1602,7 @@ def run_one(
             x=split_val["x"],
             y=split_val["y"],
             u=split_val.get("u"),
+            extras=split_val.get("extras"),
             batch_size=eval_bs,
             shuffle=False,
             seed=int(seed),
@@ -1533,6 +1611,7 @@ def run_one(
             x=split_test["x"],
             y=split_test["y"],
             u=split_test.get("u"),
+            extras=split_test.get("extras"),
             batch_size=eval_bs,
             shuffle=False,
             seed=int(seed),
@@ -1990,22 +2069,14 @@ def run_one(
             }
             _write_json(ledger_path, ledger_obj)
 
-        train_outer_updates_used = int(
-            ledger_obj.get(
-                "train_outer_updates_used",
-                ledger_obj.get("train_updates_used", getattr(adapter, "train_updates_used", 0)),
-            )
+        ledger_obj = _normalize_train_update_accounting(
+            ledger_obj=ledger_obj,
+            adapter=adapter,
+            train_max_updates=int(train_max_updates),
+            train_skipped=bool(train_skipped),
         )
-        train_inner_updates_used = int(
-            ledger_obj.get("train_inner_updates_used", getattr(adapter, "train_inner_updates_used", 0))
-        )
+        train_outer_updates_used = int(ledger_obj.get("train_outer_updates_used", 0))
         train_skipped_flag = bool(ledger_obj.get("train_skipped", train_skipped))
-        ledger_obj["train_outer_updates_used"] = int(train_outer_updates_used)
-        ledger_obj["train_inner_updates_used"] = int(train_inner_updates_used)
-        # Backward-compatible alias: keep train_updates_used as outer updates.
-        ledger_obj["train_updates_used"] = int(train_outer_updates_used)
-        ledger_obj["train_max_updates"] = int(train_max_updates)
-        ledger_obj["train_skipped"] = bool(train_skipped_flag)
         ledger_obj["cache_enabled"] = bool(cache_enabled)
         ledger_obj["cache_hit"] = bool(cache_hit)
         ledger_obj["cache_key"] = (str(cache_key) if cache_key is not None else None)
@@ -2214,6 +2285,12 @@ def main() -> None:
     )
     ap.add_argument("--tasks", nargs="*", default=None, help="task_id allowlist (optional)")
     ap.add_argument(
+        "--scenario-ids",
+        nargs="*",
+        default=None,
+        help="scenario_id allowlist after sweep expansion (optional; useful for resumable queued runs)",
+    )
+    ap.add_argument(
         "--log-level",
         type=str,
         choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
@@ -2267,6 +2344,7 @@ def main() -> None:
     if args.tasks:
         wanted_t = set(args.tasks)
         tasks = [t for t in tasks if t.get("task_id") in wanted_t]
+    scenario_id_filter = set(str(x) for x in (args.scenario_ids or []))
 
     summary_rel = suite.get("reporting", {}).get("tables", {}).get("summary_csv", "reports/summary.csv")
     summary_csv = (_bench_root() / summary_rel).resolve()
@@ -2281,6 +2359,8 @@ def main() -> None:
         if skip_if_disabled and not _enabled(task, task_default):
             continue
         scenarios = _expand_sweep(task.get("sweep"))
+        if scenario_id_filter:
+            scenarios = [s for s in scenarios if _scenario_id_for_settings(task, s) in scenario_id_filter]
         total += len(scenarios) * len(seeds) * len(models) * len(plan_specs)
 
     print(f"[run_suite] plan: ~{total} runs (after enabled filtering)")
@@ -2300,6 +2380,8 @@ def main() -> None:
             continue
 
         scenario_list = _expand_sweep(task.get("sweep"))
+        if scenario_id_filter:
+            scenario_list = [s for s in scenario_list if _scenario_id_for_settings(task, s) in scenario_id_filter]
         for scenario_settings in scenario_list:
             for seed in seeds:
                 for model in models:

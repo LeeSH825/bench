@@ -9,6 +9,7 @@ import unittest
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import numpy as np
 import torch
 
 from bench.models import registry
@@ -162,6 +163,11 @@ class LoggingDiagnosticsTests(unittest.TestCase):
         self.assertTrue(diag_npz.exists())
         stats_obj = json.loads(diag_stats.read_text(encoding="utf-8"))
         self.assertEqual(stats_obj["reason"], "debug")
+        self.assertIn("residual_stats", stats_obj)
+        self.assertIsNotNone(stats_obj["residual_stats"])
+        with np.load(diag_npz) as diag_npz_obj:
+            self.assertIn("residual", diag_npz_obj.files)
+            self.assertIn("residual_norm_t", diag_npz_obj.files)
 
     def test_run_one_shape_mismatch_reports_clear_error(self) -> None:
         suite = self._prepare_suite()

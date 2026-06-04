@@ -1,0 +1,205 @@
+suite:
+  name: gpu_fig5a_official_longtrain
+  version: "0.1.0"
+  description: >
+    Official GPU Fig5a-style R-noise sweep with longer training budgets.
+    Diagnostic-only models are intentionally omitted.
+
+seeds: [0, 1, 2]
+
+tasks:
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_m10
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=-10"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 10.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_0
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=0"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 1.0 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_10
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=10"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 0.1 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_20
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=20"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 0.01 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_30
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=30"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 0.001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+  - task_id: F5a_official_gpu_m2n2_T50_invR2db_40
+    task_name: "Official GPU Fig5a 2x2 T50 inv_r2_db=40"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 50
+    dataset_sizes: { N_train: 64, N_val: 16, N_test: 16 }
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0 }
+      R: { type: "scaled_identity", r2: 0.0001 }
+    observation: { type: "full", h_type: "linear", H: "canonical_inverse" }
+    control_input_u: false
+    ground_truth: { has_gt: true }
+    sweep: {}
+
+models:
+  - model_id: mb_kf_oracle
+    display_name: "Model-Based KF (Oracle)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "oracle"
+    outputs_covariance: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        F5a_official_gpu_m2n2_T50_invR2db_m10: "main_linear_canonical.py"
+        F5a_official_gpu_m2n2_T50_invR2db_0: "main_linear_canonical.py"
+        F5a_official_gpu_m2n2_T50_invR2db_10: "main_linear_canonical.py"
+        F5a_official_gpu_m2n2_T50_invR2db_20: "main_linear_canonical.py"
+        F5a_official_gpu_m2n2_T50_invR2db_30: "main_linear_canonical.py"
+        F5a_official_gpu_m2n2_T50_invR2db_40: "main_linear_canonical.py"
+    input_layout: "BTD"
+    batch_size: 8
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 100
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    repo:
+      path: "third_party/Split_KalmanNet"
+      entrypoints:
+        F5a_official_gpu_m2n2_T50_invR2db_m10: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+        F5a_official_gpu_m2n2_T50_invR2db_0: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+        F5a_official_gpu_m2n2_T50_invR2db_10: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+        F5a_official_gpu_m2n2_T50_invR2db_20: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+        F5a_official_gpu_m2n2_T50_invR2db_30: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+        F5a_official_gpu_m2n2_T50_invR2db_40: "GSSFiltering/filtering.py::Split_KalmanNet_Filter"
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 4
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 100
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/gpu_fig5a_official_longtrain"
+  budget:
+    train_max_updates: 1000
+    train_batch_size: 8
+    eval_batch_size: 16
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 3
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    enabled: false
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+    - "env.txt"
+    - "git_versions.txt"
+  tables:
+    summary_csv: "reports/summary_gpu_fig5a_official_longtrain.csv"

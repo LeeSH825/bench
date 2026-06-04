@@ -77,11 +77,16 @@ track_cfg:
   adaptation_enabled: false
 init_id: untrained
 runner_overrides:
-  device: cuda
+  device: cpu
   precision: fp32
+  logging:
+    level: DEBUG
+    log_to_file: true
+    log_file: null
+    debug_every: 8
 data:
-  cache_root: /tmp/bench_data_cache
-  train_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/train.npz
-  val_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/val.npz
-  test_npz: /tmp/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/test.npz
+  cache_root: /home/dss-pc-05/bench/bench_data_cache
+  train_npz: /home/dss-pc-05/bench/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/train.npz
+  val_npz: /home/dss-pc-05/bench/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/val.npz
+  test_npz: /home/dss-pc-05/bench/bench_data_cache/gpu_models_smoke/A_linear_gpu_models_smoke_v0/scenario_02e09f43363c/seed_0/test.npz
   canonical_layout: NTD

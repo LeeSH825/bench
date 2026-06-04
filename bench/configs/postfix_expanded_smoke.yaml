@@ -1,0 +1,172 @@
+suite:
+  name: postfix_expanded_smoke
+  version: "0.1.0"
+  description: >
+    Small post-fix expansion smoke for plan-identity reporting, update accounting,
+    residual diagnostics, and fairness checks across baseline and shift tasks.
+
+seeds: [0]
+
+tasks:
+  - task_id: A_linear_postfix_smoke_v0
+    task_name: "Postfix Linear No-Shift Tiny"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 16
+    dataset_sizes:
+      N_train: 16
+      N_val: 4
+      N_test: 4
+    noise:
+      form: "diag"
+      Q: { type: "scaled_identity", q2: 1.0e-3 }
+      R: { type: "scaled_identity", r2: 1.0e-3 }
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep:
+      inv_r2_db:
+        start: 30
+        stop: 30
+        step: 1
+
+  - task_id: C_shift_postfix_smoke_v0
+    task_name: "Postfix Linear Shift Tiny"
+    system_type: linear
+    x_dim: 2
+    y_dim: 2
+    sequence_length_T: 16
+    dataset_sizes:
+      N_train: 16
+      N_val: 4
+      N_test: 4
+    noise:
+      pre_shift:
+        Q: { type: "scaled_identity", q2: 1.0e-3 }
+        R: { type: "scaled_identity", r2: 1.0e-3 }
+        obs_distribution: { name: "gaussian" }
+      shift:
+        t0: 8
+        post_shift:
+          obs_distribution: { name: "gaussian" }
+          R_scale: 10.0
+    observation:
+      type: "full"
+      h_type: "linear"
+      H: "canonical_inverse"
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+models:
+  - model_id: mb_kf_oracle
+    display_name: "Model-Based KF (Oracle)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "oracle"
+    outputs_covariance: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+      entrypoints:
+        A_linear_postfix_smoke_v0: "main_linear_canonical.py"
+        C_shift_postfix_smoke_v0: "main_linear_canonical.py"
+    input_layout: "BTD"
+    batch_size: 2
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 2
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: adaptive_knet
+    display_name: "Adaptive-KNet-ICASSP24"
+    adapter: "bench.models.adaptive_knet:AdaptiveKNetAdapter"
+    repo:
+      path: "third_party/Adaptive-KNet-ICASSP24"
+      entrypoints:
+        A_linear_postfix_smoke_v0: "main_linear_canonical.py"
+        C_shift_postfix_smoke_v0: "main_cm_linear.py"
+    estimator_class_path: "mnets.KNet_mnet.KalmanNetNN"
+    input_layout: "BTD"
+    batch_size: 2
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 2
+    knet_trainable: true
+    adapt_lr: 1.0e-5
+    adapt_overflow_policy: "fail"
+    capabilities:
+      supports_adaptation: true
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cpu"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/postfix_expanded_smoke"
+  budget:
+    train_max_updates: 4
+    train_batch_size: 2
+    eval_batch_size: 2
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 0
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+    - track_id: budgeted
+      adaptation_enabled: true
+      adaptation_budget:
+        max_updates: 8
+        max_updates_per_step: 1
+        allowed_after_t0_only: true
+        overflow_policy: "fail"
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    window_W: 8
+    tolerance_eps: 0.05
+    metric: "mse"
+    aggregation: "mean_over_window"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+  tables:
+    summary_csv: "reports/summary_postfix_expanded_smoke.csv"

@@ -44,6 +44,12 @@ from .generator.validate import validate_artifacts
 from ..utils.seeding import stable_int_seed_v0, numpy_rng_v0
 from ..utils.io import ensure_dir
 from ..utils.sweep import expand_sweep_grid
+from .generator.basilisk_adcs import generate_basilisk_adcs_v0
+from .generator.basilisk_imu_adcs import (
+    generate_basilisk_imu_adcs_v0,
+    generate_basilisk_imu_bias_adcs_v0,
+    generate_basilisk_imu_sparse_ref_adcs_v0,
+)
 
 
 def _repo_root_from_here() -> Path:
@@ -235,6 +241,30 @@ _UZH_FPV_TASK_FAMILIES = {
     "uzh_fpv_ca",
     "uzh_fpv_ca_v0",
 }
+_BASILISK_ADCS_TASK_FAMILIES = {
+    "basilisk_adcs",
+    "basilisk_adcs_v0",
+    "bsk_adcs",
+    "bsk_adcs_v0",
+}
+_BASILISK_IMU_ADCS_TASK_FAMILIES = {
+    "basilisk_imu_adcs",
+    "basilisk_imu_adcs_v0",
+    "bsk_imu_adcs",
+    "bsk_imu_adcs_v0",
+}
+_BASILISK_IMU_BIAS_ADCS_TASK_FAMILIES = {
+    "basilisk_imu_bias_adcs",
+    "basilisk_imu_bias_adcs_v0",
+    "bsk_imu_bias_adcs",
+    "bsk_imu_bias_adcs_v0",
+}
+_BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES = {
+    "basilisk_imu_sparse_ref_adcs",
+    "basilisk_imu_sparse_ref_adcs_v0",
+    "bsk_imu_sparse_ref_adcs",
+    "bsk_imu_sparse_ref_adcs_v0",
+}
 
 
 def _normalized_task_family(task_cfg: Dict[str, Any]) -> str:
@@ -255,6 +285,14 @@ def _normalized_task_family(task_cfg: Dict[str, Any]) -> str:
         return "nclt_v0"
     if family in _UZH_FPV_TASK_FAMILIES:
         return "uzh_fpv_v0"
+    if family in _BASILISK_ADCS_TASK_FAMILIES:
+        return "basilisk_adcs_v0"
+    if family in _BASILISK_IMU_ADCS_TASK_FAMILIES:
+        return "basilisk_imu_adcs_v0"
+    if family in _BASILISK_IMU_BIAS_ADCS_TASK_FAMILIES:
+        return "basilisk_imu_bias_adcs_v0"
+    if family in _BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES:
+        return "basilisk_imu_sparse_ref_adcs_v0"
     return family
 
 
@@ -580,6 +618,42 @@ def _dispatch_generate_v1(
             scenario_id=scenario_id,
             task_family="uzh_fpv_v0",
         )
+    if task_family == "basilisk_adcs_v0":
+        return generate_basilisk_adcs_v0(
+            suite_name=suite_name,
+            task_cfg_dict=task_cfg_dict,
+            scenario_cfg=scenario_cfg,
+            seed=int(seed),
+            scenario_id=scenario_id,
+            task_family="basilisk_adcs_v0",
+        )
+    if task_family == "basilisk_imu_adcs_v0":
+        return generate_basilisk_imu_adcs_v0(
+            suite_name=suite_name,
+            task_cfg_dict=task_cfg_dict,
+            scenario_cfg=scenario_cfg,
+            seed=int(seed),
+            scenario_id=scenario_id,
+            task_family="basilisk_imu_adcs_v0",
+        )
+    if task_family == "basilisk_imu_bias_adcs_v0":
+        return generate_basilisk_imu_bias_adcs_v0(
+            suite_name=suite_name,
+            task_cfg_dict=task_cfg_dict,
+            scenario_cfg=scenario_cfg,
+            seed=int(seed),
+            scenario_id=scenario_id,
+            task_family="basilisk_imu_bias_adcs_v0",
+        )
+    if task_family == "basilisk_imu_sparse_ref_adcs_v0":
+        return generate_basilisk_imu_sparse_ref_adcs_v0(
+            suite_name=suite_name,
+            task_cfg_dict=task_cfg_dict,
+            scenario_cfg=scenario_cfg,
+            seed=int(seed),
+            scenario_id=scenario_id,
+            task_family="basilisk_imu_sparse_ref_adcs_v0",
+        )
 
     if task_family != "linear_gaussian_v0":
         supported = sorted(
@@ -591,6 +665,10 @@ def _dispatch_generate_v1(
             | _LORENZ_TASK_FAMILIES
             | _NCLT_TASK_FAMILIES
             | _UZH_FPV_TASK_FAMILIES
+            | _BASILISK_ADCS_TASK_FAMILIES
+            | _BASILISK_IMU_ADCS_TASK_FAMILIES
+            | _BASILISK_IMU_BIAS_ADCS_TASK_FAMILIES
+            | _BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES
         )
         raise NotImplementedError(
             f"task_family '{task_family}' is not registered. "

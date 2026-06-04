@@ -14,12 +14,12 @@
     "T": 16
   },
   "accuracy": {
-    "mse": 32718.83203125,
-    "rmse": 180.88347639087988,
-    "mse_db": 45.14797792204768
+    "mse": 32718.86939403741,
+    "rmse": 180.8835796694587,
+    "mse_db": 45.1479828814066
   },
   "timing": {
-    "timing_ms_per_step": 3.1017246406577215,
+    "timing_ms_per_step": 0.19328515628558307,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 2
@@ -51,7 +51,7 @@
   "adapter_meta": {
     "adapter_id": "adaptive_knet",
     "adapter_version": "s3_route_b_v1",
-    "runtime_device": "cuda",
+    "runtime_device": "cpu",
     "covariance_support": false,
     "input_layout_bench": "BTD",
     "internal_layout_repo": "BDT_stepwise",
@@ -79,9 +79,15 @@
     "seed": 0,
     "model_id": "adaptive_knet",
     "deterministic": true,
-    "device_requested": "cuda",
-    "device_resolved": "cuda",
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
     "precision": "fp32",
+    "logging": {
+      "level": "INFO",
+      "log_to_file": true,
+      "log_file": null,
+      "debug_every": 8
+    },
     "budgets": {
       "train_max_updates": 4,
       "adapt_max_updates": 0,
@@ -118,5 +124,5 @@
     "init_id": "untrained",
     "adapt_updates_per_step": {}
   },
-  "run_dir": "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/adaptive_knet/frozen/seed_0/scenario_6a9b5fd1ec79/init_untrained"
+  "run_dir": "/home/dss-pc-05/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/adaptive_knet/frozen/seed_0/scenario_6a9b5fd1ec79/init_untrained"
 }

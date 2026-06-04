@@ -297,7 +297,16 @@ def main() -> None:
     ap.add_argument(
         "--fig5a-plot",
         action="store_true",
-        help="write Fig5(a)-style plot: mse_db vs inv_r2_db grouped by (model_id,x_dim,y_dim,T)",
+        help="write Fig5(a)-style plot: mse_db vs inv_r2_db grouped by model/dims/plan",
+    )
+    ap.add_argument(
+        "--fig5a-official-plans",
+        action="store_true",
+        help=(
+            "for Fig5(a) plots, include only official plan rows "
+            "(model-based baselines pretrained:frozen, validated NN models per docs/official_plan_policy.md). "
+            "Points CSV still includes all rows."
+        ),
     )
     ap.add_argument(
         "--severity-x-field",
@@ -421,6 +430,8 @@ def main() -> None:
             print("[dry-run] will write:", f"fig5a_points_{suite_name}.csv")
             print("[dry-run] will plot:", f"fig5a_overlay_mse_db_vs_inv_r2_db_{suite_name}.png")
             print("[dry-run] will plot:", f"fig5a_mse_db_vs_inv_r2_db_{suite_name}.png")
+            if args.fig5a_official_plans:
+                print("[dry-run] fig5a plots will filter to official plans only")
         if args.organize_by_suite:
             print("[dry-run] will mirror to:", out_dir / suite_name / day_stamp / time_stamp / "tables")
             print("[dry-run] will mirror to:", out_dir / suite_name / day_stamp / time_stamp / "plots")
@@ -556,8 +567,16 @@ def main() -> None:
         written_tables.append(fig5a_points_csv)
         print(f"[make_report] wrote: {fig5a_points_csv}")
 
-        wrote_overlay = plot_fig5a_mse_vs_inv_r2(records=records, out_path=fig5a_overlay_path)
-        wrote_legacy = plot_fig5a_mse_vs_inv_r2(records=records, out_path=fig5a_legacy_path)
+        wrote_overlay = plot_fig5a_mse_vs_inv_r2(
+            records=records,
+            out_path=fig5a_overlay_path,
+            official_plans_only=bool(args.fig5a_official_plans),
+        )
+        wrote_legacy = plot_fig5a_mse_vs_inv_r2(
+            records=records,
+            out_path=fig5a_legacy_path,
+            official_plans_only=bool(args.fig5a_official_plans),
+        )
 
         if wrote_overlay:
             written_plots.append(fig5a_overlay_path)

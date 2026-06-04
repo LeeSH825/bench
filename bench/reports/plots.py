@@ -229,6 +229,87 @@ def _mean(xs: List[float]) -> Optional[float]:
     return float(sum(xs) / float(len(xs)))
 
 
+_FIG5A_OFFICIAL_PLAN_BY_MODEL: Dict[str, Optional[Tuple[str, str]]] = {
+    # Validated paper-style NN comparisons.
+    "kalmannet_tsp": ("trained", "frozen"),
+    "split_knet": ("trained", "frozen"),
+    # Current integrations are diagnostic-only until their model-specific
+    # semantic mismatches are resolved and revalidated.
+    "adaptive_knet": None,
+    "maml_knet": None,
+}
+
+
+def _is_fig5a_official_plan(r: RunRecord) -> bool:
+    model_id = str(r.model_id).strip().lower()
+    init_id = str(r.init_id).strip().lower()
+    track_id = str(r.track_id).strip().lower()
+    model_based = model_id in {
+        "oracle_kf",
+        "mb_kf_oracle",
+        "nominal_kf",
+        "mb_kf_nominal",
+        "oracle_shift_kf",
+    } or model_id.startswith("mb_kf_")
+    if model_based:
+        return init_id == "pretrained" and track_id == "frozen"
+    plan = _FIG5A_OFFICIAL_PLAN_BY_MODEL.get(model_id, ("trained", "frozen"))
+    if plan is None:
+        return False
+    return init_id == plan[0] and track_id == plan[1]
+
+
+def _build_fig5a_series(
+    *,
+    records: List[RunRecord],
+    official_plans_only: bool = False,
+) -> List[Dict[str, Any]]:
+    groups: Dict[Tuple[int, int, int, str, str, str], Dict[float, List[float]]] = {}
+    for r in records:
+        if r.status != "ok":
+            continue
+        if official_plans_only and not _is_fig5a_official_plan(r):
+            continue
+        if r.mse_db is None or r.inv_r2_db is None:
+            continue
+        if r.x_dim is None or r.y_dim is None or r.T is None:
+            continue
+        key = (
+            int(r.x_dim),
+            int(r.y_dim),
+            int(r.T),
+            str(r.model_id),
+            str(r.init_id),
+            str(r.track_id),
+        )
+        x = float(r.inv_r2_db)
+        y = float(r.mse_db)
+        groups.setdefault(key, {}).setdefault(x, []).append(y)
+
+    series: List[Dict[str, Any]] = []
+    for (x_dim, y_dim, t_len, model_id, init_id, track_id), x_map in sorted(groups.items()):
+        xs = sorted(x_map.keys())
+        ys = []
+        for x in xs:
+            vals = x_map[x]
+            ys.append(sum(vals) / float(len(vals)))
+        series.append(
+            {
+                "key": (x_dim, y_dim, t_len, model_id, init_id, track_id),
+                "x_dim": x_dim,
+                "y_dim": y_dim,
+                "T": t_len,
+                "model_id": model_id,
+                "init_id": init_id,
+                "track_id": track_id,
+                "label": f"{model_id} | {init_id}:{track_id} | {x_dim}x{y_dim}, T={t_len}",
+                "xs": xs,
+                "ys": ys,
+            }
+        )
+    return series
+
+
 def plot_track_comparison(
     task_id: str,
     records: List[RunRecord],
@@ -446,58 +527,47 @@ def plot_fig5a_mse_vs_inv_r2(
     *,
     records: List[RunRecord],
     out_path: Path,
+    official_plans_only: bool = False,
 ) -> bool:
     """
     Fig.5(a)-style plot:
       x-axis: inv_r2_db = 10*log10(1/r^2)
       y-axis: mse_db
-      lines grouped by (model_id, x_dim, y_dim, T)
+      lines grouped by (model_id, init_id, track_id, x_dim, y_dim, T)
     """
-    groups: Dict[Tuple[int, int, int, str], Dict[float, List[float]]] = {}
-    for r in records:
-        if r.status != "ok":
-            continue
-        if r.mse_db is None or r.inv_r2_db is None:
-            continue
-        if r.x_dim is None or r.y_dim is None or r.T is None:
-            continue
-        key = (int(r.x_dim), int(r.y_dim), int(r.T), str(r.model_id))
-        x = float(r.inv_r2_db)
-        y = float(r.mse_db)
-        groups.setdefault(key, {}).setdefault(x, []).append(y)
-
-    if not groups:
+    series = _build_fig5a_series(records=records, official_plans_only=official_plans_only)
+    if not series:
         return False
 
     style_by_model: Dict[str, Dict[str, str]] = {
         "kalmannet_tsp": {"linestyle": "-", "marker": "o"},
         "oracle_kf": {"linestyle": "--", "marker": "s"},
+        "mb_kf_oracle": {"linestyle": "--", "marker": "s"},
         "nominal_kf": {"linestyle": ":", "marker": "^"},
+        "mb_kf_nominal": {"linestyle": ":", "marker": "^"},
         "oracle_shift_kf": {"linestyle": "-.", "marker": "D"},
     }
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     plt.figure()
-    for (x_dim, y_dim, t_len, model_id), x_map in sorted(groups.items()):
-        xs = sorted(x_map.keys())
-        ys = []
-        for x in xs:
-            vals = x_map[x]
-            ys.append(sum(vals) / float(len(vals)))
-        style = style_by_model.get(str(model_id), {"linestyle": "-", "marker": "o"})
-        label = f"{x_dim}x{y_dim}, T={t_len} | {model_id}"
+    for item in series:
+        model_id = str(item["model_id"])
+        style = style_by_model.get(model_id, {"linestyle": "-", "marker": "o"})
         plt.plot(
-            xs,
-            ys,
+            item["xs"],
+            item["ys"],
             marker=style["marker"],
             linestyle=style["linestyle"],
             linewidth=1.6,
-            label=label,
+            label=str(item["label"]),
         )
 
     plt.xlabel("inv_r2_db = 10*log10(1/r^2)")
     plt.ylabel("mse_db")
-    plt.title("Fig5a-style: MSE[dB] vs (1/r^2)[dB]")
+    title = "Fig5a-style: MSE[dB] vs (1/r^2)[dB]"
+    if official_plans_only:
+        title += " (official plans only)"
+    plt.title(title)
     plt.legend(fontsize=8)
     plt.tight_layout()
     plt.savefig(out_path)

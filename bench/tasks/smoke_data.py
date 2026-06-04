@@ -43,8 +43,8 @@ def _canonical_match_report(F: np.ndarray, H: np.ndarray) -> Tuple[bool, bool, f
     n = int(F.shape[0])
     F_ref = kalmannet_tsp_F_linear_canonical(n)
     H_ref = kalmannet_tsp_H_reverse_canonical(n)
-    f_err = float(np.max(np.abs(F.astype(np.float64) - F_ref)))
-    h_err = float(np.max(np.abs(H.astype(np.float64) - H_ref)))
+    f_err = float(np.max(np.abs(F.astype(np.float64) - F_ref))) if tuple(F.shape) == tuple(F_ref.shape) else float("inf")
+    h_err = float(np.max(np.abs(H.astype(np.float64) - H_ref))) if tuple(H.shape) == tuple(H_ref.shape) else float("inf")
     return (f_err <= 1e-6, h_err <= 1e-6, f_err, h_err)
 
 

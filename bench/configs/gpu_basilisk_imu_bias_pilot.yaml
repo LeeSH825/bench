@@ -1,0 +1,162 @@
+suite:
+  name: gpu_basilisk_imu_bias_pilot
+  version: "0.1.0"
+  description: >
+    Seed-0 CUDA pilot for the AVS Basilisk IMU bias-state ADCS task.
+
+seeds: [0]
+
+tasks:
+  - task_id: Basilisk_IMU_Bias_ADCS_pilot_v0
+    task_name: "Basilisk IMU Bias-State ADCS Pilot"
+    task_family: basilisk_imu_bias_adcs_v0
+    system_type: nonlinear
+    x_dim: 9
+    y_dim: 6
+    sequence_length_T: 100
+    dataset_sizes:
+      N_train: 256
+      N_val: 64
+      N_test: 64
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-8 }
+    observation:
+      type: basilisk_imu_sensor_with_controlled_gyro_bias
+      h_type: imu_gyro_delta_bias
+      measurement_mode: gyro_delta_angle
+    imu:
+      profile_id: clean_imu
+      measurement_mode: gyro_delta_angle
+      sensor_pos_B: [0.0, 0.0, 0.0]
+      body_to_platform_euler321_rad: [0.0, 0.0, 0.0]
+      profiles:
+        clean_imu:
+          severity: clean_imu
+          gyro_noise_std: 0.0
+          accel_noise_std: 0.0
+          gyro_bias_std: 0.0
+          accel_bias_std: 0.0
+    bias_state:
+      profile_id: clean_bias
+      profiles:
+        clean_bias:
+          severity: clean_bias
+          bias_init_std: 0.0
+          bias_rw_std: 0.0
+          gyro_noise_std: 0.0
+          delta_noise_std: 0.0
+        mild_bias:
+          severity: mild_bias
+          bias_init_std: 5.0e-4
+          bias_rw_std: 1.0e-5
+          gyro_noise_std: 5.0e-4
+          delta_noise_std: 5.0e-5
+        moderate_bias:
+          severity: moderate_bias
+          bias_init_std: 2.0e-3
+          bias_rw_std: 5.0e-5
+          gyro_noise_std: 1.0e-3
+          delta_noise_std: 1.0e-4
+        low_cost_bias:
+          severity: low_cost_bias
+          bias_init_std: 5.0e-3
+          bias_rw_std: 1.0e-4
+          gyro_noise_std: 2.0e-3
+          delta_noise_std: 2.0e-4
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep:
+      bias_state.profile_id: [clean_bias, mild_bias, moderate_bias, low_cost_bias]
+
+models:
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    repo:
+      path: "third_party/Split_KalmanNet"
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 4
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 100
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: me_split_knet_v0
+    display_name: "ME-Split-KalmanNet v0"
+    adapter: "bench.models.me_split_knet:MESplitKNetV0Adapter"
+    repo:
+      path: "third_party/Split_KalmanNet"
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 4
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 100
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    enhancer_hidden_dim: 64
+    enhancer_num_layers: 2
+    enhancer_kernel_size: 3
+    enhancer_dropout: 0.0
+    enhancer_pretrain_updates: 100
+    enhancer_pretrain_target: imu_clean_y_seq
+    imu_pretrain_enabled: true
+    delta_scale: 0.25
+    delta_clip_ratio: 0.25
+    delta_clip_abs:
+    lambda_delta: 1.0e-2
+    lambda_smooth: 1.0e-2
+    lambda_identity: 0.0
+    w_imu_denoise: 1.0
+    w_imu_corr: 0.5
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/gpu_basilisk_imu_bias_pilot"
+  budget:
+    train_max_updates: 500
+    train_batch_size: 8
+    eval_batch_size: 16
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    window_W: 8
+    tolerance_eps: 0.05
+    metric: "mse"
+    aggregation: "mean_over_window"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  tables:
+    summary_csv: "reports/summary_gpu_basilisk_imu_bias_pilot.csv"

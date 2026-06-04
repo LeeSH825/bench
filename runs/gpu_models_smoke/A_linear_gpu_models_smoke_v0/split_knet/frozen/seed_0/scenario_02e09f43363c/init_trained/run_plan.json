@@ -9,9 +9,15 @@
   "seed": 0,
   "model_id": "split_knet",
   "deterministic": true,
-  "device_requested": "cuda",
-  "device_resolved": "cuda",
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
   "precision": "fp32",
+  "logging": {
+    "level": "DEBUG",
+    "log_to_file": true,
+    "log_file": null,
+    "debug_every": 8
+  },
   "budgets": {
     "train_max_updates": 4,
     "adapt_max_updates": 0,

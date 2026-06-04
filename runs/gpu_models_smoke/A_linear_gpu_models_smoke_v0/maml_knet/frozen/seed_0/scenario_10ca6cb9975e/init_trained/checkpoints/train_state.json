@@ -1,8 +1,8 @@
 {
   "status": "ok",
   "best_step": 4,
-  "best_val_mse": 0.0071719016414135695,
-  "last_train_loss": 0.003501851693727076,
+  "best_val_mse": 0.007171898381784558,
+  "last_train_loss": 0.0035018512280657887,
   "updates_used": 4,
   "train_outer_updates_used": 4,
   "train_inner_updates_used": 8,
@@ -10,11 +10,11 @@
   "val_history": [
     {
       "step": 2.0,
-      "val_mse": 0.013645436614751816
+      "val_mse": 0.013645435450598598
     },
     {
       "step": 4.0,
-      "val_mse": 0.0071719016414135695
+      "val_mse": 0.007171898381784558
     }
   ],
   "meta_train": {

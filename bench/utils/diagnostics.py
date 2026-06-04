@@ -62,6 +62,27 @@ def array_stats(value: Any) -> Dict[str, Any]:
     return stats
 
 
+def residual_array(x_hat: Any, x_true: Any) -> Optional[np.ndarray]:
+    try:
+        xh = to_numpy(x_hat)
+        xt = to_numpy(x_true)
+    except Exception:
+        return None
+    if xh.shape != xt.shape:
+        return None
+    try:
+        return np.asarray(xh, dtype=np.float64) - np.asarray(xt, dtype=np.float64)
+    except Exception:
+        return None
+
+
+def residual_stats(x_hat: Any, x_true: Any) -> Optional[Dict[str, Any]]:
+    resid = residual_array(x_hat, x_true)
+    if resid is None:
+        return None
+    return array_stats(resid)
+
+
 def format_array_stats(label: str, value: Any) -> str:
     stats = array_stats(value)
     return (

@@ -182,6 +182,24 @@
 
   ## 6. Tracks & Fairness Rules (Frozen vs Budgeted)
 
+  ### 6.0 Plan identity
+
+  - A benchmark plan is the pair `init_id:track_id`.
+  - `init_id` describes the estimator state before evaluation:
+  - `pretrained`: load a provided checkpoint or model-defined pretrained state.
+  - `trained`: train on the benchmark train split before evaluation.
+  - `untrained`: evaluate initialized weights without benchmark training.
+  - `track_id` describes online adaptation rules:
+  - `frozen`: no online adaptation is allowed during test-time evaluation.
+  - `budgeted`: online adaptation is allowed only within configured budget limits.
+  - Common plans:
+  - `pretrained:frozen`: model-based oracle or externally pretrained baseline.
+  - `trained:frozen`: standard trained NN comparison.
+  - `trained:budgeted`: trained NN with budgeted online adaptation.
+  - `untrained:frozen`: diagnostic stress test; not a model-level paper result.
+  - Reports and plots should never merge multiple plans into one unlabeled model curve.
+  - Verified in: bench/runners/run_suite.py, bench/reports/plots.py.
+
   ### 6.1 Frozen inference track
 
   - Allowed frozen plans in runner: pretrained:frozen, trained:frozen, untrained:frozen.
@@ -235,6 +253,7 @@
   - --include-ops: ops table + tradeoff plot
   - --budget-curves: budget curve plot
   - --fig5a-plot: fig5a CSV/plots
+  - --fig5a-official-plans: for Fig5a only, filter to paper-style official comparisons.
   - Organized mirror (default on): reports/<suite>/<YYYY-MM-DD>/<HHMMSS>/{tables,plots,misc} and reports/<suite>/latest/....
   - Regenerate:
 
@@ -256,7 +275,28 @@
 
   - Verified in: bench/reports/make_report.py, bench/reports/aggregate.py, bench/reports/plots.py, bench/reports/README.md.
 
-  ### 7.4 MB-KF Q/R policy and modes
+  - Fig5a grouping policy:
+  - default Fig5a plots group by `(x_dim, y_dim, T, model_id, init_id, track_id)`.
+  - default legend labels include plan identity, for example `kalmannet_tsp | trained:frozen | 2x2, T=50`.
+  - `--fig5a-official-plans` excludes diagnostic/non-official plans from plotted series while leaving the points CSV traceable.
+  - Official filtering keeps model-based baselines as `pretrained:frozen` and validated NN models according to [docs/official_plan_policy.md](docs/official_plan_policy.md).
+  - Use default split-by-plan plots for debugging and official-plan plots for paper-style comparisons.
+  - Verified in: bench/reports/plots.py, bench/reports/make_report.py.
+
+  ### 7.4 Interpreting high mse_db
+
+  - `mse_db` is defined as `10*log10(mse)`.
+  - A value above 100 dB is not automatically a reporting bug; it usually means the linear MSE is extremely large.
+  - First check the invariant: recompute `10*log10(mse)` from metrics.json.
+  - If the invariant holds, treat the point as real estimator divergence until proven otherwise.
+  - Use diagnostics to distinguish causes:
+  - if `x_true` and `x_hat` are both large and residuals are moderate, the task state scale may be large.
+  - if `x_true` is moderate but `residual_stats` is huge, the estimator diverged.
+  - if oracle is stable while an NN diverges, inspect adapter/training/normalization assumptions for that NN.
+  - High-dB points in plots must be attributable to `init_id:track_id`, or excluded only by an explicit official-plan filter.
+  - Verified in: bench/metrics/core.py, bench/runners/run_suite.py, bench/utils/diagnostics.py.
+
+  ### 7.5 MB-KF Q/R policy and modes
 
   - MB-KF adapters use mode-specific R handling:
   - nominal: uses nominal assumed Q/R only (no post-shift R scaling during runtime).
@@ -266,7 +306,7 @@
   - Reporting reads severity from scenario/meta fields; this does not force MB-KF runtime mode.
   - Verified in: bench/models/mb_kf.py.
 
-  ### 7.5 Budget semantics for meta-learning models
+  ### 7.6 Budget semantics for meta-learning models
 
   - Benchmark budget semantics for MAML-KNet are explicit:
   - train_max_updates enforces outer optimizer.step() count only.
@@ -293,6 +333,8 @@
   - env.json, pip_freeze.txt, requirements.lock (if present), git_versions.txt: reproducibility snapshots.
   - stdout.log, stderr.log: run-level logs.
   - failure.json: written on missing-data or runtime failure paths.
+  - diagnostics/stats.json: additive diagnostics with x_true/x_hat/residual summary stats when available.
+  - diagnostics/first_batch_dump.npz: capped first-batch arrays, including residual and residual_norm_t when available.
   - Notes:
   - Early missing-data failures may contain only failure-focused files (for example failure.json, stderr.log).
   - stderr.log may be absent on clean successful runs.
@@ -331,6 +373,26 @@
   models/kalmannet_tsp.py, bench/models/adaptive_knet.py, bench/models/maml_knet.py, bench/models/split_knet.py.
   - Symptom: TG7 dataset loader failures mentioning NCLT_ROOT or UZH_FPV_ROOT. Likely cause: env vars unset or dataset layout incomplete. Fix: set env var and ensure expected NPZ layout. Verified in: bench/
   tasks/generator/datasets/nclt.py, bench/tasks/generator/datasets/uzh_fpv.py, bench/tasks/generator/datasets/common.py, bench/tests/test_datasets_tg7.py.
+
+  ### 9.4 Debugging quickstart
+
+  - Use DEBUG logging and file logs for suspicious runs:
+
+  .venv/bin/python -m bench.runners.run_suite --suite-yaml <suite.yaml> --tasks <task_id> --models <model_id> --seeds 0 --plans <init_id>:<track_id> --device cpu --log-level DEBUG --log-to-file --debug-every 10
+
+  - Inspect:
+  - run_dir/bench.log or stdout/stderr logs for per-step stats and policy decisions.
+  - run_dir/metrics.json for scalar metrics and plan identity.
+  - run_dir/metrics_step.csv for per-step MSE and dB consistency.
+  - run_dir/budget_ledger.json for train/adapt update accounting.
+  - run_dir/diagnostics/stats.json for x_true, x_hat, and residual stats.
+  - run_dir/diagnostics/first_batch_dump.npz for capped arrays and residual_norm_t.
+  - For stale historical failures, use:
+
+  .venv/bin/python -m bench.tools.cleanup_stale_failures --runs-root runs
+
+  - The cleanup command defaults to dry-run; add `--apply` to move stale failure.json files to run_dir/stale/.
+  - Verified in: bench/runners/run_suite.py, bench/utils/diagnostics.py, bench/tools/cleanup_stale_failures.py.
 
   ## 10. Configuration Guide
 

@@ -14,12 +14,12 @@
     "T": 16
   },
   "accuracy": {
-    "mse": 22.79278564453125,
-    "rmse": 4.774179054510969,
-    "mse_db": 13.57797406185973
+    "mse": 22.792788751996714,
+    "rmse": 4.774179379955964,
+    "mse_db": 13.577974653957174
   },
   "timing": {
-    "timing_ms_per_step": 1.921774562504197,
+    "timing_ms_per_step": 0.3222603593826534,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 2
@@ -51,7 +51,7 @@
   "adapter_meta": {
     "adapter_id": "split_knet",
     "adapter_version": "s8_gpu_device_v1",
-    "runtime_device": "cuda",
+    "runtime_device": "cpu",
     "integration_mode": "import_model_only",
     "covariance_support": false,
     "input_layout_bench": "BTD",
@@ -87,9 +87,15 @@
     "seed": 0,
     "model_id": "split_knet",
     "deterministic": true,
-    "device_requested": "cuda",
-    "device_resolved": "cuda",
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
     "precision": "fp32",
+    "logging": {
+      "level": "DEBUG",
+      "log_to_file": true,
+      "log_file": null,
+      "debug_every": 8
+    },
     "budgets": {
       "train_max_updates": 4,
       "adapt_max_updates": 0,
@@ -125,5 +131,5 @@
     "track_id": "frozen",
     "init_id": "untrained"
   },
-  "run_dir": "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/split_knet/frozen/seed_0/scenario_10ca6cb9975e/init_untrained"
+  "run_dir": "/home/dss-pc-05/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/split_knet/frozen/seed_0/scenario_10ca6cb9975e/init_untrained"
 }

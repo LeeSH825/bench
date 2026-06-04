@@ -151,6 +151,220 @@ def _normalize_repo_root(repo_root: Path) -> Path:
     )
 
 
+def _load_checkpoint_metadata(ckpt_path: Optional[Path]) -> Optional[Dict[str, Any]]:
+    if ckpt_path is None:
+        return None
+    candidates = [
+        ckpt_path.with_suffix(ckpt_path.suffix + ".json"),
+        ckpt_path.with_suffix(".json"),
+        ckpt_path.parent / "checkpoint_metadata.json",
+        ckpt_path.parent / "metadata.json",
+    ]
+    for p in candidates:
+        if not p.exists():
+            continue
+        try:
+            obj = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if isinstance(obj, dict):
+            return obj
+    return None
+
+
+def _infer_maml_checkpoint_expectations(ckpt_path: Optional[Path]) -> Dict[str, Any]:
+    metadata = _load_checkpoint_metadata(ckpt_path)
+    if metadata is not None:
+        return {
+            "metadata_status": "present",
+            "expectation_source": "sidecar_metadata",
+            "expected": dict(metadata),
+        }
+
+    if ckpt_path is None:
+        return {
+            "metadata_status": "not_applicable",
+            "expectation_source": "no_checkpoint",
+            "expected": {},
+        }
+
+    norm = str(ckpt_path).replace("\\", "/").lower()
+    if "/maml_model/linear/" in norm:
+        return {
+            "metadata_status": "missing",
+            "expectation_source": "inferred_from_bundled_linear_reference",
+            "expected": {
+                "task_family": "2d_synthetic_rotation_linear",
+                "state_dim": 2,
+                "obs_dim": 2,
+                "architecture_type": "linear",
+                "sequence_length_train": 30,
+                "sequence_length_test": 50,
+                "inner_loop_steps": "reference update_step/update_step_test",
+                "meta_train_distribution": "MAML-KalmanNet bundled 2D synthetic linear rotation/noise tasks",
+                "evidence": [
+                    "third_party/MAML_KalmanNet/MAML-KalmanNet/main_linear.py",
+                    "third_party/MAML_KalmanNet/MAML-KalmanNet/Simulations/linear/linear_syntheticNShot.py",
+                ],
+            },
+        }
+    if "/maml_model/nonlinear/" in norm:
+        return {
+            "metadata_status": "missing",
+            "expectation_source": "inferred_from_bundled_nonlinear_reference",
+            "expected": {
+                "task_family": "2d_synthetic_rotation_nonlinear",
+                "state_dim": 2,
+                "obs_dim": 2,
+                "architecture_type": "nonlinear",
+                "sequence_length_train": 30,
+                "sequence_length_test": 50,
+                "inner_loop_steps": "reference update_step/update_step_test",
+                "meta_train_distribution": "MAML-KalmanNet bundled 2D synthetic nonlinear rotation/noise tasks",
+                "evidence": [
+                    "third_party/MAML_KalmanNet/MAML-KalmanNet/main_nonlinear.py",
+                    "third_party/MAML_KalmanNet/MAML-KalmanNet/Simulations/linear/linear_syntheticNShot.py",
+                ],
+            },
+        }
+    if "/maml_model/uzh/" in norm:
+        return {
+            "metadata_status": "missing",
+            "expectation_source": "inferred_from_bundled_uzh_reference",
+            "expected": {
+                "task_family": "uzh_fpv",
+                "state_dim": None,
+                "obs_dim": None,
+                "architecture_type": "unknown",
+                "inner_loop_steps": "unknown",
+                "meta_train_distribution": "bundled UZH checkpoint; metadata unavailable",
+                "evidence": ["third_party/MAML_KalmanNet/MAML-KalmanNet/MAML_model/UZH"],
+            },
+        }
+
+    return {
+        "metadata_status": "missing",
+        "expectation_source": "unknown_checkpoint_without_metadata",
+        "expected": {},
+    }
+
+
+def _maml_task_family(system_info: Dict[str, Any], cfg: Dict[str, Any]) -> str:
+    for source in (system_info, cfg):
+        value = source.get("task_family")
+        if value:
+            return str(value)
+    meta = system_info.get("meta")
+    if isinstance(meta, dict):
+        for key in ("task_family", "family"):
+            value = meta.get(key)
+            if value:
+                return str(value)
+    task_id = system_info.get("task_id") or cfg.get("task_id")
+    if task_id:
+        text = str(task_id).lower()
+        if "lorenz" in text:
+            return "lorenz_v0"
+        if "linear" in text:
+            return "linear_gaussian_v0"
+    return "unknown"
+
+
+def _build_maml_checkpoint_compatibility_report(
+    *,
+    ckpt_path: Optional[Path],
+    system_info: Dict[str, Any],
+    cfg: Dict[str, Any],
+    is_linear_net: bool,
+) -> Dict[str, Any]:
+    inferred = _infer_maml_checkpoint_expectations(ckpt_path)
+    expected = dict(inferred.get("expected") or {})
+    observed = {
+        "task_family": _maml_task_family(system_info, cfg),
+        "state_dim": int(system_info.get("x_dim", cfg.get("x_dim", -1))),
+        "obs_dim": int(system_info.get("y_dim", cfg.get("y_dim", -1))),
+        "sequence_length_T": int(system_info.get("T", cfg.get("T", cfg.get("sequence_length", -1)))),
+        "architecture_type": "linear" if is_linear_net else "nonlinear",
+        "inner_loop_steps": int(cfg.get("inner_steps", cfg.get("update_step", 1))),
+        "inner_loop_steps_test": int(cfg.get("inner_steps_test", cfg.get("update_step_test", 1))),
+    }
+
+    checks: List[Dict[str, Any]] = []
+
+    def add_check(name: str, expected_value: Any, observed_value: Any, *, exact: bool = True) -> None:
+        if expected_value is None or expected_value == "unknown":
+            status = "unknown"
+        elif exact:
+            status = "pass" if expected_value == observed_value else "fail"
+        else:
+            status = "pass" if str(expected_value).lower() in str(observed_value).lower() else "fail"
+        checks.append(
+            {
+                "name": name,
+                "expected": expected_value,
+                "observed": observed_value,
+                "status": status,
+            }
+        )
+
+    if expected:
+        add_check("state_dim", expected.get("state_dim"), observed["state_dim"])
+        add_check("obs_dim", expected.get("obs_dim"), observed["obs_dim"])
+        add_check("architecture_type", expected.get("architecture_type"), observed["architecture_type"])
+        expected_family = expected.get("task_family")
+        if expected_family in {"2d_synthetic_rotation_linear", "2d_synthetic_rotation_nonlinear"}:
+            family_status = "pass" if observed["task_family"] == expected_family else "fail"
+            checks.append(
+                {
+                    "name": "task_family",
+                    "expected": expected_family,
+                    "observed": observed["task_family"],
+                    "status": family_status,
+                }
+            )
+        elif expected_family:
+            add_check("task_family", expected_family, observed["task_family"], exact=False)
+
+    failing = [c for c in checks if c.get("status") == "fail"]
+    unknown = [c for c in checks if c.get("status") == "unknown"]
+    if ckpt_path is None:
+        status = "no_checkpoint"
+    elif not expected:
+        status = "unknown"
+    elif failing:
+        status = "mismatch"
+    elif unknown:
+        status = "unknown"
+    else:
+        status = "compatible"
+
+    official_allowed = False
+    if status == "compatible":
+        official_block_reason = (
+            "maml_knet remains diagnostic-only until a Lorenz-compatible meta-train/checkpoint "
+            "and explicit meta-test adaptation path are validated."
+        )
+    elif status == "unknown":
+        official_block_reason = "checkpoint metadata is missing or incomplete"
+    elif status == "no_checkpoint":
+        official_block_reason = "no checkpoint compatibility target is available"
+    else:
+        official_block_reason = "checkpoint/task compatibility mismatch"
+
+    return {
+        "adapter_id": "maml_knet",
+        "checkpoint_path": str(ckpt_path) if ckpt_path is not None else None,
+        "metadata_status": inferred.get("metadata_status"),
+        "expectation_source": inferred.get("expectation_source"),
+        "expected": expected,
+        "observed": observed,
+        "checks": checks,
+        "compatibility_status": status,
+        "official_allowed": official_allowed,
+        "official_block_reason": official_block_reason,
+    }
+
+
 def _resolve_x0_batch(
     context: Dict[str, Any],
     *,
@@ -286,6 +500,7 @@ class MAMLKNetAdapter(ModelAdapter):
         self._ledger_path: Optional[Path] = None
         self._train_state_path: Optional[Path] = None
         self._saved_ckpt_path: Optional[Path] = None
+        self._checkpoint_compatibility: Dict[str, Any] = {}
 
         self._x_dim: Optional[int] = None
         self._y_dim: Optional[int] = None
@@ -406,6 +621,30 @@ class MAMLKNetAdapter(ModelAdapter):
         if ckpt is not None:
             self._safe_load_checkpoint(ckpt)
             self._saved_ckpt_path = ckpt
+        self._checkpoint_compatibility = _build_maml_checkpoint_compatibility_report(
+            ckpt_path=ckpt,
+            system_info=system_info,
+            cfg=cfg,
+            is_linear_net=is_linear_net,
+        )
+        if self._run_dir is not None:
+            report_path = self._run_dir / "maml_checkpoint_compatibility.json"
+            self._checkpoint_compatibility["report_path"] = str(report_path)
+            _write_json(report_path, self._checkpoint_compatibility)
+        compat_status = str(self._checkpoint_compatibility.get("compatibility_status", "unknown"))
+        if compat_status != "compatible":
+            logger.warning(
+                "MAML checkpoint compatibility status=%s official_allowed=%s reason=%s report=%s",
+                compat_status,
+                self._checkpoint_compatibility.get("official_allowed"),
+                self._checkpoint_compatibility.get("official_block_reason"),
+                self._checkpoint_compatibility.get("report_path"),
+            )
+        elif not bool(self._checkpoint_compatibility.get("official_allowed", False)):
+            logger.info(
+                "MAML checkpoint compatible with declared metadata but still diagnostic-only: %s",
+                self._checkpoint_compatibility.get("official_block_reason"),
+            )
 
         self.last_class = "filter.Filter + state_dict_learner.Learner"
         self.last_layout = "bench_BTD_to_repo_BYT_stepwise_filter"
@@ -1106,11 +1345,14 @@ class MAMLKNetAdapter(ModelAdapter):
                 "eval_supported": True,
                 "adapt_supported": False,
                 "supports_budgeted": False,
+                "official_allowed": bool(self._checkpoint_compatibility.get("official_allowed", False)),
             },
+            "checkpoint_compatibility": dict(self._checkpoint_compatibility),
             "assumptions": {
                 "A_input_layout": "Filter routines consume state/obs as [B,D,T]; adapter converts bench BTD internally.",
                 "B_task_semantics": "v0 shift t0 per-step adaptation semantics are not mapped to MAML episode adaptation in this adapter.",
                 "C_metrics_ownership": "third_party metrics are ignored; bench computes official metrics from adapter x_hat only.",
+                "D_official_policy": "maml_knet is diagnostic-only until checkpoint/task compatibility and meta-test adaptation are validated.",
             },
             "how_to_verify": {
                 "A_input_layout": "third_party/MAML_KalmanNet/MAML-KalmanNet/filter.py::compute_x_post/compute_x_post_qry",

@@ -14,12 +14,12 @@
     "T": 16
   },
   "accuracy": {
-    "mse": 0.0002730715204961598,
-    "rmse": 0.016524875808796864,
-    "mse_db": -35.63723591461576
+    "mse": 0.0002730715765814906,
+    "rmse": 0.01652487750579382,
+    "mse_db": -35.63723502263159
   },
   "timing": {
-    "timing_ms_per_step": 0.8007900156599135,
+    "timing_ms_per_step": 0.08040259376684844,
     "timing_std_ms_per_step": 0.0,
     "warmup_batches_excluded": 1,
     "eval_batch_size": 2
@@ -51,7 +51,7 @@
   "adapter_meta": {
     "adapter_id": "mb_kf",
     "adapter_version": "s10_kf_baseline_v1",
-    "runtime_device": "cuda",
+    "runtime_device": "cpu",
     "baseline": "mb_kf",
     "mode": "oracle",
     "uses_shift_meta": false,
@@ -80,19 +80,25 @@
     "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
   },
   "run_plan": {
-    "plan_id": "untrained__frozen",
-    "init_id": "untrained",
+    "plan_id": "pretrained__frozen",
+    "init_id": "pretrained",
     "track_id": "frozen",
-    "official_benchmark_eligible": false,
+    "official_benchmark_eligible": true,
     "suite_name": "gpu_models_smoke",
     "task_id": "A_linear_gpu_models_smoke_v0",
     "scenario_id": "10ca6cb9975e",
     "seed": 0,
     "model_id": "mb_kf_oracle",
     "deterministic": true,
-    "device_requested": "cuda",
-    "device_resolved": "cuda",
+    "device_requested": "cpu",
+    "device_resolved": "cpu",
     "precision": "fp32",
+    "logging": {
+      "level": "DEBUG",
+      "log_to_file": true,
+      "log_file": null,
+      "debug_every": 8
+    },
     "budgets": {
       "train_max_updates": 4,
       "adapt_max_updates": 0,
@@ -126,7 +132,7 @@
     "cache_hit": false,
     "cache_key": null,
     "track_id": "frozen",
-    "init_id": "untrained"
+    "init_id": "pretrained"
   },
-  "run_dir": "/home/xynus/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/mb_kf_oracle/frozen/seed_0/scenario_10ca6cb9975e"
+  "run_dir": "/home/dss-pc-05/bench/runs/gpu_models_smoke/A_linear_gpu_models_smoke_v0/mb_kf_oracle/frozen/seed_0/scenario_10ca6cb9975e"
 }

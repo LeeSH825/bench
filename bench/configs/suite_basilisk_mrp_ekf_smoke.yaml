@@ -1,0 +1,100 @@
+suite:
+  name: basilisk_mrp_ekf_smoke
+  version: "0.1.0"
+  description: >
+    CPU smoke suite for the diagnostic Basilisk MRP-EKF baseline.
+
+seeds: [0]
+
+tasks:
+  - task_id: Basilisk_ADCS_mrp_omega_T50_smoke_v0
+    task_name: "Basilisk ADCS MRP/Omega Smoke"
+    task_family: basilisk_adcs_v0
+    system_type: nonlinear
+    x_dim: 6
+    y_dim: 6
+    sequence_length_T: 50
+    dataset_sizes:
+      N_train: 32
+      N_val: 8
+      N_test: 8
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: { type: "scaled_identity", q2: 1.0e-8 }
+      R: { type: "scaled_identity", r2: 1.0e-4 }
+    observation:
+      type: full_state_adcs
+      h_type: direct_sigma_omega
+      H: identity
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    sweep: {}
+
+models:
+  - model_id: basilisk_mrp_ekf
+    display_name: "Basilisk MRP-EKF"
+    adapter: "bench.models.basilisk_mrp_ekf:BasiliskMRPEKFAdapter"
+    input_layout: "BTD"
+    batch_size: 8
+    eval_batch_size: 8
+    integration: rk4
+    fd_eps: 1.0e-5
+    p0_source: measurement_noise
+    p0_scale: 1.0
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cpu"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/basilisk_mrp_ekf_smoke"
+  budget:
+    train_max_updates: 0
+    train_batch_size: 8
+    eval_batch_size: 8
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll", "shift_recovery_k"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    window_W: 8
+    tolerance_eps: 0.05
+    metric: "mse"
+    aggregation: "mean_over_window"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+    - "stdout.log"
+    - "stderr.log"
+    - "env.txt"
+    - "git_versions.txt"
+  tables:
+    summary_csv: "reports/summary_basilisk_mrp_ekf_smoke.csv"
