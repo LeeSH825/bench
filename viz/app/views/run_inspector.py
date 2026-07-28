@@ -714,6 +714,7 @@ def _render_cross_model_comparison(
             "meta": run.meta,
             "traj": selected_traj,
             "aggregate": run.aggregate,
+            "metrics": run.metrics,
         }
     ]
     evaluator = (
@@ -748,6 +749,7 @@ def _render_cross_model_comparison(
                     "meta": loaded.meta,
                     "traj": candidate_traj,
                     "aggregate": loaded.aggregate,
+                    "metrics": loaded.metrics,
                 }
             )
         except Exception as exc:
@@ -755,6 +757,15 @@ def _render_cross_model_comparison(
                 f"Comparison trajectory could not be loaded for {item.run.run_dir}: {exc}. "
                 "No fallback trajectory was substituted."
             )
+
+    st.markdown("**Dataset-average RMSE**")
+    st.caption("Computed over all evaluation trajectories; this is separate from the selected trajectory RMSE.")
+    rmse_columns = st.columns(min(4, max(1, len(model_data))))
+    for index, model in enumerate(model_data):
+        title, value = panels.dataset_rmse_metric(
+            model["meta"], model.get("aggregate"), model.get("metrics")
+        )
+        rmse_columns[index % len(rmse_columns)].metric(model["label"], value, help=title)
 
     option_columns = st.columns(3)
     with option_columns[0]:

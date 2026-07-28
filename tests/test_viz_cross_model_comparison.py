@@ -357,6 +357,30 @@ class VizCrossModelComparisonTests(unittest.TestCase):
             self.assertNotIn("nees", comparison.available_internal_metrics(learned.meta))
             self.assertIn("nees", comparison.available_internal_metrics(physical.meta))
 
+    def test_raw_state_error_is_truth_subtracted_from_estimate(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            run = load_run(_write_run(Path(tmp), "state_error", physical=False, model_id="state_error"))
+            traj = run.load_trajectory(stored_index=0)
+            got = comparison.strict_metric_series(run.meta, traj, "state_error")
+            np.testing.assert_array_equal(got, traj["x_hat"] - traj["x_true"])
+            result = panels.cross_model_comparison_panel(
+                "state_error",
+                [{"label": "state_error", "meta": run.meta, "traj": traj, "aggregate": run.aggregate}],
+            )
+            self.assertEqual(len(result.figure.data), 9)
+
+    def test_dataset_rmse_is_computed_over_all_trajectories(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            run = load_run(_write_run(Path(tmp), "dataset_rmse", physical=False, model_id="dataset_rmse"))
+            title, value = panels.dataset_rmse_metric(run.meta, run.aggregate, run.metrics)
+            self.assertEqual(title, "Dataset generic-state RMSE [state units]")
+            errors = []
+            for info in run.list_trajectories():
+                traj = run.load_trajectory(stored_index=info.stored_index)
+                errors.append(np.asarray(traj["x_hat"], dtype=np.float64) - traj["x_true"])
+            expected = float(np.sqrt(np.mean(np.stack(errors) ** 2)))
+            self.assertAlmostEqual(float(value), expected, places=4)
+
     def test_model_toggle_adds_and_removes_traces(self) -> None:
         with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
             base = load_run(_write_run(Path(tmp), "base", physical=True, model_id="base"))

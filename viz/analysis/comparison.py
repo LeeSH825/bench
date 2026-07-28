@@ -22,6 +22,7 @@ PHYSICAL_METRIC_LABELS: Mapping[str, str] = {
 }
 
 STRICT_METRIC_LABELS: Mapping[str, str] = {
+    "state_error": "Raw state error (estimate - truth)",
     "innovation": "Innovation",
     "innovation_norm": "Innovation norm",
     "gain_norm": "Kalman gain Frobenius norm",
@@ -107,6 +108,8 @@ def available_physical_metrics(meta: Mapping[str, Any]) -> list[str]:
 def available_internal_metrics(meta: Mapping[str, Any]) -> list[str]:
     caps = meta.get("capabilities", {})
     metrics: list[str] = []
+    if isinstance(meta.get("state_spec"), Mapping):
+        metrics.append("state_error")
     if bool(caps.get("innovation")) and bool(_section(meta, "innovation").get("available")):
         metrics.extend(["innovation", "innovation_norm"])
     if bool(caps.get("gain")) and bool(_section(meta, "gain").get("available")):
@@ -487,6 +490,8 @@ def strict_metric_series(
     col: int = 0,
 ) -> np.ndarray:
     valid = np.asarray(traj.get("innov_valid", np.ones(len(traj["t"]), dtype=bool)), dtype=bool)
+    if metric == "state_error":
+        return _array(traj, "x_hat") - _array(traj, "x_true")
     if metric in {"innovation", "innovation_norm"}:
         values = _array(traj, "innov")
         values = np.where(valid[:, None], values, np.nan)

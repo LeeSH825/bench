@@ -606,6 +606,45 @@ def dataset_summary_items(
     return out
 
 
+def dataset_rmse_metric(
+    meta: Mapping[str, Any],
+    aggregate: Optional[Mapping[str, np.ndarray]],
+    metrics: Optional[Mapping[str, Any]] = None,
+) -> tuple[str, str]:
+    """Return the RMSE over all evaluation trajectories, with its meaning."""
+    metrics_obj = metrics if isinstance(metrics, Mapping) else {}
+    adcs_event = metrics_obj.get("adcs_event")
+    if isinstance(adcs_event, Mapping):
+        value = adcs_event.get("attitude_rmse_deg")
+        try:
+            if np.isfinite(float(value)):
+                return "Dataset attitude geodesic RMSE [deg]", _format_metric(float(value))
+        except (TypeError, ValueError):
+            pass
+
+    data_spec = meta.get("data_spec", {})
+    n_samples = int(data_spec.get("num_trajectories", 0) or 0)
+    if aggregate and "err_mean" in aggregate and n_samples > 0:
+        mean_error = _as_f64(aggregate["err_mean"])
+        mean_square = mean_error * mean_error
+        if "emp_std" in aggregate and n_samples >= 2:
+            sample_variance = _as_f64(aggregate["emp_std"]) ** 2
+            mean_square = mean_square + sample_variance * ((n_samples - 1) / n_samples)
+        return "Dataset generic-state RMSE [state units]", _format_metric(
+            float(np.sqrt(np.nanmean(mean_square)))
+        )
+
+    accuracy = metrics_obj.get("accuracy")
+    if isinstance(accuracy, Mapping):
+        value = accuracy.get("rmse")
+        try:
+            if np.isfinite(float(value)):
+                return "Dataset generic-state RMSE [state units]", _format_metric(float(value))
+        except (TypeError, ValueError):
+            pass
+    return "Dataset RMSE", "NA"
+
+
 def summary_items(
     meta: Mapping[str, Any],
     traj: Mapping[str, np.ndarray],
@@ -770,6 +809,7 @@ def _comparison_payload(
             col=gain_col,
         )
         yaxis = {
+            "state_error": "state error [native units]",
             "innovation": "measurement units",
             "innovation_norm": "innovation norm",
             "gain_norm": "gain norm",
