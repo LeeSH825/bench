@@ -260,6 +260,7 @@ class ModelBasedKFAdapter(ModelAdapter):
         self.last_class: Optional[str] = None
         self._debug_every: int = 0
         self._runtime_diag: Dict[str, Any] = {}
+        self._emit_viz_diagnostics = False
 
     def setup(
         self,
@@ -276,6 +277,7 @@ class ModelBasedKFAdapter(ModelAdapter):
         self.adapt_updates_used = 0
         self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
         self._runtime_diag = {}
+        self._emit_viz_diagnostics = bool(run_ctx.get("emit_viz_artifacts", False))
 
         mode = str(cfg.get("baseline_mode", "")).strip().lower()
         if not mode:
@@ -449,7 +451,7 @@ class ModelBasedKFAdapter(ModelAdapter):
             dtype=self.dtype,
         )
 
-        want_cov = bool(return_cov and self._outputs_covariance)
+        want_cov = bool((return_cov and self._outputs_covariance) or self._emit_viz_diagnostics)
         x_hat, cov = self._rollout_kf(y_btd=y, x0_batch=x0_batch, return_cov=want_cov)
         validate_exact_layout(
             x_hat,
@@ -473,12 +475,17 @@ class ModelBasedKFAdapter(ModelAdapter):
 
         preds: List[torch.Tensor] = []
         covs: List[torch.Tensor] = []
+        viz_diag_accum: Dict[str, List[torch.Tensor]] = {
+            "innov": [],
+            "S": [],
+            "gain": [],
+        }
         total_n = 0
         with torch.no_grad():
             for bi, batch in enumerate(test_dl):
                 _x_raw, y_raw = _extract_batch_xy(batch)
                 y = _to_tensor(y_raw, device=self.device, dtype=self.dtype)
-                pred = self.predict(y, context=None, return_cov=self._outputs_covariance)
+                pred = self.predict(y, context=None, return_cov=bool(self._outputs_covariance or self._emit_viz_diagnostics))
                 if isinstance(pred, tuple):
                     x_hat_b = pred[0]
                     cov_b = pred[1]
@@ -499,6 +506,15 @@ class ModelBasedKFAdapter(ModelAdapter):
                 preds.append(x_hat_b.detach().cpu())
                 if isinstance(cov_b, torch.Tensor):
                     covs.append(cov_b.detach().cpu())
+                if self._emit_viz_diagnostics:
+                    viz_diag = self._runtime_diag.get("viz_diagnostics")
+                    if isinstance(viz_diag, dict):
+                        for key in viz_diag_accum:
+                            value = viz_diag.get(key)
+                            if isinstance(value, torch.Tensor):
+                                viz_diag_accum[key].append(value.detach().cpu())
+                            elif value is not None:
+                                viz_diag_accum[key].append(torch.as_tensor(value).detach().cpu())
 
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
@@ -514,25 +530,28 @@ class ModelBasedKFAdapter(ModelAdapter):
         if covs:
             cov_cat = torch.cat(covs, dim=0).contiguous()
 
-        preds_path = None
-        if self._artifacts_dir is not None:
-            preds_path = self._artifacts_dir / "preds_test.npz"
-            if cov_cat is None:
-                np.savez_compressed(preds_path, x_hat=x_hat.numpy())
-            else:
-                np.savez_compressed(preds_path, x_hat=x_hat.numpy(), cov=cov_cat.numpy())
+        viz_diag_cat: Dict[str, torch.Tensor] = {}
+        if self._emit_viz_diagnostics:
+            if cov_cat is not None:
+                viz_diag_cat["P"] = cov_cat
+            for key, values in viz_diag_accum.items():
+                if values:
+                    viz_diag_cat[key] = torch.cat(values, dim=0).contiguous()
 
         self.adapt_updates_used = 0
         self._update_ledger(
             train_updates_used=int(self.train_updates_used),
             adapt_updates_used=0,
         )
-        return {
+        result: Dict[str, Any] = {
             "status": "ok",
             "x_hat": x_hat,
             "cov": cov_cat,
-            "preds_path": (str(preds_path) if preds_path is not None else None),
+            "preds_path": None,
         }
+        if viz_diag_cat:
+            result["diagnostics"] = viz_diag_cat
+        return result
 
     def adapt(
         self,
@@ -558,6 +577,12 @@ class ModelBasedKFAdapter(ModelAdapter):
 
     def get_runtime_diagnostics(self) -> Dict[str, Any]:
         return dict(self._runtime_diag)
+
+    def supports_viz_diagnostics(self) -> bool:
+        return True
+
+    def set_viz_diagnostics_enabled(self, enabled: bool) -> None:
+        self._emit_viz_diagnostics = bool(enabled)
 
     def save(self, ckpt_dir: Union[str, Path]) -> Dict[str, Any]:
         if self._F is None or self._H is None or self._Q is None or self._R_nominal is None or self._R_shift is None:
@@ -692,6 +717,10 @@ class ModelBasedKFAdapter(ModelAdapter):
         x_post = x0_batch.clone()
         x_hist = torch.empty((B, T, self._x_dim), device=self.device, dtype=self.dtype)
         cov_hist = torch.empty((B, T, self._x_dim, self._x_dim), device=self.device, dtype=self.dtype) if return_cov else None
+        collect_viz = bool(self._emit_viz_diagnostics)
+        innov_hist = torch.empty((B, T, self._y_dim), device=self.device, dtype=self.dtype) if collect_viz else None
+        s_hist = torch.empty((B, T, self._y_dim, self._y_dim), device=self.device, dtype=self.dtype) if collect_viz else None
+        gain_hist = torch.empty((B, T, self._x_dim, self._y_dim), device=self.device, dtype=self.dtype) if collect_viz else None
         innov_norm_t: List[float] = []
         k_norm_t: List[float] = []
 
@@ -731,6 +760,13 @@ class ModelBasedKFAdapter(ModelAdapter):
             x_hist[:, t, :] = x_post[:, :, 0]
             if cov_hist is not None:
                 cov_hist[:, t, :, :] = P_post
+            if collect_viz:
+                if innov_hist is not None:
+                    innov_hist[:, t, :] = innov[:, :, 0]
+                if s_hist is not None:
+                    s_hist[:, t, :, :] = S
+                if gain_hist is not None:
+                    gain_hist[:, t, :, :] = K
             if self._debug_every > 0 and ((t % self._debug_every) == 0 or has_nonfinite(x_post)):
                 logger.debug(
                     "kf t=%s %s innov_norm=%s K_norm=%s",
@@ -744,6 +780,12 @@ class ModelBasedKFAdapter(ModelAdapter):
             "innovation_norm_t": np.asarray(innov_norm_t, dtype=np.float32),
             "k_norm_t": np.asarray(k_norm_t, dtype=np.float32),
         }
+        if collect_viz:
+            self._runtime_diag["viz_diagnostics"] = {
+                "innov": innov_hist.detach().cpu() if innov_hist is not None else None,
+                "S": s_hist.detach().cpu() if s_hist is not None else None,
+                "gain": gain_hist.detach().cpu() if gain_hist is not None else None,
+            }
         validate_exact_layout(
             x_hist,
             expected=(int(B), int(T), int(self._x_dim)),

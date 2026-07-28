@@ -103,6 +103,15 @@ class ModelAdapter(ABC):
         """
         raise NotImplementedError
 
+    def supports_viz_diagnostics(self) -> bool:
+        """Return True when the adapter can emit opt-in visualization diagnostics."""
+        return False
+
+    def set_viz_diagnostics_enabled(self, enabled: bool) -> None:
+        """Opt-in hook for visualization diagnostics; adapters may override."""
+        if enabled:
+            raise NotImplementedError("visualization diagnostics are not supported by this adapter")
+
     @abstractmethod
     def load(self, ckpt_path: str) -> None:
         """Load model weights from a checkpoint path."""

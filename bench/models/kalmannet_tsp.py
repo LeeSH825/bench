@@ -311,6 +311,7 @@ class KalmanNetTSPAdapter(ModelAdapter):
         self.adapt_updates_used: int = 0
         self._debug_every: int = 0
         self._runtime_diag: Dict[str, Any] = {}
+        self._emit_viz_diagnostics: bool = False
 
     def setup(
         self,
@@ -325,6 +326,7 @@ class KalmanNetTSPAdapter(ModelAdapter):
         self._run_ctx = dict(run_ctx)
         self._debug_every = int(run_ctx.get("debug_every", cfg.get("debug_every", 0)) or 0)
         self._runtime_diag = {}
+        self._emit_viz_diagnostics = False
         self.repo_root, self.entrypoints = _resolve_repo_spec(cfg)
         self._imports = _load_kalmannet_tsp(self.repo_root)
 
@@ -588,6 +590,9 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         self.model.eval()
         preds: List[torch.Tensor] = []
+        diagnostics: Optional[Dict[str, List[np.ndarray]]] = None
+        if self._emit_viz_diagnostics:
+            diagnostics = {"innov": [], "gain": []}
         total_n = 0
         with torch.no_grad():
             for bi, batch in enumerate(test_dl):
@@ -604,6 +609,15 @@ class KalmanNetTSPAdapter(ModelAdapter):
                 if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred)):
                     logger.debug("eval batch=%s %s", bi, format_array_stats("x_hat", pred))
                 preds.append(pred.detach().cpu())
+                if diagnostics is not None:
+                    batch_diag = self._runtime_diag.get("viz_diagnostics")
+                    if not isinstance(batch_diag, dict):
+                        raise RuntimeError("runtime_error: visualization diagnostics were enabled but not captured")
+                    for key in diagnostics:
+                        value = batch_diag.get(key)
+                        if not isinstance(value, np.ndarray):
+                            raise RuntimeError(f"runtime_error: visualization diagnostic {key!r} is missing")
+                        diagnostics[key].append(value)
 
         if not preds:
             raise RuntimeError("runtime_error: empty test dataloader.")
@@ -615,11 +629,6 @@ class KalmanNetTSPAdapter(ModelAdapter):
             label="x_hat",
         )
 
-        preds_path = None
-        if self._artifacts_dir is not None:
-            preds_path = self._artifacts_dir / "preds_test.npz"
-            np.savez_compressed(preds_path, x_hat=x_hat.numpy())
-
         # frozen track: no updates in eval/adapt
         self.adapt_updates_used = 0
         self._update_ledger(
@@ -627,12 +636,17 @@ class KalmanNetTSPAdapter(ModelAdapter):
             adapt_updates_used=0,
         )
 
-        return {
+        result = {
             "status": "ok",
             "x_hat": x_hat,
             "cov": None,
-            "preds_path": (str(preds_path) if preds_path is not None else None),
+            "preds_path": None,
         }
+        if diagnostics is not None:
+            result["diagnostics"] = {
+                key: np.concatenate(values, axis=0) for key, values in diagnostics.items()
+            }
+        return result
 
     @torch.no_grad()
     def predict(
@@ -713,6 +727,8 @@ class KalmanNetTSPAdapter(ModelAdapter):
             "adapter_version": "s2_route_b_v1",
             "runtime_device": str(self.device),
             "covariance_support": False,
+            "viz_diagnostics_version": "learned_gain_innovation_v1",
+            "gain_semantics": "learned_kalman_gain",
             "input_layout_bench": "BTD",
             "internal_layout_repo": "BDT_stepwise",
             "entrypoints": {
@@ -722,6 +738,12 @@ class KalmanNetTSPAdapter(ModelAdapter):
                 "pipeline_candidate": "Pipelines/Pipeline_EKF.py::Pipeline_EKF",
             },
         }
+
+    def supports_viz_diagnostics(self) -> bool:
+        return True
+
+    def set_viz_diagnostics_enabled(self, enabled: bool) -> None:
+        self._emit_viz_diagnostics = bool(enabled)
 
     def _forward_sequence(self, y_btd: torch.Tensor, context: Optional[Dict[str, Any]]) -> torch.Tensor:
         if self.model is None or self._x_dim is None or self._y_dim is None:
@@ -763,6 +785,11 @@ class KalmanNetTSPAdapter(ModelAdapter):
 
         x_repo = torch.empty((B, self._x_dim, T), device=self.device, dtype=self.dtype)
         x_norm_t: List[float] = []
+        gain_history = None
+        innov_history = None
+        if self._emit_viz_diagnostics:
+            gain_history = np.empty((B, T, self._x_dim, self._y_dim), dtype=np.float32)
+            innov_history = np.empty((B, T, self._y_dim), dtype=np.float32)
         for t in range(T):
             y_t = y_repo[:, :, t].unsqueeze(2)  # [B,Dy,1]
             x_t = self.model(y_t)
@@ -778,11 +805,31 @@ class KalmanNetTSPAdapter(ModelAdapter):
                     f"(expected {(B, self._x_dim, 1)})"
                 )
             x_repo[:, :, t] = x_t[:, :, 0]
+            if gain_history is not None and innov_history is not None:
+                gain_t = getattr(self.model, "KGain", None)
+                y_pred_t = getattr(self.model, "m1y", None)
+                if not isinstance(gain_t, torch.Tensor) or gain_t.shape != (B, self._x_dim, self._y_dim):
+                    raise RuntimeError(
+                        f"runtime_error: learned gain at t={t} has shape "
+                        f"{getattr(gain_t, 'shape', None)}, expected {(B, self._x_dim, self._y_dim)}"
+                    )
+                if not isinstance(y_pred_t, torch.Tensor) or y_pred_t.shape != (B, self._y_dim, 1):
+                    raise RuntimeError(
+                        f"runtime_error: predicted observation at t={t} has shape "
+                        f"{getattr(y_pred_t, 'shape', None)}, expected {(B, self._y_dim, 1)}"
+                    )
+                gain_history[:, t] = gain_t.detach().cpu().numpy()
+                innov_history[:, t] = (y_t - y_pred_t).squeeze(2).detach().cpu().numpy()
             x_norm_t.append(float(torch.linalg.norm(x_t).detach().cpu().item()))
             if self._debug_every > 0 and ((t % self._debug_every) == 0 or has_nonfinite(x_t)):
                 logger.debug("forward t=%s %s", t, format_array_stats("x_t", x_t))
 
         self._runtime_diag = {"x_norm_t": np.asarray(x_norm_t, dtype=np.float32)}
+        if gain_history is not None and innov_history is not None:
+            self._runtime_diag["viz_diagnostics"] = {
+                "gain": gain_history,
+                "innov": innov_history,
+            }
         x_hat = x_repo.permute(0, 2, 1).contiguous()
         validate_exact_layout(
             x_hat,

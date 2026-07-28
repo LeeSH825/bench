@@ -437,6 +437,7 @@ class SplitKNetAdapter(ModelAdapter):
         self._runtime_diag: Dict[str, Any] = {}
         self._train_diag_history: List[Dict[str, Any]] = []
         self._clip_applied_count: int = 0
+        self._emit_viz_diagnostics: bool = False
 
     def setup(
         self,
@@ -452,6 +453,7 @@ class SplitKNetAdapter(ModelAdapter):
         self._runtime_diag = {}
         self._train_diag_history = []
         self._clip_applied_count = 0
+        self._emit_viz_diagnostics = False
 
         repo_raw, self.entrypoints = _resolve_repo_spec(cfg)
         self.repo_root = _normalize_repo_root(repo_raw)
@@ -606,6 +608,21 @@ class SplitKNetAdapter(ModelAdapter):
         _ = x_btd, y_raw_btd, y_model_btd, batch, phase
         return y_raw_btd.new_zeros(())
 
+    def state_estimation_loss(
+        self,
+        *,
+        pred_btd: torch.Tensor,
+        x_btd: torch.Tensor,
+        batch: Optional[Dict[str, Any]],
+        phase: str,
+        loss_fn: torch.nn.Module,
+    ) -> torch.Tensor:
+        """Compute the state loss; wrappers may override without changing the trainer."""
+        _ = batch, phase
+        if x_btd.shape[1] > 1:
+            return loss_fn(pred_btd[:, 1:, :], x_btd[:, 1:, :])
+        return loss_fn(pred_btd, x_btd)
+
     def train(
         self,
         train_dl: Any,
@@ -686,10 +703,13 @@ class SplitKNetAdapter(ModelAdapter):
 
                 optimizer.zero_grad(set_to_none=True)
                 pred = self._forward_batch(y_btd=y_model, x0_batch=x0_batch)
-                if x.shape[1] > 1:
-                    loss = loss_fn(pred[:, 1:, :], x[:, 1:, :])
-                else:
-                    loss = loss_fn(pred, x)
+                loss = self.state_estimation_loss(
+                    pred_btd=pred,
+                    x_btd=x,
+                    batch=batch,
+                    phase="train",
+                    loss_fn=loss_fn,
+                )
                 loss = loss + self.measurement_extra_loss(
                     x_btd=x,
                     y_raw_btd=y,
@@ -910,6 +930,15 @@ class SplitKNetAdapter(ModelAdapter):
 
         eval_init_from_gt = bool(self._cfg.get("eval_init_from_gt", False))
         preds: List[torch.Tensor] = []
+        diagnostics: Optional[Dict[str, List[np.ndarray]]] = None
+        if self._emit_viz_diagnostics:
+            diagnostics = {
+                "innov": [],
+                "innov_valid": [],
+                "gain": [],
+                "gain_g1": [],
+                "gain_g2": [],
+            }
         total_n = 0
         self._filter_obj.kf_net.eval()
         with torch.no_grad():
@@ -926,6 +955,17 @@ class SplitKNetAdapter(ModelAdapter):
                     label="y_model",
                 )
                 pred = self._forward_batch(y_btd=y_model, x0_batch=x0_batch)
+                if self._emit_viz_diagnostics:
+                    if diagnostics is None:
+                        raise RuntimeError("runtime_error: Split-KalmanNet diagnostic history is unavailable")
+                    batch_diag = self._runtime_diag.get("viz_diagnostics")
+                    if not isinstance(batch_diag, dict):
+                        raise RuntimeError("runtime_error: Split-KalmanNet diagnostics were not captured")
+                    for key in diagnostics:
+                        value = batch_diag.get(key)
+                        if not isinstance(value, np.ndarray):
+                            raise RuntimeError(f"runtime_error: Split-KalmanNet diagnostic {key!r} is missing")
+                        diagnostics[key].append(value)
                 validate_exact_layout(
                     pred,
                     expected=(int(y.shape[0]), int(y.shape[1]), int(self._x_dim)),
@@ -947,23 +987,26 @@ class SplitKNetAdapter(ModelAdapter):
             label="x_hat",
         )
 
-        preds_path = None
-        if self._artifacts_dir is not None:
-            preds_path = self._artifacts_dir / "preds_test.npz"
-            np.savez_compressed(preds_path, x_hat=x_hat.numpy())
-
         self.adapt_updates_used = 0
         self._update_ledger(
             train_updates_used=int(self.train_updates_used),
             adapt_updates_used=0,
         )
 
-        return {
+        result: Dict[str, Any] = {
             "status": "ok",
             "x_hat": x_hat,
             "cov": None,
-            "preds_path": (str(preds_path) if preds_path is not None else None),
+            "preds_path": None,
         }
+        if self._emit_viz_diagnostics:
+            if diagnostics is None:
+                raise RuntimeError("runtime_error: Split-KalmanNet diagnostic history is unavailable")
+            result["diagnostics"] = {
+                key: np.concatenate(values, axis=0)
+                for key, values in diagnostics.items()
+            }
+        return result
 
     @torch.no_grad()
     def predict(
@@ -1048,6 +1091,16 @@ class SplitKNetAdapter(ModelAdapter):
             "runtime_device": str(self.device),
             "integration_mode": "import_model_only",
             "covariance_support": False,
+            "viz_diagnostics_version": "split_gain_components_v1",
+            "diagnostic_semantics": {
+                "gain": "learned_combined_kalman_gain",
+                "gain_g1": "learned_split_factor_g1",
+                "gain_g2": "learned_split_factor_g2",
+                "innov": "measurement_residual_used_by_update",
+                "validity_mask": "innov_valid",
+                "combination": "gain_g1 @ H.T @ gain_g2",
+                "observation_jacobian": "fixed_system_info_H_not_stored_per_trajectory",
+            },
             "input_layout_bench": "BTD",
             "internal_layout_repo": "stepwise_colvec",
             "class_path": self._filter_class_path,
@@ -1068,6 +1121,12 @@ class SplitKNetAdapter(ModelAdapter):
                 "C_adapt_support": "search in third_party/Split_KalmanNet for online update/adapt routines beyond offline Trainer",
             },
         }
+
+    def supports_viz_diagnostics(self) -> bool:
+        return True
+
+    def set_viz_diagnostics_enabled(self, enabled: bool) -> None:
+        self._emit_viz_diagnostics = bool(enabled)
 
     def _forward_batch(
         self,
@@ -1094,17 +1153,45 @@ class SplitKNetAdapter(ModelAdapter):
                 dtype=self.dtype,
             )
 
+        self._runtime_diag.pop("viz_diagnostics", None)
         preds: List[torch.Tensor] = []
         seq_norms: List[float] = []
+        diagnostic_rows: Optional[Dict[str, List[np.ndarray]]] = None
+        if self._emit_viz_diagnostics:
+            diagnostic_rows = {
+                "innov": [],
+                "innov_valid": [],
+                "gain": [],
+                "gain_g1": [],
+                "gain_g2": [],
+            }
         for bi in range(int(bsz)):
             y_seq = y_btd[bi]  # [T,Dy]
             x0_col = x0[bi]    # [Dx,1]
             pred_seq = self._rollout_one(y_td=y_seq, x0_col=x0_col)
+            if self._emit_viz_diagnostics:
+                if diagnostic_rows is None:
+                    raise RuntimeError("runtime_error: Split-KalmanNet diagnostic rows are unavailable")
+                sequence_diag = self._runtime_diag.pop("_viz_sequence_diagnostics", None)
+                if not isinstance(sequence_diag, dict):
+                    raise RuntimeError("runtime_error: missing per-sequence Split-KalmanNet diagnostics")
+                for key in diagnostic_rows:
+                    value = sequence_diag.get(key)
+                    if not isinstance(value, np.ndarray):
+                        raise RuntimeError(f"runtime_error: missing per-sequence diagnostic {key!r}")
+                    diagnostic_rows[key].append(value)
             seq_norms.append(float(torch.linalg.norm(pred_seq).detach().cpu().item()))
             if self._debug_every > 0 and ((bi % self._debug_every) == 0 or has_nonfinite(pred_seq)):
                 logger.debug("forward batch_item=%s %s", bi, format_array_stats("pred_seq", pred_seq))
             preds.append(pred_seq)
         self._runtime_diag.update({"seq_norms": np.asarray(seq_norms, dtype=np.float32)})
+        if self._emit_viz_diagnostics:
+            if diagnostic_rows is None:
+                raise RuntimeError("runtime_error: Split-KalmanNet diagnostic rows are unavailable")
+            self._runtime_diag["viz_diagnostics"] = {
+                key: np.stack(values, axis=0)
+                for key, values in diagnostic_rows.items()
+            }
         x_hat = torch.stack(preds, dim=0).contiguous()
         validate_exact_layout(
             x_hat,
@@ -1132,9 +1219,61 @@ class SplitKNetAdapter(ModelAdapter):
         self._filter_obj.state_history = self._filter_obj.state_post.clone()
         self._filter_obj.dnn_first = True
 
-        for t in range(1, t_len):
-            obs_t = y_td[t].reshape(self._y_dim, 1)
-            self._filter_obj.filtering(obs_t)
+        sequence_diag: Optional[Dict[str, np.ndarray]] = None
+        captures: List[Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = []
+        hook_handle = None
+        if self._emit_viz_diagnostics:
+            sequence_diag = {
+                "innov": np.full((t_len, self._y_dim), np.nan, dtype=np.float32),
+                "innov_valid": np.zeros((t_len,), dtype=np.bool_),
+                "gain": np.full((t_len, self._x_dim, self._y_dim), np.nan, dtype=np.float32),
+                "gain_g1": np.full((t_len, self._x_dim, self._x_dim), np.nan, dtype=np.float32),
+                "gain_g2": np.full((t_len, self._y_dim, self._y_dim), np.nan, dtype=np.float32),
+            }
+
+            def _capture_split_factors(_module: Any, inputs: Tuple[Any, ...], output: Any) -> None:
+                if len(inputs) != 6 or not isinstance(output, (tuple, list)) or len(output) != 2:
+                    raise RuntimeError("runtime_error: unexpected Split-KalmanNet factor interface")
+                innovation = inputs[1]
+                h_flat = inputs[5]
+                gain_g1, gain_g2 = output
+                tensors = (innovation, h_flat, gain_g1, gain_g2)
+                if not all(isinstance(value, torch.Tensor) for value in tensors):
+                    raise RuntimeError("runtime_error: Split-KalmanNet diagnostics must be tensors")
+                h_matrix = h_flat.reshape(self._y_dim, self._x_dim)
+                with torch.no_grad():
+                    combined_gain = gain_g1 @ h_matrix.transpose(0, 1) @ gain_g2
+                captures.append(
+                    (
+                        innovation.reshape(self._y_dim).detach().cpu().numpy().astype(np.float32, copy=True),
+                        combined_gain.detach().cpu().numpy().astype(np.float32, copy=True),
+                        gain_g1.detach().cpu().numpy().astype(np.float32, copy=True),
+                        gain_g2.detach().cpu().numpy().astype(np.float32, copy=True),
+                    )
+                )
+
+            hook_handle = self._filter_obj.kf_net.register_forward_hook(_capture_split_factors)
+
+        try:
+            for t in range(1, t_len):
+                obs_t = y_td[t].reshape(self._y_dim, 1)
+                captured_before = len(captures)
+                self._filter_obj.filtering(obs_t)
+                if sequence_diag is not None:
+                    if len(captures) != captured_before + 1:
+                        raise RuntimeError(f"runtime_error: expected one Split-KalmanNet capture at t={t}")
+                    innov_t, gain_t, gain_g1_t, gain_g2_t = captures[-1]
+                    sequence_diag["innov"][t] = innov_t
+                    sequence_diag["innov_valid"][t] = True
+                    sequence_diag["gain"][t] = gain_t
+                    sequence_diag["gain_g1"][t] = gain_g1_t
+                    sequence_diag["gain_g2"][t] = gain_g2_t
+        finally:
+            if hook_handle is not None:
+                hook_handle.remove()
+
+        if sequence_diag is not None:
+            self._runtime_diag["_viz_sequence_diagnostics"] = sequence_diag
 
         x_hist = self._filter_obj.state_history
         if not isinstance(x_hist, torch.Tensor):
@@ -1433,10 +1572,13 @@ class SplitKNetAdapter(ModelAdapter):
                 label="y_model",
             )
             pred = self._forward_batch(y_btd=y_model, x0_batch=x0_batch)
-            if x.shape[1] > 1:
-                loss = loss_fn(pred[:, 1:, :], x[:, 1:, :])
-            else:
-                loss = loss_fn(pred, x)
+            loss = self.state_estimation_loss(
+                pred_btd=pred,
+                x_btd=x,
+                batch=batch,
+                phase="val",
+                loss_fn=loss_fn,
+            )
             loss = loss + self.measurement_extra_loss(
                 x_btd=x,
                 y_raw_btd=y,

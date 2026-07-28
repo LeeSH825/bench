@@ -15,7 +15,7 @@ import time
 import traceback
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -37,6 +37,12 @@ except Exception as e:
 from bench.metrics.core import (
     mse_per_step,
     compute_shift_recovery_k,
+)
+from bench.metrics.adcs_event import compute_adcs_event_metrics
+from bench.visualization.pred_artifact import (
+    PRED_ARTIFACT_FILENAME,
+    PRED_META_FILENAME,
+    save_pred_artifact,
 )
 from bench.utils.diagnostics import (
     array_stats,
@@ -360,6 +366,202 @@ def _extract_t0(task: Dict[str, Any], meta: Optional[Dict[str, Any]]) -> Optiona
     except Exception:
         pass
     return None
+
+
+def _adcs_event_metrics_if_available(
+    *,
+    x_true: np.ndarray,
+    x_pred: np.ndarray,
+    split_extras: Optional[Mapping[str, np.ndarray]],
+) -> Optional[Dict[str, Any]]:
+    extras = split_extras if isinstance(split_extras, Mapping) else {}
+    event_flag = extras.get("event_flag_seq")
+    if event_flag is None:
+        return None
+    metrics = compute_adcs_event_metrics(
+        x_true=x_true,
+        x_pred=x_pred,
+        event_flag_seq=event_flag,
+    )
+    json_metrics = {
+        key: (float(value) if np.isfinite(float(value)) else None)
+        for key, value in metrics.items()
+    }
+    event_mask = np.asarray(event_flag) > 0.5
+    return {
+        **json_metrics,
+        "event_sample_count": int(np.sum(event_mask)),
+        "event_flag_source": "test.npz:event_flag_seq",
+        "attitude_error_definition": "exact_shortest_quaternion_angle_from_mrp",
+        "angular_velocity_units": "match_state_omega_units",
+    }
+
+
+def _nested_value(mapping: Any, path: Sequence[str]) -> Any:
+    cur = mapping
+    for key in path:
+        if not isinstance(cur, Mapping) or key not in cur:
+            return None
+        cur = cur[key]
+    return cur
+
+
+def _prediction_artifact_policy(
+    *,
+    suite: Dict[str, Any],
+    task: Dict[str, Any],
+    runner_cfg: Dict[str, Any],
+) -> Tuple[bool, bool]:
+    configured: Optional[bool] = None
+    for container in (
+        task.get("artifacts"),
+        suite.get("artifacts"),
+        runner_cfg.get("artifacts"),
+    ):
+        if isinstance(container, Mapping) and "save_predictions" in container:
+            configured = bool(container["save_predictions"])
+            break
+
+    visualization_enabled = False
+    for container in (task.get("visualization"), suite.get("visualization")):
+        if isinstance(container, Mapping) and bool(container.get("enabled", False)):
+            visualization_enabled = True
+            break
+
+    # D20: prediction artifacts default on. Visualization requires the artifact
+    # even if a conflicting save_predictions=false is present.
+    save_predictions = True if configured is None else configured
+    return bool(save_predictions or visualization_enabled), bool(visualization_enabled)
+
+
+def _viz_artifact_policy(
+    *,
+    suite: Dict[str, Any],
+    task: Dict[str, Any],
+    runner_cfg: Dict[str, Any],
+    cli_emit: Optional[bool],
+) -> bool:
+    if bool(cli_emit):
+        return True
+    for container in (task.get("viz"), suite.get("viz"), runner_cfg.get("viz")):
+        if isinstance(container, Mapping) and bool(container.get("emit", False)):
+            return True
+    return False
+
+
+def _prediction_time_s(
+    *,
+    task: Dict[str, Any],
+    split_test: Dict[str, Any],
+    meta: Optional[Dict[str, Any]],
+    n_step: int,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    direct = split_test.get("time_s")
+    if direct is None:
+        direct = (split_test.get("extras") or {}).get("time_s")
+    if direct is not None:
+        return np.asarray(direct), {"time_source": "dataset:time_s", "time_unit": "s"}
+
+    dt_candidates = (
+        ("meta.ssm.true.dt", _nested_value(meta, ("ssm", "true", "dt"))),
+        ("meta.simulation.dt", _nested_value(meta, ("simulation", "dt"))),
+        ("meta.dt", _nested_value(meta, ("dt",))),
+        ("task.simulation.dt", _nested_value(task, ("simulation", "dt"))),
+        ("task.dt", _nested_value(task, ("dt",))),
+    )
+    for source, raw in dt_candidates:
+        try:
+            dt = float(raw)
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(dt) and dt > 0.0:
+            return (
+                np.arange(int(n_step), dtype=np.float64) * dt,
+                {"time_source": source, "time_unit": "s", "dt_s": dt},
+            )
+
+    hz_candidates = (
+        ("meta.sampling_hz", _nested_value(meta, ("sampling_hz",))),
+        ("meta.protocol.sampling_hz", _nested_value(meta, ("protocol", "sampling_hz"))),
+        ("task.sampling_hz", _nested_value(task, ("sampling_hz",))),
+    )
+    for source, raw in hz_candidates:
+        try:
+            hz = float(raw)
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(hz) and hz > 0.0:
+            dt = 1.0 / hz
+            return (
+                np.arange(int(n_step), dtype=np.float64) * dt,
+                {"time_source": source, "time_unit": "s", "dt_s": dt},
+            )
+
+    return (
+        np.arange(int(n_step), dtype=np.float64),
+        {
+            "time_source": "sample_index_fallback",
+            "time_unit": "sample_index",
+            "time_warning": "No task timestamp or sampling interval was available; time_s stores sample indices.",
+        },
+    )
+
+
+def _prediction_trajectory_id(split_test: Dict[str, Any], n_seq: int) -> np.ndarray:
+    direct = split_test.get("trajectory_id")
+    if direct is None:
+        direct = (split_test.get("extras") or {}).get("trajectory_id")
+    if direct is None:
+        return np.arange(int(n_seq), dtype=np.int64)
+    return np.asarray(direct)
+
+
+def _prediction_state_meta(
+    *,
+    task: Dict[str, Any],
+    meta: Optional[Dict[str, Any]],
+    x_dim: int,
+) -> Dict[str, Any]:
+    if int(x_dim) != 9:
+        return {}
+
+    task_family = str(
+        task.get("task_family")
+        or (meta or {}).get("task_family")
+        or ""
+    ).lower()
+    state_names = _nested_value(meta, ("ssm", "true", "state"))
+    state_text = " ".join(str(v).lower() for v in state_names) if isinstance(state_names, list) else ""
+    has_bias_state = (
+        "bias_adcs" in task_family
+        or "gyro_bias" in state_text
+        or isinstance((meta or {}).get("bias_state"), Mapping)
+    )
+    if not has_bias_state:
+        return {}
+
+    return {
+        "state_schema": {
+            "attitude": {
+                "type": "mrp",
+                "name": "sigma_BN",
+                "indices": [0, 1, 2],
+            },
+            "angular_rate": {
+                "type": "rad_s",
+                "name": "omega_BN_B",
+                "indices": [3, 4, 5],
+            },
+            "gyro_bias": {
+                "type": "rad_s",
+                "name": "gyro_bias",
+                "indices": [6, 7, 8],
+                "optional": True,
+            },
+        },
+        "attitude_convention": "MRP sigma_BN",
+        "time_unit": "s",
+    }
 
 
 def _cache_root(default_bench_root: Path) -> Path:
@@ -859,6 +1061,72 @@ def _read_adapter_meta(adapter: Any) -> Dict[str, Any]:
     return {}
 
 
+def _sanitize_extra_metric_value(value: Any) -> Any:
+    if value is None or isinstance(value, (str, bool)):
+        return value
+    if isinstance(value, Mapping):
+        return {
+            str(key): _sanitize_extra_metric_value(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_sanitize_extra_metric_value(item) for item in value]
+    if isinstance(value, torch.Tensor):
+        tensor = value.detach().cpu()
+        if tensor.numel() == 1:
+            return _sanitize_extra_metric_value(tensor.item())
+        return _sanitize_extra_metric_value(tensor.tolist())
+    if isinstance(value, np.ndarray):
+        return _sanitize_extra_metric_value(value.tolist())
+    if isinstance(value, (np.bool_,)):
+        return bool(value)
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        scalar = float(value)
+        return scalar if math.isfinite(scalar) else None
+    raise TypeError(f"unsupported extra metric value type: {type(value).__name__}")
+
+
+def _read_adapter_extra_metrics(adapter: Any) -> Dict[str, Any]:
+    if not hasattr(adapter, "get_extra_metrics"):
+        return {}
+    try:
+        maybe = adapter.get_extra_metrics()  # type: ignore
+        if not isinstance(maybe, Mapping):
+            return {}
+        sanitized = _sanitize_extra_metric_value(maybe)
+        return dict(sanitized) if isinstance(sanitized, dict) else {}
+    except Exception as exc:
+        logger.warning("Ignoring invalid adapter extra metrics: %s: %s", type(exc).__name__, exc)
+        return {}
+
+
+def _finalize_adapter_evaluation_diagnostics(
+    *,
+    adapter: Any,
+    run_dir: Path,
+    split_extras: Optional[Mapping[str, np.ndarray]],
+    x_true: np.ndarray,
+    x_pred: np.ndarray,
+) -> Dict[str, Any]:
+    if not hasattr(adapter, "finalize_evaluation_diagnostics"):
+        return {}
+    maybe = adapter.finalize_evaluation_diagnostics(  # type: ignore[attr-defined]
+        run_dir=run_dir,
+        split_extras=split_extras,
+        x_true=x_true,
+        x_pred=x_pred,
+    )
+    if maybe is None:
+        return {}
+    if not isinstance(maybe, Mapping):
+        raise TypeError(
+            "finalize_evaluation_diagnostics must return a mapping or None"
+        )
+    return dict(maybe)
+
+
 def _compute_train_cache_key(
     *,
     model_id: str,
@@ -997,8 +1265,14 @@ def _load_split_npz(npz_path: Path) -> Dict[str, Any]:
         u = z["u"].astype(np.float32, copy=False) if "u" in z.files else None
         F = z["F"] if "F" in z.files else None
         H = z["H"] if "H" in z.files else None
+        time_s = np.array(z["time_s"], copy=True) if "time_s" in z.files else None
+        trajectory_id = (
+            np.array(z["trajectory_id"], copy=True)
+            if "trajectory_id" in z.files
+            else None
+        )
         extras: Dict[str, np.ndarray] = {}
-        core_keys = {"x", "y", "u", "F", "H", "meta_json"}
+        core_keys = {"x", "y", "u", "F", "H", "time_s", "trajectory_id", "meta_json"}
         n = int(x.shape[0])
         for key in z.files:
             if key in core_keys:
@@ -1012,7 +1286,17 @@ def _load_split_npz(npz_path: Path) -> Dict[str, Any]:
                 meta = json.loads(z["meta_json"].item())
             except Exception:
                 meta = None
-    return {"x": x, "y": y, "u": u, "F": F, "H": H, "meta": meta, "extras": extras}
+    return {
+        "x": x,
+        "y": y,
+        "u": u,
+        "F": F,
+        "H": H,
+        "time_s": time_s,
+        "trajectory_id": trajectory_id,
+        "meta": meta,
+        "extras": extras,
+    }
 
 
 class _SeqDataset(Dataset):
@@ -1038,7 +1322,7 @@ class _SeqDataset(Dataset):
         if self._u is not None:
             sample["u"] = torch.from_numpy(self._u[idx])
         for key, arr in self._extras.items():
-            sample[key] = torch.from_numpy(arr[idx])
+            sample[key] = torch.as_tensor(arr[idx])
         return sample
 
 
@@ -1172,6 +1456,50 @@ def _try_call_eval(
         return adapter.eval(test_loader)  # type: ignore
 
 
+def _adapter_supports_viz_diagnostics(adapter: Any) -> bool:
+    supports = getattr(adapter, "supports_viz_diagnostics", None)
+    if callable(supports):
+        return bool(supports())
+    return callable(getattr(adapter, "set_viz_diagnostics_enabled", None))
+
+
+def _collect_viz_diagnostics(
+    *,
+    adapter: Any,
+    test_loader: Any,
+    ckpt_path: Optional[Path],
+    track_cfg: Dict[str, Any],
+    x_hat_np: np.ndarray,
+    N: int,
+    T: int,
+    D: int,
+) -> Dict[str, Any]:
+    if not _adapter_supports_viz_diagnostics(adapter):
+        return {}
+    set_enabled = getattr(adapter, "set_viz_diagnostics_enabled", None)
+    if not callable(set_enabled):
+        raise RuntimeError("adapter reports visualization diagnostics support but has no set_viz_diagnostics_enabled hook")
+    try:
+        set_enabled(True)
+        diag_res = _try_call_eval(adapter, test_loader, ckpt_path, track_cfg)
+        if not isinstance(diag_res, Mapping) or "x_hat" not in diag_res:
+            raise RuntimeError("viz_diagnostics_eval_missing_x_hat")
+        diag_x_hat = _validate_full_x_hat(diag_res["x_hat"], N=N, T=T, D=D)
+        diag_x_np = diag_x_hat.detach().cpu().numpy()
+        if not np.array_equal(diag_x_np, x_hat_np):
+            max_abs = float(np.max(np.abs(diag_x_np - x_hat_np)))
+            raise RuntimeError(
+                "viz_diagnostics_changed_predictions: "
+                f"max_abs_diff={max_abs}"
+            )
+        maybe_diag = diag_res.get("diagnostics")
+        if isinstance(maybe_diag, Mapping):
+            return dict(maybe_diag)
+        return {}
+    finally:
+        set_enabled(False)
+
+
 def _try_call_adapt(
     adapter: Any,
     stream_or_loader: Any,
@@ -1256,6 +1584,7 @@ def run_one(
     log_to_file: Optional[bool] = None,
     log_file: Optional[str] = None,
     debug_every: Optional[int] = None,
+    emit_viz_artifacts: Optional[bool] = None,
 ) -> Dict[str, Any]:
     bench_root = _bench_root()
     cache_root = _cache_root(bench_root)
@@ -1366,48 +1695,89 @@ def run_one(
 
     # Early missing_data
     if not test_path.exists():
-        context = {
-            "suite_name": suite_name,
-            "task_id": task_id,
-            "scenario_id": scenario_id,
-            "cache_scenario_id": cache_scenario_id,
-            "seed": int(seed),
-            "model_id": model_id,
-            "track_id": track_id,
-            "init_id": str(init_id),
-            "cache_root": str(cache_root),
-            "scenario_settings": {k: _to_jsonable(v) for k, v in (scenario_settings or {}).items()},
-            "scenario_cfg_basis": scenario_cfg_basis,
-            "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
-            "resolved_from_cache": bool(resolved_from_cache),
-        }
-        failure = {
-            "status": "missing_data",
-            "failure_type": "io_error",
-            "phase": "data_loading",
-            "failure_stage": "data_loading",
-            "message": f"missing_data: expected test split at {test_path}",
-            "context": context,
-            "missing_path": str(test_path),
-            "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed.",
-        }
-        _write_json(run_dir / "failure.json", failure)
-        log_err(json.dumps(failure, indent=2, ensure_ascii=False))
-        logger.error("Missing test split: %s", test_path)
-        clear_logging_context()
-        return {
-            "status": "missing_data",
-            "run_dir": str(run_dir),
-            "suite": suite_name,
-            "task_id": task_id,
-            "scenario_id": scenario_id,
-            "seed": seed,
-            "model_id": model_id,
-            "track_id": track_id,
-            "init_id": str(init_id),
-            "failure_type": "io_error",
-            "error": "missing_data",
-        }
+        data_mode = str(runner_cfg.get("data_mode", "bench_generated")).strip().lower()
+        if data_mode == "replay_generated":
+            try:
+                from bench.tasks.bench_generated import prepare_bench_generated_v0  # lazy import
+
+                replay_arts = prepare_bench_generated_v0(
+                    suite_name=suite_name,
+                    task_cfg=task,
+                    seed=int(seed),
+                    cache_root=cache_root,
+                    scenario_overrides=scenario_settings,
+                )
+                if not replay_arts:
+                    raise RuntimeError(
+                        "replay_generated bridge produced no dataset artifacts"
+                    )
+                selected_art = None
+                for art in replay_arts:
+                    if str(art.scenario_id) == str(cache_scenario_id):
+                        selected_art = art
+                        break
+                if selected_art is None:
+                    selected_art = replay_arts[0]
+                train_path = Path(selected_art.train.path)
+                val_path = Path(selected_art.val.path)
+                test_path = Path(selected_art.test.path)
+                cache_scenario_id = str(selected_art.scenario_id)
+                resolved_from_cache = True
+                logger.info(
+                    "Generated replay_generated cache suite=%s task=%s scenario=%s",
+                    suite_name,
+                    task_id,
+                    cache_scenario_id,
+                )
+            except Exception as exc:
+                logger.error("replay_generated cache generation failed: %s", exc)
+                raise
+
+        if test_path.exists():
+            logger.info("replay_generated data cache available at %s", test_path)
+        else:
+            context = {
+                "suite_name": suite_name,
+                "task_id": task_id,
+                "scenario_id": scenario_id,
+                "cache_scenario_id": cache_scenario_id,
+                "seed": int(seed),
+                "model_id": model_id,
+                "track_id": track_id,
+                "init_id": str(init_id),
+                "cache_root": str(cache_root),
+                "scenario_settings": {k: _to_jsonable(v) for k, v in (scenario_settings or {}).items()},
+                "scenario_cfg_basis": scenario_cfg_basis,
+                "scenario_id_method": "bench_generated.canonicalize_scenario_id(task_id, scenario_cfg_basis) (+ fallback scan)",
+                "resolved_from_cache": bool(resolved_from_cache),
+            }
+            failure = {
+                "status": "missing_data",
+                "failure_type": "io_error",
+                "phase": "data_loading",
+                "failure_stage": "data_loading",
+                "message": f"missing_data: expected test split at {test_path}",
+                "context": context,
+                "missing_path": str(test_path),
+                "hint": "Run bench.tasks.smoke_data/bench_generated for this suite/task/scenario/seed.",
+            }
+            _write_json(run_dir / "failure.json", failure)
+            log_err(json.dumps(failure, indent=2, ensure_ascii=False))
+            logger.error("Missing test split: %s", test_path)
+            clear_logging_context()
+            return {
+                "status": "missing_data",
+                "run_dir": str(run_dir),
+                "suite": suite_name,
+                "task_id": task_id,
+                "scenario_id": scenario_id,
+                "seed": seed,
+                "model_id": model_id,
+                "track_id": track_id,
+                "init_id": str(init_id),
+                "failure_type": "io_error",
+                "error": "missing_data",
+            }
 
     track_cfg = _track_cfg(runner_cfg, track_id)
     budget_cfg = dict(runner_cfg.get("budget", {}) or {})
@@ -1420,6 +1790,21 @@ def run_one(
     adapt_max_updates = int(adaptation_budget_cfg.get("max_updates", 200))
     adapt_max_updates_per_step = int(adaptation_budget_cfg.get("max_updates_per_step", 1))
     allowed_after_t0_only = bool(adaptation_budget_cfg.get("allowed_after_t0_only", False))
+    save_predictions, visualization_enabled = _prediction_artifact_policy(
+        suite=suite,
+        task=task,
+        runner_cfg=runner_cfg,
+    )
+    viz_emit = _viz_artifact_policy(
+        suite=suite,
+        task=task,
+        runner_cfg=runner_cfg,
+        cli_emit=emit_viz_artifacts,
+    )
+    for stale_name in (PRED_ARTIFACT_FILENAME, PRED_META_FILENAME):
+        stale_path = run_dir / "artifacts" / stale_name
+        if stale_path.exists():
+            stale_path.unlink()
 
     run_plan = {
         "plan_id": f"{init_id}__{track_id}",
@@ -1447,6 +1832,11 @@ def run_one(
             "adapt_max_updates_per_step": int(adapt_max_updates_per_step) if adaptation_enabled else 0,
             "t0_gate_enabled": bool(allowed_after_t0_only),
             "adaptation_budget": _normalize_jsonish(track_cfg.get("adaptation_budget", {})),
+        },
+        "artifacts": {
+            "save_predictions": bool(save_predictions),
+            "save_predictions_default": True,
+            "visualization_enabled": bool(visualization_enabled),
         },
     }
     _write_json(run_dir / "run_plan.json", run_plan)
@@ -1528,6 +1918,11 @@ def run_one(
     shift_info: Dict[str, Any] = {}
     adapter_meta: Dict[str, Any] = {}
     adapter_runtime: Optional[Dict[str, Any]] = None
+    prediction_artifact_info: Dict[str, Any] = {
+        "enabled": bool(save_predictions),
+        "status": "pending" if save_predictions else "disabled",
+    }
+    run_warnings: List[Dict[str, Any]] = []
 
     try:
         if adaptation_enabled and adapt_max_updates > 200:
@@ -1866,6 +2261,7 @@ def run_one(
                 logger.info("Adapt stage skipped because no shift t0 was detected")
 
         batch_times_ms: List[float] = []
+        eval_res: Any = None
 
         if hasattr(adapter, "eval"):
             if device.type == "cuda":
@@ -1957,6 +2353,18 @@ def run_one(
         mse_val = float(np.mean(mse_t_mean))
         rmse_val = float(np.sqrt(max(mse_val, 0.0)))
         mse_db_val = float(10.0 * np.log10(max(mse_val, 1e-30)))
+        adcs_event_metrics = _adcs_event_metrics_if_available(
+            x_true=x_gt,
+            x_pred=x_hat_np,
+            split_extras=split_test.get("extras"),
+        )
+        _finalize_adapter_evaluation_diagnostics(
+            adapter=adapter,
+            run_dir=run_dir,
+            split_extras=split_test.get("extras"),
+            x_true=x_gt,
+            x_pred=x_hat_np,
+        )
         thresholds_hit: List[str] = []
         if not np.isfinite(np.array([mse_val, mse_db_val], dtype=np.float64)).all():
             thresholds_hit.append("metric_nonfinite")
@@ -2046,6 +2454,62 @@ def run_one(
                 adapter_meta = {}
         adapter_meta["selected_layout"] = getattr(adapter, "last_layout", None)
         adapter_meta["selected_class"] = getattr(adapter, "last_class", None)
+        adapter_extra_metrics = _read_adapter_extra_metrics(adapter)
+
+        if viz_emit:
+            diagnostics = _collect_viz_diagnostics(
+                adapter=adapter,
+                test_loader=test_loader,
+                ckpt_path=eval_ckpt_path,
+                track_cfg=track_cfg,
+                x_hat_np=x_hat_np,
+                N=N,
+                T=T,
+                D=Dx,
+            )
+            time_s_viz, time_meta_viz = _prediction_time_s(
+                task=task,
+                split_test=split_test,
+                meta=meta,
+                n_step=T,
+            )
+            config_snapshot_path = run_dir / "config_snapshot.yaml"
+            config_hash = _sha1_file(config_snapshot_path) if config_snapshot_path.exists() else None
+            viz_trajectory_ids = _prediction_trajectory_id(split_test, N)
+            viz_trajectory_id_source = (
+                "test.npz:trajectory_id"
+                if split_test.get("trajectory_id") is not None
+                else "test_split_row_index_fallback"
+            )
+            from viz.io.writer import write_viz_artifacts
+
+            write_viz_artifacts(
+                run_dir=run_dir,
+                repo_root=bench_root,
+                suite_name=str(suite_name),
+                task_id=str(task_id),
+                task_family=str(task.get("task_family", (meta or {}).get("task_family", ""))),
+                scenario_id=str(scenario_id),
+                model_id=str(model_id),
+                seed=int(seed),
+                track_id=str(track_id),
+                init_id=str(init_id),
+                run_status="ok",
+                time_s=time_s_viz,
+                time_meta=time_meta_viz,
+                x_true=x_gt,
+                y_obs=y_test,
+                x_hat=x_hat_np,
+                split_extras=split_test.get("extras"),
+                diagnostics=diagnostics,
+                adapter_meta=adapter_meta,
+                config_hash=config_hash,
+                data_split="test",
+                split_source="explicit",
+                trajectory_ids=viz_trajectory_ids,
+                trajectory_id_source=viz_trajectory_id_source,
+                scenario_meta={"display_name": None, "parameters": dict(scenario_settings)},
+            )
         logger.info(
             "Eval complete mse=%s rmse=%s mse_db=%s recovery_k=%s",
             mse_val,
@@ -2053,6 +2517,69 @@ def run_one(
             mse_db_val,
             (recovery or {}).get("recovery_k", None),
         )
+
+        if save_predictions:
+            try:
+                time_s, time_meta = _prediction_time_s(
+                    task=task,
+                    split_test=split_test,
+                    meta=meta,
+                    n_step=T,
+                )
+                trajectory_id = _prediction_trajectory_id(split_test, N)
+                artifact_meta: Dict[str, Any] = {
+                    "suite_name": str(suite_name),
+                    "task_id": str(task_id),
+                    "scenario_id": str(scenario_id),
+                    "seed": int(seed),
+                    "model_id": str(model_id),
+                    "track_id": str(track_id),
+                    "init_id": str(init_id),
+                    "source_split": "test",
+                    **time_meta,
+                }
+                artifact_meta.update(
+                    _prediction_state_meta(
+                        task=task,
+                        meta=meta,
+                        x_dim=Dx,
+                    )
+                )
+                pred_path, pred_meta_path = save_pred_artifact(
+                    run_dir / "artifacts",
+                    time_s=time_s,
+                    x_true=x_gt,
+                    y_obs=y_test,
+                    x_hat=x_hat_np,
+                    trajectory_id=trajectory_id,
+                    meta=artifact_meta,
+                )
+                prediction_artifact_info = {
+                    "enabled": True,
+                    "status": "ok",
+                    "path": str(pred_path),
+                    "meta_path": str(pred_meta_path),
+                }
+                logger.info("Wrote prediction artifact: %s", pred_path)
+            except Exception as artifact_exc:
+                artifact_error = f"{type(artifact_exc).__name__}: {artifact_exc}"
+                prediction_artifact_info = {
+                    "enabled": True,
+                    "status": "failed",
+                    "error": artifact_error,
+                }
+                warning_obj = {
+                    "type": "prediction_artifact_failed",
+                    "message": artifact_error,
+                }
+                run_warnings.append(warning_obj)
+                log_err(f"[WARN] prediction_artifact_failed: {artifact_error}")
+                logger.warning("Prediction artifact generation failed: %s", artifact_error)
+                if visualization_enabled:
+                    raise RuntimeError(
+                        "prediction_artifact_failed: visualization.enabled=true requires "
+                        f"a valid prediction artifact ({artifact_error})"
+                    ) from artifact_exc
 
         ledger_obj = _read_json_if_exists(ledger_path)
         if not ledger_obj:
@@ -2157,10 +2684,23 @@ def run_one(
                 "selected_class": getattr(adapter, "last_class", None),
             },
             "adapter_meta": adapter_meta,
+            "prediction_artifact": prediction_artifact_info,
+            "warnings": run_warnings,
             "run_plan": run_plan,
             "budgets": ledger_obj,
             "run_dir": str(run_dir),
         }
+        if adcs_event_metrics is not None:
+            metrics_obj["adcs_event"] = adcs_event_metrics
+        for key, value in adapter_extra_metrics.items():
+            if key in metrics_obj:
+                logger.warning(
+                    "Ignoring adapter extra metric with reserved key=%s for model_id=%s",
+                    key,
+                    model_id,
+                )
+                continue
+            metrics_obj[key] = value
         _write_json(run_dir / "metrics.json", metrics_obj)
         stale_failure = run_dir / "failure.json"
         if stale_failure.exists():
@@ -2184,6 +2724,8 @@ def run_one(
             "mse_db": mse_db_val,
             "timing_ms_per_step": float(timing_ms_per_step),
             "recovery_k": (recovery or {}).get("recovery_k", None),
+            "prediction_artifact": prediction_artifact_info,
+            "warnings": run_warnings,
         }
 
     except Exception as e:
@@ -2300,6 +2842,11 @@ def main() -> None:
     ap.add_argument("--log-to-file", action="store_true", help="also write per-run bench.log files")
     ap.add_argument("--log-file", type=str, default=None, help="optional explicit log file path")
     ap.add_argument("--debug-every", type=int, default=None, help="periodic debug summary interval")
+    ap.add_argument(
+        "--emit-viz-artifacts",
+        action="store_true",
+        help="opt-in diagnostic visualization artifact emission (default: off)",
+    )
     args = ap.parse_args()
 
     suite_path = Path(args.suite_yaml).expanduser().resolve()
@@ -2405,6 +2952,7 @@ def main() -> None:
                             log_to_file=bool(log_cfg["log_to_file"]),
                             log_file=log_cfg["log_file"],
                             debug_every=int(log_cfg["debug_every"]),
+                            emit_viz_artifacts=bool(args.emit_viz_artifacts),
                         )
                         _append_summary_row(summary_csv, res, summary_fields)
                         rd = res.get("run_dir")
