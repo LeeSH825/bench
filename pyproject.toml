@@ -32,6 +32,13 @@ dev = [
   "ruff>=0.5",
   "pytest>=7.4",
 ]
+viz = [
+  "streamlit>=1.60,<2",
+  "plotly>=6.9,<7",
+]
+basilisk = [
+  "bsk>=2.10.2,<3",
+]
 
 # placeholders for later separation (Step 4+)
 kalmannet_tsp = []
