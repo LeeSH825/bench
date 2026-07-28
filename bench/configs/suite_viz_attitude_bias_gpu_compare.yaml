@@ -1,0 +1,137 @@
+suite:
+  name: viz_attitude_bias_gpu_compare
+  version: "0.1.0"
+  description: >
+    GPU smoke comparison on the Basilisk IMU attitude-plus-gyro-bias task.
+    The model-based KF uses the generator's small-angle F/H diagnostic model;
+    it is not a physical nonlinear oracle.
+
+seeds: [0]
+
+tasks:
+  - task_id: Basilisk_IMU_Bias_ADCS_viz_compare_v0
+    task_name: "Basilisk IMU attitude and gyro-bias comparison"
+    task_family: basilisk_imu_bias_adcs_v0
+    system_type: nonlinear
+    x_dim: 9
+    y_dim: 6
+    sequence_length_T: 50
+    dataset_sizes:
+      N_train: 32
+      N_val: 8
+      N_test: 8
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: {type: "scaled_identity", q2: 1.0e-8}
+    observation:
+      type: basilisk_imu_sensor_with_controlled_gyro_bias
+      h_type: imu_gyro_delta_bias
+      measurement_mode: gyro_delta_angle
+    imu:
+      profile_id: clean_imu
+      measurement_mode: gyro_delta_angle
+      sensor_pos_B: [0.0, 0.0, 0.0]
+      body_to_platform_euler321_rad: [0.0, 0.0, 0.0]
+      profiles:
+        clean_imu:
+          severity: clean_imu
+          gyro_noise_std: 0.0
+          accel_noise_std: 0.0
+          gyro_bias_std: 0.0
+          accel_bias_std: 0.0
+    bias_state:
+      profile_id: moderate_bias
+      profiles:
+        moderate_bias:
+          severity: moderate_bias
+          bias_init_std: 2.0e-3
+          bias_rw_std: 5.0e-5
+          gyro_noise_std: 1.0e-3
+          delta_noise_std: 1.0e-4
+    control_input_u: false
+    ground_truth: {has_gt: true}
+    sweep: {}
+
+models:
+  - model_id: oracle_kf
+    display_name: "Model-based KF (small-angle baseline)"
+    adapter: "bench.models.mb_kf:ModelBasedKFAdapter"
+    baseline_mode: "oracle"
+    outputs_covariance: true
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: true
+      needs_system_model: true
+
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+    estimator_class_path: "KNet.KalmanNet_nn.KalmanNetNN"
+    input_layout: "BTD"
+    batch_size: 8
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 8
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    repo:
+      path: "third_party/Split_KalmanNet"
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 8
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 8
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/viz_attitude_bias_gpu_compare"
+  budget:
+    train_max_updates: 30
+    train_batch_size: 8
+    eval_batch_size: 16
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 0
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
