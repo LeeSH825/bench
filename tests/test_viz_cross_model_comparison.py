@@ -381,6 +381,17 @@ class VizCrossModelComparisonTests(unittest.TestCase):
             expected = float(np.sqrt(np.mean(np.stack(errors) ** 2)))
             self.assertAlmostEqual(float(value), expected, places=4)
 
+    def test_dataset_rmse_prefers_runner_accuracy_over_ambiguous_aggregate_std(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            run = load_run(_write_run(Path(tmp), "dataset_rmse_accuracy", physical=False, model_id="dataset_rmse_accuracy"))
+            title, value = panels.dataset_rmse_metric(
+                run.meta,
+                {"emp_std": np.ones((12, 9), dtype=np.float32)},
+                {"accuracy": {"rmse": 0.123456}},
+            )
+            self.assertEqual(title, "Dataset RMSE [native state units]")
+            self.assertEqual(value, "0.1235")
+
     def test_model_toggle_adds_and_removes_traces(self) -> None:
         with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
             base = load_run(_write_run(Path(tmp), "base", physical=True, model_id="base"))

@@ -610,6 +610,33 @@ def _render_cross_model_comparison(
         key="comparison_mode",
     )
     mode = next(key for key, label in mode_labels.items() if label == selected_mode_label)
+
+    indexed_runs, index_errors, scan_seconds = discover_run_index(runs_root)
+    rmse_models: list[tuple[str, VizRun]] = [(str(run.meta.get("model_id") or "base"), run)]
+    if selected_info.source_trajectory_id is not None and isinstance(run.meta.get("state_spec"), Mapping):
+        rmse_candidates = comparison_candidates(
+            run,
+            indexed_runs,
+            source_trajectory_id=selected_info.source_trajectory_id,
+            mode="strict",
+            metric="state_error",
+        )
+        for item in rmse_candidates:
+            if item.compatibility.get("compatible") and item.run.run_dir != run.run_dir:
+                rmse_models.append((str(item.run.meta.get("model_id") or "unknown"), item.run))
+
+    st.markdown("**Dataset-average RMSE**")
+    st.caption(
+        "Full evaluation dataset RMSE; selected trajectory RMSE is separate. "
+        "Only models with matching state semantics are listed."
+    )
+    rmse_columns = st.columns(min(4, max(1, len(rmse_models))))
+    for index, (label, rmse_run) in enumerate(rmse_models):
+        title, value = panels.dataset_rmse_metric(
+            rmse_run.meta, rmse_run.aggregate, rmse_run.metrics
+        )
+        rmse_columns[index % len(rmse_columns)].metric(label, value, help=title)
+
     available = (
         comparison.available_physical_metrics(run.meta)
         if mode == "physical"
@@ -638,7 +665,6 @@ def _render_cross_model_comparison(
         key=f"comparison_metric_{mode}",
     )
 
-    indexed_runs, index_errors, scan_seconds = discover_run_index(runs_root)
     candidates = comparison_candidates(
         run,
         indexed_runs,
@@ -757,15 +783,6 @@ def _render_cross_model_comparison(
                 f"Comparison trajectory could not be loaded for {item.run.run_dir}: {exc}. "
                 "No fallback trajectory was substituted."
             )
-
-    st.markdown("**Dataset-average RMSE**")
-    st.caption("Computed over all evaluation trajectories; this is separate from the selected trajectory RMSE.")
-    rmse_columns = st.columns(min(4, max(1, len(model_data))))
-    for index, model in enumerate(model_data):
-        title, value = panels.dataset_rmse_metric(
-            model["meta"], model.get("aggregate"), model.get("metrics")
-        )
-        rmse_columns[index % len(rmse_columns)].metric(model["label"], value, help=title)
 
     option_columns = st.columns(3)
     with option_columns[0]:

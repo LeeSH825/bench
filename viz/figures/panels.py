@@ -613,6 +613,15 @@ def dataset_rmse_metric(
 ) -> tuple[str, str]:
     """Return the RMSE over all evaluation trajectories, with its meaning."""
     metrics_obj = metrics if isinstance(metrics, Mapping) else {}
+    accuracy = metrics_obj.get("accuracy")
+    if isinstance(accuracy, Mapping):
+        value = accuracy.get("rmse")
+        try:
+            if np.isfinite(float(value)):
+                return "Dataset RMSE [native state units]", _format_metric(float(value))
+        except (TypeError, ValueError):
+            pass
+
     adcs_event = metrics_obj.get("adcs_event")
     if isinstance(adcs_event, Mapping):
         value = adcs_event.get("attitude_rmse_deg")
@@ -634,14 +643,6 @@ def dataset_rmse_metric(
             float(np.sqrt(np.nanmean(mean_square)))
         )
 
-    accuracy = metrics_obj.get("accuracy")
-    if isinstance(accuracy, Mapping):
-        value = accuracy.get("rmse")
-        try:
-            if np.isfinite(float(value)):
-                return "Dataset generic-state RMSE [state units]", _format_metric(float(value))
-        except (TypeError, ValueError):
-            pass
     return "Dataset RMSE", "NA"
 
 
