@@ -49,11 +49,13 @@ F32_TRAJ_KEYS = {
     "torque_cmd",
     "sow_hat",
     "gate",
+    "correction_attitude",
+    "correction_bias",
 }
 
 F16_TRAJ_KEYS = {"P", "S", "gain", "gain_g1", "gain_g2"}
 
-BOOL_TRAJ_KEYS = {"innov_valid", "eclipse_flag", "event_flag", "ref_mask"}
+BOOL_TRAJ_KEYS = {"innov_valid", "eclipse_flag", "event_flag", "ref_mask", "correction_valid"}
 
 SPLIT_GAIN_COMPONENT_SEMANTICS = {
     "gain": "learned_combined_kalman_gain",
@@ -158,6 +160,185 @@ def state_spec_for(formulation: str, x_dim: int) -> Dict[str, Any]:
         "shadow_set": shadow_set,
         "nominal_attitude_stored": False,
         "rpy_reference_frame": rpy_reference_frame,
+    }
+
+
+def _layout_blocks(state_spec: Mapping[str, Any]) -> Dict[str, tuple[int, int, Mapping[str, Any]]]:
+    blocks: Dict[str, tuple[int, int, Mapping[str, Any]]] = {}
+    offset = 0
+    for item in state_spec.get("layout", []):
+        if not isinstance(item, Mapping):
+            continue
+        dim = int(item.get("dim", 0))
+        kind = str(item.get("kind", "state"))
+        blocks.setdefault(kind, (offset, offset + dim, item))
+        offset += dim
+    return blocks
+
+
+def _expanded_state_semantics(state_spec: Mapping[str, Any]) -> tuple[list[str], list[str]]:
+    names: list[str] = []
+    units: list[str] = []
+    axis_names = ("x", "y", "z")
+    for item in state_spec.get("layout", []):
+        if not isinstance(item, Mapping):
+            continue
+        dim = int(item.get("dim", 0))
+        name = str(item.get("name", "state"))
+        unit = str(item.get("unit", "unknown"))
+        for index in range(dim):
+            suffix = axis_names[index] if index < len(axis_names) else str(index)
+            names.append(f"{name}_{suffix}")
+            units.append(unit)
+    return names, units
+
+
+def _expanded_measurement_semantics(meas_spec: Mapping[str, Any]) -> tuple[list[str], list[str]]:
+    names: list[str] = []
+    units: list[str] = []
+    axis_names = ("x", "y", "z")
+    for item in meas_spec.get("channels", []):
+        if not isinstance(item, Mapping):
+            continue
+        dim = int(item.get("dim", 0))
+        name = str(item.get("name", "measurement"))
+        unit = str(item.get("unit", "unknown"))
+        for index in range(dim):
+            suffix = axis_names[index] if index < len(axis_names) else str(index)
+            names.append(f"{name}_{suffix}")
+            units.append(unit)
+    return names, units
+
+
+def comparison_spec_for(
+    *,
+    state_spec: Mapping[str, Any],
+    meas_spec: Mapping[str, Any],
+    capabilities: Mapping[str, bool],
+    diagnostic_semantics: Mapping[str, Any],
+    adapter_meta: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    n_samples: int,
+) -> Dict[str, Any]:
+    blocks = _layout_blocks(state_spec)
+    state_order, state_units = _expanded_state_semantics(state_spec)
+    measurement_order, measurement_units = _expanded_measurement_semantics(meas_spec)
+    attitude_block_info = blocks.get("attitude") or blocks.get("attitude_error")
+    bias_block_info = blocks.get("bias")
+    attitude_block = (
+        [int(attitude_block_info[0]), int(attitude_block_info[1])]
+        if attitude_block_info is not None
+        else None
+    )
+    bias_block = [int(bias_block_info[0]), int(bias_block_info[1])] if bias_block_info is not None else None
+
+    attitude_coordinate_space = None
+    if attitude_block_info is not None:
+        attitude_unit = str(attitude_block_info[2].get("unit", ""))
+        if attitude_unit == "MRP":
+            attitude_coordinate_space = "mrp"
+        elif attitude_unit in {"rad", "rotation_vector_rad"}:
+            attitude_coordinate_space = "rotation_vector_rad"
+
+    attitude_available = attitude_block is not None and attitude_coordinate_space is not None
+    bias_available = bias_block is not None and bool(capabilities.get("bias_state"))
+    covariance_available = bool(capabilities.get("covariance"))
+    innovation_available = bool(capabilities.get("innovation"))
+    gain_available = bool(capabilities.get("gain"))
+    innovation_dimension = len(measurement_order)
+    state_dimension = len(state_order)
+    gain_semantic = diagnostic_semantics.get("gain") or adapter_meta.get("gain_semantics")
+    if gain_semantic is None:
+        gain_semantic = (
+            "model_based_kalman_gain"
+            if covariance_available and bool(capabilities.get("innovation_cov"))
+            else "gain_mapping_measurement_residual_to_state_correction"
+        )
+
+    return {
+        "schema_version": "1",
+        "comparison_source": "explicit_writer_v1_1",
+        "identity": dict(identity),
+        "attitude": {
+            "available": attitude_available,
+            "reason": None if attitude_available else "state_spec has no supported attitude state",
+            "estimate_key": "q_hat" if attitude_available else None,
+            "truth_key": "q_true" if attitude_available else None,
+            "representation": "quaternion" if attitude_available else None,
+            "quaternion_order": "wxyz" if attitude_available else None,
+            "rotation_direction": "body_to_inertial" if attitude_available else None,
+            "frame_from": "body_B" if attitude_available else None,
+            "frame_to": "inertial_N" if attitude_available else None,
+            "rpy_sequence": "ZYX" if attitude_available else None,
+            "rpy_convention": "intrinsic" if attitude_available else None,
+            "rpy_output_order": ["roll", "pitch", "yaw"] if attitude_available else None,
+            "error_definition": "geodesic_relative_rotation" if attitude_available else None,
+            "state_block": attitude_block,
+            "state_coordinate_space": attitude_coordinate_space,
+        },
+        "bias": {
+            "available": bias_available,
+            "reason": None if bias_available else "bias state truth is not available",
+            "estimate_key": "x_hat" if bias_available else None,
+            "estimate_block": bias_block,
+            "truth_key": "b_true" if bias_available else None,
+            "units": "rad_per_s" if bias_available else None,
+            "frame": "body_B" if bias_available else None,
+        },
+        "covariance": {
+            "available": covariance_available,
+            "physical": covariance_available,
+            "key": "P" if covariance_available else None,
+            "space": state_spec.get("covariance_space") if covariance_available else None,
+            "state_order": state_order,
+            "attitude_block": attitude_block if covariance_available else None,
+            "bias_block": bias_block if covariance_available else None,
+            "posterior_stage": "posterior_filter_state" if covariance_available else None,
+        },
+        "innovation": {
+            "available": innovation_available,
+            "key": "innov" if innovation_available else None,
+            "measurement_type": "ordered_measurement_channels" if innovation_available else None,
+            "residual_definition": "measurement_minus_predicted_measurement" if innovation_available else None,
+            "units": measurement_units if innovation_available else None,
+            "frame": "declared_per_channel_or_unspecified" if innovation_available else None,
+            "dimension": innovation_dimension if innovation_available else None,
+            "measurement_order": measurement_order if innovation_available else None,
+            "valid_mask_key": "innov_valid" if innovation_available else None,
+        },
+        "gain": {
+            "available": gain_available,
+            "key": "gain" if gain_available else None,
+            "semantic": str(gain_semantic) if gain_available else None,
+            "row_state_order": state_order if gain_available else None,
+            "column_measurement_order": measurement_order if gain_available else None,
+            "row_units": state_units if gain_available else None,
+            "column_units": measurement_units if gain_available else None,
+            "state_scaling": "native_state_coordinates" if gain_available else None,
+            "measurement_scaling": "native_measurement_coordinates" if gain_available else None,
+            "shape": [state_dimension, innovation_dimension] if gain_available else None,
+            "attitude_block": attitude_block if gain_available else None,
+            "bias_block": bias_block if gain_available else None,
+        },
+        "correction": {
+            "available": gain_available and innovation_available,
+            "source": "reconstructed_gain_times_innovation" if gain_available and innovation_available else None,
+            "actual_applied": False if gain_available and innovation_available else None,
+            "gain_key": "gain" if gain_available and innovation_available else None,
+            "innovation_key": "innov" if gain_available and innovation_available else None,
+            "valid_mask_key": "innov_valid" if gain_available and innovation_available else None,
+            "attitude_block": attitude_block if gain_available and innovation_available else None,
+            "attitude_coordinate_space": attitude_coordinate_space if gain_available and innovation_available else None,
+            "bias_block": bias_block if gain_available and innovation_available else None,
+            "bias_units": "rad_per_s" if bias_block is not None and gain_available and innovation_available else None,
+        },
+        "empirical_uncertainty": {
+            "available": int(n_samples) >= 2,
+            "key": "emp_std" if int(n_samples) >= 2 else None,
+            "source": "sample_standard_deviation_of_trajectory_estimation_errors" if int(n_samples) >= 2 else None,
+            "physical": False,
+            "sample_count": int(n_samples),
+        },
     }
 
 
@@ -271,6 +452,155 @@ def validate_meta(meta: Mapping[str, Any]) -> None:
                 f"meta.diagnostic_semantics.{key} must be {expected!r}, "
                 f"got {diagnostic_semantics.get(key)!r}"
             )
+    comparison_spec = normalized.get("comparison_spec")
+    if comparison_spec is not None:
+        validate_comparison_spec(comparison_spec)
+
+
+def _validate_block(value: Any, *, dimension: int, label: str, required: bool = False) -> None:
+    if value is None and not required:
+        return
+    if not isinstance(value, list) or len(value) != 2:
+        raise ContractError(f"{label} must be [start,end] or null")
+    start, end = value
+    if (
+        not isinstance(start, int)
+        or isinstance(start, bool)
+        or not isinstance(end, int)
+        or isinstance(end, bool)
+        or start < 0
+        or end <= start
+        or end > int(dimension)
+    ):
+        raise ContractError(f"{label}={value!r} is outside dimension {dimension}")
+
+
+def validate_comparison_spec(spec: Mapping[str, Any]) -> None:
+    if not isinstance(spec, Mapping):
+        raise ContractError("meta.comparison_spec must be a mapping")
+    if spec.get("schema_version") != "1":
+        raise ContractError(f"unsupported comparison_spec.schema_version={spec.get('schema_version')!r}")
+    if spec.get("comparison_source") not in {"explicit_writer_v1_1", "synthetic_fixture", "explicit_adapter"}:
+        raise ContractError(f"unknown comparison_spec.comparison_source={spec.get('comparison_source')!r}")
+    identity = spec.get("identity")
+    if not isinstance(identity, Mapping):
+        raise ContractError("comparison_spec.identity must be a mapping")
+    if not isinstance(identity.get("physical_scenario_id"), str) or not identity.get("physical_scenario_id"):
+        raise ContractError("comparison_spec.identity.physical_scenario_id must be a non-empty string")
+    truth_fingerprints = identity.get("truth_fingerprints")
+    if not isinstance(truth_fingerprints, Mapping):
+        raise ContractError("comparison_spec.identity.truth_fingerprints must be a mapping")
+
+    for section_name in (
+        "attitude",
+        "bias",
+        "covariance",
+        "innovation",
+        "gain",
+        "correction",
+        "empirical_uncertainty",
+    ):
+        if not isinstance(spec.get(section_name), Mapping):
+            raise ContractError(f"comparison_spec.{section_name} must be a mapping")
+
+    covariance = spec["covariance"]
+    state_order = covariance.get("state_order")
+    if not isinstance(state_order, list) or not all(isinstance(value, str) and value for value in state_order):
+        raise ContractError("comparison_spec.covariance.state_order must be a list of names")
+    state_dim = len(state_order)
+
+    attitude_spec = spec["attitude"]
+    if bool(attitude_spec.get("available")):
+        expected = {
+            "representation": "quaternion",
+            "quaternion_order": "wxyz",
+            "rotation_direction": "body_to_inertial",
+            "frame_from": "body_B",
+            "frame_to": "inertial_N",
+            "rpy_sequence": "ZYX",
+            "rpy_convention": "intrinsic",
+            "rpy_output_order": ["roll", "pitch", "yaw"],
+            "error_definition": "geodesic_relative_rotation",
+        }
+        for key, value in expected.items():
+            if attitude_spec.get(key) != value:
+                raise ContractError(f"unsupported comparison_spec.attitude.{key}={attitude_spec.get(key)!r}")
+        if attitude_spec.get("estimate_key") != "q_hat" or attitude_spec.get("truth_key") != "q_true":
+            raise ContractError("comparison_spec.attitude must use q_hat/q_true canonical keys")
+        if attitude_spec.get("state_coordinate_space") not in VALID_COVARIANCE_SPACES:
+            raise ContractError("comparison_spec.attitude.state_coordinate_space is unsupported")
+        if not isinstance(truth_fingerprints.get("attitude_truth"), str):
+            raise ContractError("comparison attitude requires an attitude_truth fingerprint")
+        _validate_block(attitude_spec.get("state_block"), dimension=state_dim, label="comparison_spec.attitude.state_block", required=True)
+
+    bias_spec = spec["bias"]
+    if bool(bias_spec.get("available")):
+        if bias_spec.get("estimate_key") != "x_hat" or bias_spec.get("truth_key") != "b_true":
+            raise ContractError("comparison_spec.bias must use x_hat/b_true canonical keys")
+        if bias_spec.get("units") != "rad_per_s" or bias_spec.get("frame") != "body_B":
+            raise ContractError("comparison_spec.bias units/frame must be rad_per_s/body_B")
+        if not isinstance(truth_fingerprints.get("bias_truth"), str):
+            raise ContractError("comparison bias requires a bias_truth fingerprint")
+        _validate_block(bias_spec.get("estimate_block"), dimension=state_dim, label="comparison_spec.bias.estimate_block", required=True)
+
+    if bool(covariance.get("available")):
+        if covariance.get("physical") is not True or covariance.get("key") != "P":
+            raise ContractError("available comparison covariance must be physical trajectory key P")
+        if covariance.get("space") not in VALID_COVARIANCE_SPACES:
+            raise ContractError(f"unknown comparison covariance space={covariance.get('space')!r}")
+        _validate_block(covariance.get("attitude_block"), dimension=state_dim, label="comparison_spec.covariance.attitude_block")
+        _validate_block(covariance.get("bias_block"), dimension=state_dim, label="comparison_spec.covariance.bias_block")
+    elif covariance.get("physical") not in {False, None}:
+        raise ContractError("comparison covariance cannot be physical when unavailable")
+
+    innovation = spec["innovation"]
+    if bool(innovation.get("available")):
+        dimension = innovation.get("dimension")
+        order = innovation.get("measurement_order")
+        units = innovation.get("units")
+        if not isinstance(dimension, int) or isinstance(dimension, bool) or dimension <= 0:
+            raise ContractError("comparison_spec.innovation.dimension must be positive")
+        if not isinstance(order, list) or len(order) != dimension or not all(isinstance(value, str) for value in order):
+            raise ContractError("comparison_spec.innovation.measurement_order does not match dimension")
+        if not isinstance(units, list) or len(units) != dimension or not all(isinstance(value, str) for value in units):
+            raise ContractError("comparison_spec.innovation.units does not match dimension")
+        if innovation.get("key") != "innov" or innovation.get("valid_mask_key") != "innov_valid":
+            raise ContractError("comparison_spec.innovation must use innov/innov_valid keys")
+
+    gain_spec = spec["gain"]
+    if bool(gain_spec.get("available")):
+        shape = gain_spec.get("shape")
+        if not isinstance(shape, list) or len(shape) != 2 or shape[0] != state_dim:
+            raise ContractError("comparison_spec.gain.shape does not match state dimension")
+        measurement_dim = innovation.get("dimension")
+        if not isinstance(measurement_dim, int) or shape[1] != measurement_dim:
+            raise ContractError("comparison_spec.gain.shape does not match innovation dimension")
+        for key, expected_length in (
+            ("row_state_order", shape[0]),
+            ("row_units", shape[0]),
+            ("column_measurement_order", shape[1]),
+            ("column_units", shape[1]),
+        ):
+            value = gain_spec.get(key)
+            if not isinstance(value, list) or len(value) != expected_length:
+                raise ContractError(f"comparison_spec.gain.{key} length mismatch")
+        _validate_block(gain_spec.get("attitude_block"), dimension=state_dim, label="comparison_spec.gain.attitude_block")
+        _validate_block(gain_spec.get("bias_block"), dimension=state_dim, label="comparison_spec.gain.bias_block")
+
+    correction = spec["correction"]
+    if bool(correction.get("available")):
+        if correction.get("source") not in {"reconstructed_gain_times_innovation", "actual_applied"}:
+            raise ContractError(f"unsupported comparison correction source={correction.get('source')!r}")
+        if correction.get("source") == "reconstructed_gain_times_innovation" and correction.get("actual_applied") is not False:
+            raise ContractError("reconstructed correction must declare actual_applied=false")
+        _validate_block(correction.get("attitude_block"), dimension=state_dim, label="comparison_spec.correction.attitude_block")
+        _validate_block(correction.get("bias_block"), dimension=state_dim, label="comparison_spec.correction.bias_block")
+
+    empirical = spec["empirical_uncertainty"]
+    if empirical.get("physical") is not False:
+        raise ContractError("comparison empirical uncertainty must declare physical=false")
+    if bool(empirical.get("available")) and empirical.get("key") != "emp_std":
+        raise ContractError("comparison empirical uncertainty must use aggregate key emp_std")
 
 
 def validate_trajectory_manifest(meta: Mapping[str, Any], manifest: Any) -> None:
@@ -414,6 +744,73 @@ def validate_trajectory_capabilities(meta: Mapping[str, Any], arrays: Mapping[st
     for key in ("P", "S"):
         if key in arrays and not np.all(np.isfinite(np.asarray(arrays[key]))):
             raise ContractError(f"{key} contains NaN/Inf")
+    validate_comparison_trajectory(meta, arrays)
+
+
+def validate_comparison_trajectory(meta: Mapping[str, Any], arrays: Mapping[str, np.ndarray]) -> None:
+    spec = meta.get("comparison_spec")
+    if spec is None:
+        return
+    validate_comparison_spec(spec)
+    t_len = int(np.asarray(arrays.get("t")).shape[0])
+    state_dim = int(np.asarray(arrays.get("x_hat")).shape[1]) if "x_hat" in arrays else 0
+
+    attitude_spec = spec["attitude"]
+    if bool(attitude_spec.get("available")):
+        for key in ("q_true", "q_hat"):
+            if key not in arrays:
+                raise ContractError(f"comparison_spec.attitude declares {key} but trajectory key is missing")
+            q = np.asarray(arrays[key], dtype=np.float64)
+            if q.shape != (t_len, 4):
+                raise ContractError(f"{key} must have shape [{t_len},4], got {q.shape}")
+            if not np.all(np.isfinite(q)):
+                raise ContractError(f"{key} contains NaN/Inf")
+            norms = np.linalg.norm(q, axis=1)
+            if not np.allclose(norms, 1.0, rtol=1e-4, atol=1e-4):
+                raise ContractError(f"{key} is not normalized within tolerance")
+
+    bias_spec = spec["bias"]
+    if bool(bias_spec.get("available")):
+        if "b_true" not in arrays:
+            raise ContractError("comparison_spec.bias declares b_true but trajectory key is missing")
+        b_true = np.asarray(arrays["b_true"])
+        if b_true.shape != (t_len, 3) or not np.all(np.isfinite(b_true)):
+            raise ContractError(f"b_true must be finite with shape [{t_len},3], got {b_true.shape}")
+
+    covariance = spec["covariance"]
+    if bool(covariance.get("available")):
+        p = np.asarray(arrays.get("P"))
+        if p.shape != (t_len, state_dim, state_dim):
+            raise ContractError(
+                f"comparison covariance P must have shape [{t_len},{state_dim},{state_dim}], got {p.shape}"
+            )
+
+    innovation = spec["innovation"]
+    if bool(innovation.get("available")):
+        innov = np.asarray(arrays.get("innov"))
+        expected = (t_len, int(innovation["dimension"]))
+        if innov.shape != expected:
+            raise ContractError(f"comparison innovation must have shape {expected}, got {innov.shape}")
+
+    gain_spec = spec["gain"]
+    if bool(gain_spec.get("available")):
+        gain_arr = np.asarray(arrays.get("gain"))
+        expected = (t_len, int(gain_spec["shape"][0]), int(gain_spec["shape"][1]))
+        if gain_arr.shape != expected:
+            raise ContractError(f"comparison gain must have shape {expected}, got {gain_arr.shape}")
+
+    correction = spec["correction"]
+    for key in ("correction_attitude", "correction_bias"):
+        if key not in arrays:
+            continue
+        value = np.asarray(arrays[key])
+        if value.shape != (t_len, 3):
+            raise ContractError(f"{key} must have shape [{t_len},3], got {value.shape}")
+        valid = np.asarray(arrays.get("correction_valid", np.ones(t_len, dtype=bool)), dtype=bool)
+        if valid.shape != (t_len,) or not np.all(np.isfinite(value[valid])):
+            raise ContractError(f"{key} contains invalid values at a valid correction timestep")
+    if "correction_valid" in arrays and np.asarray(arrays["correction_valid"]).shape != (t_len,):
+        raise ContractError(f"correction_valid must have shape [{t_len}]")
 
 
 def sorted_run_key(meta: Mapping[str, Any], run_dir: Path) -> tuple[Any, ...]:

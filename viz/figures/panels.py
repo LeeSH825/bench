@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from viz.analysis import attitude, consistency, decomposition, gain, units
+from viz.analysis import attitude, comparison, consistency, decomposition, gain, units
 
 
 AXIS_MODES = ("split", "overlay", "norm")
@@ -708,3 +708,315 @@ def add_overlay_traces(
         figure=figure,
         downsample_notice="; ".join(dict.fromkeys(notice_parts)) if notice_parts else None,
     )
+
+
+def _comparison_payload(
+    model: Mapping[str, Any],
+    metric: str,
+    *,
+    gain_row: int,
+    gain_col: int,
+) -> tuple[np.ndarray, str, Optional[np.ndarray], Optional[np.ndarray]]:
+    meta = model["meta"]
+    traj = model["traj"]
+    aggregate = model.get("aggregate")
+    physical_band = None
+    empirical_spread = None
+    if metric == "attitude_rpy":
+        values = comparison.attitude_rpy_deg(meta, traj, estimate=True)
+        yaxis = "deg"
+    elif metric == "attitude_geodesic_error":
+        values = comparison.attitude_geodesic_error_deg(meta, traj)
+        yaxis = "deg"
+    elif metric in {"attitude_error_components", "attitude_uncertainty"}:
+        values = comparison.attitude_error_components_deg(meta, traj)
+        yaxis = "deg"
+        if metric == "attitude_uncertainty":
+            physical_band = comparison.physical_attitude_band_deg(meta, traj)
+            if aggregate is not None and "emp_std" in aggregate:
+                empirical_spread = comparison.empirical_spread(meta, aggregate, kind="attitude")
+    elif metric == "gyro_bias":
+        values = comparison.bias_estimate_deg_h(meta, traj)
+        yaxis = "deg/h"
+    elif metric in {"gyro_bias_error", "gyro_bias_uncertainty"}:
+        values = comparison.bias_error_deg_h(meta, traj)
+        yaxis = "deg/h"
+        if metric == "gyro_bias_uncertainty":
+            physical_band = comparison.physical_bias_band_deg_h(meta, traj)
+            if aggregate is not None and "emp_std" in aggregate:
+                empirical_spread = comparison.empirical_spread(meta, aggregate, kind="bias")
+    elif metric == "empirical_attitude_spread":
+        if aggregate is None:
+            raise ValueError("aggregate empirical uncertainty is unavailable")
+        values = comparison.empirical_spread(meta, aggregate, kind="attitude")
+        yaxis = "empirical sigma [deg]"
+    elif metric == "empirical_bias_spread":
+        if aggregate is None:
+            raise ValueError("aggregate empirical uncertainty is unavailable")
+        values = comparison.empirical_spread(meta, aggregate, kind="bias")
+        yaxis = "empirical sigma [deg/h]"
+    elif metric == "attitude_correction":
+        values = comparison.physical_correction(meta, traj, kind="attitude")
+        yaxis = "reconstructed correction [deg]"
+    elif metric == "bias_correction":
+        values = comparison.physical_correction(meta, traj, kind="bias")
+        yaxis = "reconstructed correction [deg/h]"
+    else:
+        values = comparison.strict_metric_series(
+            meta,
+            traj,
+            metric,
+            row=gain_row,
+            col=gain_col,
+        )
+        yaxis = {
+            "innovation": "measurement units",
+            "innovation_norm": "innovation norm",
+            "gain_norm": "gain norm",
+            "gain_element": "gain element",
+            "attitude_gain_block": "gain block norm",
+            "bias_gain_block": "gain block norm",
+            "nees": "NEES",
+            "nis": "NIS",
+            "p_diagonal": "state covariance",
+            "s_diagonal": "innovation covariance",
+        }.get(metric, "value")
+    return _as_f64(values), yaxis, physical_band, empirical_spread
+
+
+def _comparison_truth(
+    model: Mapping[str, Any],
+    metric: str,
+) -> Optional[np.ndarray]:
+    if metric == "attitude_rpy":
+        return comparison.attitude_rpy_deg(model["meta"], model["traj"], estimate=False)
+    if metric == "gyro_bias":
+        return comparison.bias_truth_deg_h(model["meta"], model["traj"])
+    return None
+
+
+def _transparent_hex_color(color: str, alpha: float) -> str:
+    value = str(color).lstrip("#")
+    if len(value) != 6:
+        return "rgba(31,119,180,0.08)"
+    red, green, blue = (int(value[index : index + 2], 16) for index in (0, 2, 4))
+    return f"rgba({red},{green},{blue},{float(alpha):.2f})"
+
+
+def _comparison_event_markers(traj: Mapping[str, Any]) -> list[tuple[str, np.ndarray]]:
+    markers: list[tuple[str, np.ndarray]] = []
+    for key, label in (
+        ("event_flag", "Event start"),
+        ("eclipse_flag", "Eclipse start"),
+        ("ref_mask", "Reference update"),
+    ):
+        if key not in traj:
+            continue
+        flag = np.asarray(traj[key], dtype=bool)
+        if flag.ndim != 1 or flag.size == 0:
+            continue
+        starts = flag & np.concatenate((np.ones(1, dtype=bool), ~flag[:-1]))
+        indices = np.flatnonzero(starts)
+        if indices.size:
+            markers.append((label, indices))
+    return markers
+
+
+def cross_model_comparison_panel(
+    metric: str,
+    models: Sequence[Mapping[str, Any]],
+    *,
+    axis_mode: str = "split",
+    show_truth: bool = True,
+    show_empirical: bool = False,
+    gain_row: int = 0,
+    gain_col: int = 0,
+) -> PanelResult:
+    if not models:
+        return _panel_placeholder("Cross-Model Comparison", "No compatible models are selected")
+    labels = dict(comparison.PHYSICAL_METRIC_LABELS)
+    labels.update(comparison.STRICT_METRIC_LABELS)
+    if metric not in labels:
+        return _panel_placeholder("Cross-Model Comparison", f"Unsupported comparison metric {metric!r}")
+
+    prepared: list[tuple[Mapping[str, Any], np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]] = []
+    yaxis_title = "value"
+    for model in models:
+        values, yaxis_title, physical_band, empirical_spread = _comparison_payload(
+            model,
+            metric,
+            gain_row=gain_row,
+            gain_col=gain_col,
+        )
+        prepared.append((model, values, physical_band, empirical_spread))
+    first_t = _as_f64(models[0]["traj"]["t"])
+    if any(not np.array_equal(first_t, _as_f64(model["traj"]["t"])) for model in models[1:]):
+        return _panel_placeholder("Cross-Model Comparison", "Time axis mismatch; interpolation is not allowed")
+
+    dimensions = max(1, max(1 if values.ndim == 1 else int(values.shape[1]) for _, values, _, _ in prepared))
+    mode = axis_mode if axis_mode in AXIS_MODES else "split"
+    if mode == "norm" and dimensions > 1:
+        rows = 1
+    elif mode == "split" and dimensions > 1:
+        rows = dimensions
+    else:
+        rows = 1
+    if rows > 1:
+        fig = make_subplots(
+            rows=rows,
+            cols=1,
+            shared_xaxes=True,
+            subplot_titles=[_axis_name(index) for index in range(rows)],
+        )
+    else:
+        fig = go.Figure()
+
+    colors = ("#1f77b4", "#d62728", "#2ca02c", "#9467bd", "#7f7f7f")
+    downsampled = False
+
+    def add_trace(trace: go.Scatter, row: int = 1) -> None:
+        if rows > 1:
+            fig.add_trace(trace, row=row, col=1)
+        else:
+            fig.add_trace(trace)
+
+    if show_truth:
+        truth = _comparison_truth(models[0], metric)
+        if truth is not None:
+            truth_arr = _as_f64(truth)
+            truth_dims = 1 if truth_arr.ndim == 1 else int(truth_arr.shape[1])
+            truth_plot_dims = 1 if mode == "norm" or truth_dims == 1 else truth_dims
+            for dim in range(truth_plot_dims):
+                values = truth_arr if truth_arr.ndim == 1 else (
+                    np.linalg.norm(truth_arr, axis=1) if mode == "norm" else truth_arr[:, dim]
+                )
+                x_ds, y_ds, did = _trace_xy(first_t, values)
+                downsampled = downsampled or did
+                suffix = "" if truth_dims == 1 or mode == "norm" else f" {_axis_name(dim)}"
+                add_trace(
+                    go.Scatter(
+                        x=x_ds,
+                        y=y_ds,
+                        mode="lines",
+                        name=f"Truth{suffix}",
+                        line={"color": "#111827", "width": 2.2},
+                    ),
+                    row=dim + 1,
+                )
+
+    for model_index, (model, values, physical_band, empirical_spread) in enumerate(prepared):
+        label = str(model.get("label") or model["meta"].get("model_id") or f"model {model_index + 1}")
+        color = colors[model_index % len(colors)]
+        value_dims = 1 if values.ndim == 1 else int(values.shape[1])
+        plot_dims = 1 if mode == "norm" or value_dims == 1 else value_dims
+        for dim in range(plot_dims):
+            if values.ndim == 1:
+                y = values
+            elif mode == "norm":
+                y = np.linalg.norm(values, axis=1)
+            else:
+                y = values[:, dim]
+            x_ds, y_ds, did = _trace_xy(first_t, y)
+            downsampled = downsampled or did
+            suffix = "" if value_dims == 1 or mode == "norm" else f" {_axis_name(dim)}"
+            add_trace(
+                go.Scatter(
+                    x=x_ds,
+                    y=y_ds,
+                    mode="lines",
+                    name=f"{label}{suffix}",
+                    legendgroup=label,
+                    line={"color": color, "width": 1.8},
+                ),
+                row=dim + 1,
+            )
+
+            if physical_band is not None:
+                band = _as_f64(physical_band)
+                band_y = np.linalg.norm(band, axis=1) if mode == "norm" else band[:, dim]
+                x_upper, y_upper, did_upper = _trace_xy(first_t, band_y)
+                x_lower, y_lower, did_lower = _trace_xy(first_t, -band_y)
+                downsampled = downsampled or did_upper or did_lower
+                add_trace(
+                    go.Scatter(
+                        x=x_upper,
+                        y=y_upper,
+                        mode="lines",
+                        name=f"{label} physical +3 sigma{suffix}",
+                        legendgroup=f"{label}-physical",
+                        line={"color": color, "dash": "dash", "width": 1},
+                        showlegend=dim == 0,
+                    ),
+                    row=dim + 1,
+                )
+                add_trace(
+                    go.Scatter(
+                        x=x_lower,
+                        y=y_lower,
+                        mode="lines",
+                        name=f"{label} physical -3 sigma{suffix}",
+                        legendgroup=f"{label}-physical",
+                        line={"color": color, "dash": "dash", "width": 1},
+                        fill="tonexty",
+                        fillcolor=_transparent_hex_color(color, 0.08),
+                        showlegend=False,
+                    ),
+                    row=dim + 1,
+                )
+
+            if show_empirical and empirical_spread is not None:
+                spread = _as_f64(empirical_spread)
+                spread_y = np.linalg.norm(spread, axis=1) if mode == "norm" else spread[:, dim]
+                for sign, sign_label in ((1.0, "+"), (-1.0, "-")):
+                    x_ds, y_ds, did = _trace_xy(first_t, sign * spread_y)
+                    downsampled = downsampled or did
+                    add_trace(
+                        go.Scatter(
+                            x=x_ds,
+                            y=y_ds,
+                            mode="lines",
+                            name=f"{label} empirical {sign_label}1 sigma (ensemble){suffix}",
+                            legendgroup=f"{label}-empirical",
+                            line={"color": color, "dash": "dot", "width": 1.4},
+                            showlegend=dim == 0 and sign > 0,
+                        ),
+                        row=dim + 1,
+                    )
+
+    if metric in {"innovation", "innovation_norm"}:
+        base_values = prepared[0][1]
+        if base_values.ndim > 1:
+            base_values = (
+                np.linalg.norm(base_values, axis=1)
+                if mode == "norm"
+                else base_values[:, 0]
+            )
+        finite_values = base_values[np.isfinite(base_values)]
+        marker_y = float(np.max(finite_values)) if finite_values.size else 0.0
+        for marker_index, (label, indices) in enumerate(
+            _comparison_event_markers(models[0]["traj"])
+        ):
+            add_trace(
+                go.Scatter(
+                    x=first_t[indices],
+                    y=np.full(indices.shape, marker_y, dtype=np.float64),
+                    mode="markers",
+                    name=label,
+                    marker={
+                        "symbol": "diamond-open",
+                        "size": 8,
+                        "color": colors[(marker_index + len(prepared)) % len(colors)],
+                    },
+                )
+            )
+
+    title = f"Cross-Model · {labels[metric]}"
+    result = _finish_figure(
+        fig,
+        title,
+        rows,
+        downsampled,
+        yaxis_title,
+        t=first_t,
+    )
+    return result

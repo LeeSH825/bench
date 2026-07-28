@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from viz.contract import (
     VALID_DATA_SPLITS,
     VALID_SPLIT_SOURCES,
     capabilities_for,
+    comparison_spec_for,
     deterministic_traj_index,
     formulation_for_task,
     meas_spec_for,
@@ -158,6 +160,7 @@ def _traj_arrays(
     source_map: Mapping[str, str],
     diagnostics: Mapping[str, Any],
     diagnostic_semantics: Mapping[str, Any],
+    comparison_spec: Mapping[str, Any],
 ) -> Dict[str, np.ndarray]:
     arrays: Dict[str, np.ndarray] = {
         "t": _f32(t),
@@ -190,6 +193,16 @@ def _traj_arrays(
                 valid_mask = np.logical_and(valid_mask, _bool_1d(ref_mask))
         arrays["innov_valid"] = valid_mask.astype(bool, copy=False)
 
+    for key in ("correction_attitude", "correction_bias"):
+        value = _as_numpy(diagnostics.get(key))
+        if value is not None and value.ndim == 3 and value.shape[0] > int(traj_idx):
+            arrays[key] = _f32(value[int(traj_idx)])
+    correction_valid = _as_numpy(diagnostics.get("correction_valid"))
+    if correction_valid is not None:
+        if correction_valid.ndim != 2 or correction_valid.shape[0] <= int(traj_idx):
+            raise ValueError("diagnostics.correction_valid must have shape [N,T]")
+        arrays["correction_valid"] = _bool_1d(correction_valid[int(traj_idx)])
+
     for artifact_key in ("bias_component", "noise_component", "imu_error", "b_true"):
         source_key = source_map.get(artifact_key)
         if source_key is None:
@@ -208,7 +221,11 @@ def _traj_arrays(
 
     validate_traj_arrays(arrays)
     validate_trajectory_capabilities(
-        {"capabilities": capabilities, "diagnostic_semantics": diagnostic_semantics},
+        {
+            "capabilities": capabilities,
+            "diagnostic_semantics": diagnostic_semantics,
+            "comparison_spec": comparison_spec,
+        },
         arrays,
     )
     return arrays
@@ -228,6 +245,60 @@ def _source_id_json(value: Any) -> Any:
     if converted is None or isinstance(converted, (dict, list, bool)):
         raise ValueError(f"source trajectory ID must be a non-null scalar, got {converted!r}")
     return converted
+
+
+def _fingerprint_arrays(label: str, *values: Any) -> str:
+    digest = hashlib.sha256()
+    digest.update(str(label).encode("utf-8"))
+    for value in values:
+        if isinstance(value, (list, tuple)):
+            encoded = json.dumps(_jsonable(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
+            digest.update(encoded)
+            continue
+        arr = np.ascontiguousarray(np.asarray(value))
+        digest.update(str(arr.dtype).encode("ascii"))
+        digest.update(json.dumps(list(arr.shape), separators=(",", ":")).encode("ascii"))
+        digest.update(arr.tobytes(order="C"))
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _comparison_identity(
+    *,
+    scenario_id: str,
+    t: np.ndarray,
+    x_true: np.ndarray,
+    state_spec: Mapping[str, Any],
+    extras: Mapping[str, Any],
+    source_map: Mapping[str, str],
+    source_ids: Sequence[Any],
+) -> Dict[str, Any]:
+    source_values = [_source_id_json(value) for value in source_ids]
+    fingerprints: Dict[str, str] = {
+        "time": _fingerprint_arrays("time", t),
+        "generic_state_truth": _fingerprint_arrays("generic_state_truth", t, x_true, source_values),
+    }
+    if _state_has_kind(state_spec, "attitude") and x_true.shape[-1] >= 3:
+        q_true = np.stack(
+            [continuous_quat_sign(mrp_to_quat(sequence[:, 0:3])) for sequence in x_true],
+            axis=0,
+        ).astype(np.float32)
+        fingerprints["attitude_truth"] = _fingerprint_arrays(
+            "attitude_truth_body_to_inertial_wxyz",
+            t,
+            q_true,
+            source_values,
+        )
+    b_source = source_map.get("b_true")
+    if b_source is not None and b_source in extras:
+        b_true = np.asarray(extras[b_source], dtype=np.float32)
+        if b_true.shape[:2] == x_true.shape[:2] and b_true.shape[-1] == 3:
+            fingerprints["bias_truth"] = _fingerprint_arrays("bias_truth_body_rad_per_s", t, b_true, source_values)
+    return {
+        "physical_scenario_id": str(scenario_id),
+        "dataset_id": None,
+        "dataset_id_reason": "no stable dataset-native identifier was provided",
+        "truth_fingerprints": fingerprints,
+    }
 
 
 def write_viz_artifacts(
@@ -304,6 +375,25 @@ def write_viz_artifacts(
     commit, dirty = _git_state(repo)
     caps = capabilities_for(model_id=str(model_id), diagnostics=diag, source_map=source_map)
     state_spec = state_spec_for(formulation, x_dim)
+    meas_spec = meas_spec_for(task_family, y_dim)
+    comparison_identity = _comparison_identity(
+        scenario_id=str(scenario_id),
+        t=t_arr,
+        x_true=x_true_arr,
+        state_spec=state_spec,
+        extras=extras,
+        source_map=source_map,
+        source_ids=list(source_ids),
+    )
+    comparison_spec = comparison_spec_for(
+        state_spec=state_spec,
+        meas_spec=meas_spec,
+        capabilities=caps,
+        diagnostic_semantics=diagnostic_semantics,
+        adapter_meta=adapter_meta_dict,
+        identity=comparison_identity,
+        n_samples=n_seq,
+    )
 
     series_dir = root / "series"
     aggregate = _aggregate_arrays(t=t_arr, x_true=x_true_arr, x_hat=x_hat_arr, diagnostics=diag)
@@ -323,6 +413,7 @@ def write_viz_artifacts(
             source_map=source_map,
             diagnostics=diag,
             diagnostic_semantics=diagnostic_semantics,
+            comparison_spec=comparison_spec,
         )
         relative_file = f"series/traj_{stored_index:04d}.npz"
         traj_path = root / relative_file
@@ -368,9 +459,10 @@ def write_viz_artifacts(
         "formulation": formulation,
         "sanity_benchmark_only": sanity_benchmark_only(formulation),
         "state_spec": state_spec,
-        "meas_spec": meas_spec_for(task_family, y_dim),
+        "meas_spec": meas_spec,
         "capabilities": caps,
         "diagnostic_semantics": diagnostic_semantics,
+        "comparison_spec": comparison_spec,
         "source_key_map": source_map,
         "traj_index": [int(v) for v in traj_index],
         "data_spec": {

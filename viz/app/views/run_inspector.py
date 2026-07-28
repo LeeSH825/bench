@@ -4,15 +4,17 @@ import os
 import time
 from html import escape
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 import streamlit as st
 
 from viz.app.components.axis_toggle import AXIS_MODE_OPTIONS, render_axis_toggle
-from viz.app.components.overlay_picker import render_run_picker
+from viz.app.components.comparison_picker import comparison_candidates, comparison_run_label
+from viz.app.components.overlay_picker import discover_run_index, render_run_picker
 from viz.app.components.regime_strip import render_regime_strip
+from viz.analysis import comparison
 from viz.figures import panels
-from viz.io.loader import TrajectoryInfo, VizRun, assert_overlay_compatible
+from viz.io.loader import TrajectoryInfo, VizRun, assert_overlay_compatible, load_run
 
 
 WINDOW_MODE_OPTIONS: Mapping[str, str] = {
@@ -447,6 +449,357 @@ def _with_overlay(
         )
 
 
+_PANEL_COMPARISON_METRICS = {
+    "attitude_rpy": ("physical", "attitude_rpy"),
+    "attitude_error": ("physical", "attitude_geodesic_error"),
+    "bias": ("physical", "gyro_bias"),
+    "innovation": ("strict", "innovation"),
+    "consistency": ("strict", "nees"),
+    "gain": ("strict", "gain_norm"),
+}
+
+
+def _panel_model_toggles(
+    panel_id: str,
+    candidates: Sequence[Any],
+) -> list[Any]:
+    if not candidates:
+        return []
+    st.caption(f"{panel_id} models · base: current run; toggle compatible overlays")
+    selected: list[Any] = []
+    columns = st.columns(min(3, len(candidates)))
+    for index, item in enumerate(candidates):
+        status = item.compatibility
+        compatible = bool(status.get("compatible")) and item.trajectory is not None
+        reasons = list(status.get("reasons", []))
+        label = comparison_run_label(item.run)
+        with columns[index % len(columns)]:
+            checked = st.toggle(
+                label,
+                value=compatible,
+                disabled=not compatible,
+                key=f"panel_model_{panel_id}_{abs(hash(str(item.run.run_dir)))}",
+            )
+            if not compatible:
+                st.caption(f"Unavailable: {reasons[0] if reasons else 'incompatible semantics'}")
+            elif checked:
+                selected.append(item)
+    return selected
+
+
+def _panel_overlay_bundles(
+    *,
+    panel_id: str,
+    run: VizRun,
+    selected_info: TrajectoryInfo,
+    selected_traj: Mapping[str, Any],
+    runs_root: str | Path,
+    axis_mode: str,
+    analysis_window: Optional[Mapping[str, Any]],
+    gain_display: Optional[Mapping[str, Any]],
+    cache: Dict[str, Dict[str, Any]],
+) -> list[tuple[str, Dict[str, Any]]]:
+    mode, metric = _PANEL_COMPARISON_METRICS[panel_id]
+    candidates = comparison_candidates(
+        run,
+        discover_run_index(runs_root)[0],
+        source_trajectory_id=selected_info.source_trajectory_id,
+        mode=mode,
+        metric=metric,
+    )
+    selected = _panel_model_toggles(panel_id, candidates)
+    evaluator = (
+        comparison.evaluate_physical_metric_compatibility
+        if mode == "physical"
+        else comparison.evaluate_internal_metric_compatibility
+    )
+    overlays: list[tuple[str, Dict[str, Any]]] = []
+    for item in selected:
+        run_key = str(item.run.run_dir)
+        try:
+            loaded = load_run(item.run.run_dir)
+            candidate_traj = loaded.load_trajectory(
+                source_trajectory_id=selected_info.source_trajectory_id
+            )
+            exact = evaluator(
+                run.meta,
+                loaded.meta,
+                metric=metric,
+                base_source_trajectory_id=selected_info.source_trajectory_id,
+                candidate_source_trajectory_id=item.trajectory.source_trajectory_id,
+                base_time=selected_traj["t"],
+                candidate_time=candidate_traj["t"],
+            )
+            if not exact["compatible"]:
+                st.warning(
+                    f"{panel_id}: {loaded.meta.get('model_id')} blocked: "
+                    + "; ".join(exact["reasons"])
+                )
+                continue
+            if run_key not in cache:
+                cache[run_key] = build_run_inspector_bundle(
+                    loaded,
+                    source_trajectory_id=selected_info.source_trajectory_id,
+                    axis_mode=axis_mode,
+                    analysis_window=analysis_window,
+                    gain_display=gain_display,
+                )
+            overlays.append((str(loaded.meta.get("model_id")), cache[run_key]))
+        except Exception as exc:
+            st.warning(f"{panel_id}: {item.run.meta.get('model_id')} unavailable: {exc}")
+    return overlays
+
+
+def _plot_panel_with_model_toggles(
+    *,
+    panel_id: str,
+    figure_key: str,
+    bundle: Dict[str, Any],
+    run: VizRun,
+    selected_info: TrajectoryInfo,
+    selected_traj: Mapping[str, Any],
+    runs_root: str | Path,
+    axis_mode: str,
+    analysis_window: Optional[Mapping[str, Any]],
+    gain_display: Optional[Mapping[str, Any]],
+    overlay_cache: Dict[str, Dict[str, Any]],
+) -> None:
+    figure = bundle["figures"][figure_key]
+    for label, overlay_bundle in _panel_overlay_bundles(
+        panel_id=panel_id,
+        run=run,
+        selected_info=selected_info,
+        selected_traj=selected_traj,
+        runs_root=runs_root,
+        axis_mode=axis_mode,
+        analysis_window=analysis_window,
+        gain_display=gain_display,
+        cache=overlay_cache,
+    ):
+        figure = panels.add_overlay_traces(figure, overlay_bundle["figures"][figure_key], overlay_label=label)
+    _plot(figure)
+
+
+def _comparison_model_label(meta: Mapping[str, Any], metric: str) -> str:
+    model = str(meta.get("model_id") or "unknown model")
+    if metric.startswith("gain") or metric.endswith("gain_block"):
+        return f"{model} ({panels.gain_source_label(meta, 'gain')})"
+    return model
+
+
+def _render_cross_model_comparison(
+    *,
+    runs_root: str | Path,
+    run: VizRun,
+    selected_info: TrajectoryInfo,
+    selected_traj: Mapping[str, Any],
+    axis_mode: str,
+) -> None:
+    st.subheader("Cross-Model Comparison")
+    st.caption(
+        "Physical Outputs compares canonical physical quantities across compatible formulations. "
+        "Strict Internals retains state, measurement, residual, source, and time semantics guards."
+    )
+    mode_labels = {"physical": "Physical Outputs", "strict": "Strict Internals"}
+    query_mode = _query_value("compare_mode")
+    default_mode = query_mode if query_mode in mode_labels else "physical"
+    selected_mode_label = st.segmented_control(
+        "Comparison mode",
+        list(mode_labels.values()),
+        default=mode_labels[default_mode],
+        key="comparison_mode",
+    )
+    mode = next(key for key, label in mode_labels.items() if label == selected_mode_label)
+    available = (
+        comparison.available_physical_metrics(run.meta)
+        if mode == "physical"
+        else comparison.available_internal_metrics(run.meta)
+    )
+    labels = (
+        comparison.PHYSICAL_METRIC_LABELS
+        if mode == "physical"
+        else comparison.STRICT_METRIC_LABELS
+    )
+    if not available:
+        missing_reason = (
+            "comparison_spec is absent or no canonical physical output is declared"
+            if mode == "physical"
+            else "no strictly comparable internal diagnostic semantics are declared"
+        )
+        st.info(f"Cross-model comparison unavailable: {missing_reason}.")
+        return
+    query_metric = _query_value("compare_metric")
+    metric_index = available.index(query_metric) if query_metric in available else 0
+    metric = st.selectbox(
+        "Comparison metric",
+        available,
+        index=metric_index,
+        format_func=lambda key: labels[key],
+        key=f"comparison_metric_{mode}",
+    )
+
+    indexed_runs, index_errors, scan_seconds = discover_run_index(runs_root)
+    candidates = comparison_candidates(
+        run,
+        indexed_runs,
+        source_trajectory_id=selected_info.source_trajectory_id,
+        mode=mode,
+        metric=metric,
+    )
+    st.caption(
+        f"Comparison index scan: {scan_seconds:.3f} s · selected Source ID "
+        f"{selected_info.source_trajectory_id!r} · unselected trajectories are not loaded"
+    )
+    if index_errors:
+        st.caption(f"Invalid artifacts excluded from comparison: {len(index_errors)}")
+
+    st.markdown("**Models to display**")
+    st.caption("Compatible models are selected by default; uncheck a model to remove its trace.")
+    st.checkbox(
+        f"{_comparison_model_label(run.meta, metric)} · base",
+        value=True,
+        disabled=True,
+        key="comparison_base_model",
+    )
+    base_covariance = bool(run.meta.get("comparison_spec", {}).get("covariance", {}).get("physical"))
+    base_status = "Compatible" if base_covariance or "uncertainty" not in metric else "No physical covariance"
+    st.markdown(_badge("Base", base_status, "ok" if base_status == "Compatible" else "warn"), unsafe_allow_html=True)
+
+    query_models = {
+        value.strip()
+        for value in str(_query_value("compare_models") or "").split(",")
+        if value.strip()
+    }
+    selected_candidates = []
+    selected_count = 0
+    for item in candidates:
+        status = item.compatibility
+        compatible = bool(status.get("compatible")) and item.trajectory is not None
+        model_id = str(item.run.meta.get("model_id"))
+        key = f"comparison_candidate_{abs(hash(str(item.run.run_dir)))}_{mode}_{metric}"
+        auto_select_compatible = not query_models
+        requested = (
+            model_id in query_models
+            or str(item.run.run_dir) in query_models
+            or auto_select_compatible
+        )
+        already_selected = bool(st.session_state.get(key, requested))
+        limit_reached = selected_count >= 3 and not already_selected
+        checked = st.checkbox(
+            comparison_run_label(item.run),
+            value=requested,
+            disabled=(not compatible) or limit_reached,
+            key=key,
+        )
+        reasons = list(status.get("reasons", []))
+        warnings = list(status.get("warnings", []))
+        if not compatible:
+            detail = reasons[0] if reasons else "selected Source ID is unavailable"
+            st.markdown(_badge("Blocked", detail, "bad"), unsafe_allow_html=True)
+            if mode == "strict" and (metric.startswith("gain") or metric.endswith("gain_block")):
+                st.caption("Raw gain is incompatible. Use Physical Outputs > Attitude correction or Bias correction when available.")
+        elif warnings:
+            st.markdown(_badge("Physical outputs only", warnings[0], "warn"), unsafe_allow_html=True)
+        else:
+            st.markdown(_badge("Compatible", "declared semantics match", "ok"), unsafe_allow_html=True)
+        if checked and compatible:
+            selected_count += 1
+            selected_candidates.append(item)
+    if len(candidates) > 3:
+        st.caption("At most three overlay models can be selected in addition to the base model.")
+
+    model_data: list[Dict[str, Any]] = [
+        {
+            "label": _comparison_model_label(run.meta, metric),
+            "meta": run.meta,
+            "traj": selected_traj,
+            "aggregate": run.aggregate,
+        }
+    ]
+    evaluator = (
+        comparison.evaluate_physical_metric_compatibility
+        if mode == "physical"
+        else comparison.evaluate_internal_metric_compatibility
+    )
+    for item in selected_candidates:
+        try:
+            loaded = load_run(item.run.run_dir)
+            candidate_traj = loaded.load_trajectory(
+                source_trajectory_id=selected_info.source_trajectory_id
+            )
+            exact = evaluator(
+                run.meta,
+                loaded.meta,
+                metric=metric,
+                base_source_trajectory_id=selected_info.source_trajectory_id,
+                candidate_source_trajectory_id=item.trajectory.source_trajectory_id,
+                base_time=selected_traj["t"],
+                candidate_time=candidate_traj["t"],
+            )
+            if not exact["compatible"]:
+                st.error(
+                    f"Comparison blocked for {loaded.meta.get('model_id')}: "
+                    + "; ".join(exact["reasons"])
+                )
+                continue
+            model_data.append(
+                {
+                    "label": _comparison_model_label(loaded.meta, metric),
+                    "meta": loaded.meta,
+                    "traj": candidate_traj,
+                    "aggregate": loaded.aggregate,
+                }
+            )
+        except Exception as exc:
+            st.error(
+                f"Comparison trajectory could not be loaded for {item.run.run_dir}: {exc}. "
+                "No fallback trajectory was substituted."
+            )
+
+    option_columns = st.columns(3)
+    with option_columns[0]:
+        show_truth = st.checkbox(
+            "Show truth",
+            value=metric in {"attitude_rpy", "gyro_bias"},
+            disabled=metric not in {"attitude_rpy", "gyro_bias"},
+            key=f"comparison_truth_{mode}_{metric}",
+        )
+    with option_columns[1]:
+        show_empirical = st.checkbox(
+            "Show empirical ensemble spread",
+            value=False,
+            disabled=metric not in {"attitude_uncertainty", "gyro_bias_uncertainty"},
+            key=f"comparison_empirical_{mode}_{metric}",
+        )
+    gain_row = 0
+    gain_col = 0
+    with option_columns[2]:
+        if metric == "gain_element":
+            gain_shape = run.meta.get("comparison_spec", {}).get("gain", {}).get("shape", [1, 1])
+            gain_row = int(st.number_input("Comparison gain row", 0, max(0, int(gain_shape[0]) - 1), 0))
+            gain_col = int(st.number_input("Comparison gain col", 0, max(0, int(gain_shape[1]) - 1), 0))
+    result = panels.cross_model_comparison_panel(
+        metric,
+        model_data,
+        axis_mode=axis_mode,
+        show_truth=show_truth,
+        show_empirical=show_empirical,
+        gain_row=gain_row,
+        gain_col=gain_col,
+    )
+    if metric in {"attitude_uncertainty", "gyro_bias_uncertainty"}:
+        st.caption(
+            "Physical bands use filled dashed +/-3 sigma. Empirical ensemble spread uses "
+            "unfilled dotted +/-1 sample sigma and is not model-predicted covariance."
+        )
+    _plot(result)
+    provenance = str(run.meta.get("data_spec", {}).get("source_trajectory_id_source", "unknown"))
+    if "fallback" in provenance:
+        st.warning(
+            f"Source ID provenance: {provenance}. Comparison is valid only for the same dataset file and row ordering."
+        )
+
+
 def render_run_inspector(runs_root: str | Path = "runs") -> None:
     st.title("Run Inspector")
     run, overlay, overlay_error = render_run_picker(runs_root)
@@ -559,15 +912,95 @@ def render_run_inspector(runs_root: str | Path = "runs") -> None:
         )
         _with_overlay(bundle, overlay_bundle, overlay_label=str(overlay.meta.get("model_id")))
     st.caption(f"Panel build time: {bundle['build_seconds']:.3f} s")
+    _render_cross_model_comparison(
+        runs_root=runs_root,
+        run=run,
+        selected_info=selected_info,
+        selected_traj=selected_traj,
+        axis_mode=axis_mode,
+    )
 
     figures = bundle["figures"]
+    overlay_cache: Dict[str, Dict[str, Any]] = {}
     with left:
-        _plot(figures["attitude_rpy"])
-        _plot(figures["attitude_error"])
-        _plot(figures["bias"])
-        _plot(figures["innovation"])
-        _plot(figures["consistency"])
-        _plot(figures["gain"])
+        _plot_panel_with_model_toggles(
+            panel_id="attitude_rpy",
+            figure_key="attitude_rpy",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
+        _plot_panel_with_model_toggles(
+            panel_id="attitude_error",
+            figure_key="attitude_error",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
+        _plot_panel_with_model_toggles(
+            panel_id="bias",
+            figure_key="bias",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
+        _plot_panel_with_model_toggles(
+            panel_id="innovation",
+            figure_key="innovation",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
+        _plot_panel_with_model_toggles(
+            panel_id="consistency",
+            figure_key="consistency",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
+        _plot_panel_with_model_toggles(
+            panel_id="gain",
+            figure_key="gain",
+            bundle=bundle,
+            run=run,
+            selected_info=selected_info,
+            selected_traj=selected_traj,
+            runs_root=runs_root,
+            axis_mode=axis_mode,
+            analysis_window=analysis_window,
+            gain_display=gain_display,
+            overlay_cache=overlay_cache,
+        )
         render_regime_strip(run.meta, bundle["traj"])
     with right:
         st.markdown("**Selected-trajectory metrics**")

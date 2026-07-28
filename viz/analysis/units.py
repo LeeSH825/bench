@@ -75,3 +75,11 @@ def covariance_axis_sigma_deg(covariance, covariance_space):
 
 def covariance_axis_band_deg(covariance, covariance_space, sigma_multiplier=3.0):
     return np.asarray(sigma_multiplier, dtype=np.float64) * covariance_axis_sigma_deg(covariance, covariance_space)
+
+
+def attitude_coordinate_to_deg(value, coordinate_space):
+    if coordinate_space == "mrp":
+        return mrp_delta_to_deg(value)
+    if coordinate_space == "rotation_vector_rad":
+        return rad_to_deg(value)
+    raise ValueError(f"unknown attitude coordinate_space={coordinate_space!r}")
