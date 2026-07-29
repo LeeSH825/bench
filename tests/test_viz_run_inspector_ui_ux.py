@@ -232,7 +232,7 @@ class PrimaryLabelAndSingleCandidateTest(unittest.TestCase):
             self.assertTrue(why_expanders)
             stats = [c.value for c in at.caption if c.value.startswith("Indexed runs:")]
             self.assertTrue(stats)
-            self.assertIn("Matching suite/task/scenario/split/seed/track/init: 1", stats[0])
+            self.assertIn("Matching suite/task/scenario/split/seed/track: 1", stats[0])
             self.assertIn("Display candidates: 1", stats[0])
 
 

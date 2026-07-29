@@ -115,8 +115,11 @@ class SuiteModelToggleTest(unittest.TestCase):
         changed["data_spec"]["split"] = "train"
         self.assertNotEqual(model_context_key(_meta("a")), model_context_key(changed))
 
-    def test_candidate_label_exposes_track_and_seed(self) -> None:
-        self.assertEqual(candidate_label(_meta("split_knet")), "split_knet — frozen / seed 0")
+    def test_candidate_label_exposes_init_track_and_seed(self) -> None:
+        self.assertEqual(
+            candidate_label(_meta("split_knet")),
+            "split_knet · init=pretrained · frozen / seed 0",
+        )
 
     def test_model_color_and_trace_labels_are_stable(self) -> None:
         ordered = ["kalmannet", "split_knet"]
@@ -241,9 +244,9 @@ class SuiteModelToggleAppIntegrationTest(unittest.TestCase):
         # Primary is checked by default but its checkbox is enabled (VIZ-R1.3.1)
         # and its label carries a "· primary" marker (VIZ-R1.3.2 #6): the user
         # may turn it off as long as another model stays selected.
-        self.assertEqual(labels["kalmannet — frozen / seed 0 · primary"], (True, False))
-        self.assertEqual(labels["mekf — frozen / seed 0"], (False, False))
-        self.assertEqual(labels["split_knet — frozen / seed 0"], (False, False))
+        self.assertEqual(labels["kalmannet · init=fixture · frozen / seed 0 · primary"], (True, False))
+        self.assertEqual(labels["mekf · init=fixture · frozen / seed 0"], (False, False))
+        self.assertEqual(labels["split_knet · init=fixture · frozen / seed 0"], (False, False))
         self.assertTrue(self._loads)
         self.assertTrue(all(model_id == "kalmannet" for model_id in self._loads))
 
@@ -258,9 +261,9 @@ class SuiteModelToggleAppIntegrationTest(unittest.TestCase):
         self._run(at)
 
         labels = {c.label: c.value for c in at.checkbox}
-        self.assertEqual(labels["kalmannet — frozen / seed 0 · primary"], False)
-        self.assertEqual(labels["mekf — frozen / seed 0"], True)
-        self.assertEqual(labels["split_knet — frozen / seed 0"], True)
+        self.assertEqual(labels["kalmannet · init=fixture · frozen / seed 0 · primary"], False)
+        self.assertEqual(labels["mekf · init=fixture · frozen / seed 0"], True)
+        self.assertEqual(labels["split_knet · init=fixture · frozen / seed 0"], True)
 
         names = self._trace_names(at)
         self.assertFalse(any("kalmannet" in (n or "") for panel in names for n in panel))
@@ -280,7 +283,7 @@ class SuiteModelToggleAppIntegrationTest(unittest.TestCase):
         self._run(at)
 
         labels = {c.label: c.value for c in at.checkbox}
-        self.assertEqual(labels["kalmannet — frozen / seed 0 · primary"], True)
+        self.assertEqual(labels["kalmannet · init=fixture · frozen / seed 0 · primary"], True)
         warnings = [w.value for w in at.warning]
         self.assertTrue(any("At least one model must remain selected" in w for w in warnings))
 

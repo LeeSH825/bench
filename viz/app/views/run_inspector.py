@@ -14,6 +14,7 @@ from viz.app.components.model_toggle_picker import (
     model_context_key,
     reconcile_selection,
     suite_candidates,
+    variant_label,
 )
 from viz.app.components.overlay_picker import discover_run_index, render_run_picker
 from viz.app.components.regime_strip import render_regime_strip
@@ -546,17 +547,19 @@ def _global_panel_model_toggles(
 
     st.markdown("**Models to display**")
     st.caption(
-        "Model toggles control the A-F trajectory plots. Dataset Summary remains based on "
-        "the primary navigation model."
+        "Candidates are limited to the current suite/task/scenario/split/seed/track "
+        "context (same evaluation data and protocol). Initialization and training "
+        "variants — init=trained/pretrained/untrained/... — are listed separately below "
+        "and are not filtered out; toggling them on overlays them like any other model."
     )
 
     if len(candidates) <= 1:
         only_label = candidates[0].label if candidates else "the primary run"
         st.info(
             f"Only one run artifact is available in the current suite/task/scenario/split/"
-            f"seed/track/init context ({only_label}). Other models may not have produced an "
-            "artifact for this context, or their artifacts may not contain the selected "
-            "Source ID."
+            f"seed/track context ({only_label}). Initialization and training variants are "
+            "not excluded by this filter. Other runs may be missing the selected Source ID "
+            "or another required evaluation-context field."
         )
         # De-duplicate by run_dir: `run` (the primary) is normally also one of
         # the entries in `indexed_runs` (it was selected from that list by
@@ -569,7 +572,7 @@ def _global_panel_model_toggles(
         with st.expander("Why only one candidate?", expanded=False):
             st.caption(
                 f"Indexed runs: {len(indexed_runs)} · "
-                f"Matching suite/task/scenario/split/seed/track/init: {len(context_match_dirs)} · "
+                f"Matching suite/task/scenario/split/seed/track: {len(context_match_dirs)} · "
                 f"Containing Source ID {selected_info.source_trajectory_id!r}: {len(candidates)} · "
                 f"Display candidates: {len(candidates)}"
             )
@@ -618,7 +621,45 @@ def _global_panel_model_toggles(
 
     st.session_state[state_key] = set(new_selected)
     st.caption(f"Selected models: {len(new_selected)}")
+    _render_provenance_notice(candidates, new_selected)
     return new_selected
+
+
+def _render_provenance_notice(
+    candidates: Sequence[Any],
+    selected: set[str],
+) -> None:
+    """Interpretive (non-blocking) notice + table for differing init/training provenance.
+
+    Evaluation-context compatibility (suite/task/scenario/split/seed/track)
+    is a hard gate enforced upstream; this is purely informational — it
+    never removes a selected run from the toggle set or from any panel.
+    """
+    selected_candidates = [c for c in candidates if c.run_dir in selected]
+    if len(selected_candidates) < 2:
+        return
+    init_ids = {str(c.metadata.get("init_id") or "unknown") for c in selected_candidates}
+    if len(init_ids) > 1:
+        st.warning(
+            "Selected runs use different initialization/training labels. Overlay is "
+            "allowed because the evaluation context (suite/task/scenario/split/seed/track) "
+            "matches. Interpret the plot as a baseline, ablation, or adaptation comparison, "
+            "not as identical training conditions."
+        )
+    with st.expander("Run provenance", expanded=False):
+        header = "| Run | Model | init_id | track | seed | checkpoint |"
+        separator = "|---|---|---|---|---|---|"
+        rows = [header, separator]
+        for c in selected_candidates:
+            model = str(c.metadata.get("model_id") or "unknown model")
+            init = str(c.metadata.get("init_id") or "unknown")
+            track = str(c.metadata.get("track_id") or "unknown")
+            seed = str(c.metadata.get("seed") if c.metadata.get("seed") is not None else "unknown")
+            checkpoint = c.metadata.get("checkpoint")
+            checkpoint_text = str(checkpoint) if checkpoint else "—"
+            run_id = Path(c.run_dir).name
+            rows.append(f"| {run_id} | {model} | {init} | {track} | {seed} | {checkpoint_text} |")
+        st.markdown("\n".join(rows))
 
 
 def _panel_overlay_bundles(
@@ -662,10 +703,14 @@ def _panel_overlay_bundles(
     for item in candidates:
         if str(item.run.run_dir) not in selected_model_dirs:
             continue
-        model_id = str(item.run.meta.get("model_id") or "unknown model")
+        # variant_label, not bare model_id: once init_id is out of the hard
+        # candidate filter, two selected variants can share model_id (e.g.
+        # the same model trained vs. untrained) and must stay distinguishable
+        # as separate trace/legend/exclusion identities.
+        variant_id = variant_label(item.run.meta)
         if not item.compatibility.get("compatible") or item.trajectory is None:
             reasons = "; ".join(item.compatibility.get("reasons", []))
-            exclusions.append((model_id, reasons or "selected Source ID is unavailable"))
+            exclusions.append((variant_id, reasons or "selected Source ID is unavailable"))
             continue
         run_key = str(item.run.run_dir)
         try:
@@ -683,7 +728,7 @@ def _panel_overlay_bundles(
                 candidate_time=candidate_traj["t"],
             )
             if not exact["compatible"]:
-                exclusions.append((model_id, "; ".join(exact["reasons"])))
+                exclusions.append((variant_id, "; ".join(exact["reasons"])))
                 continue
             if run_key not in cache:
                 cache[run_key] = build_run_inspector_bundle(
@@ -700,11 +745,11 @@ def _panel_overlay_bundles(
                 # source key is not present for this model). Surface it the
                 # same way as the metadata-level exclusions above instead of
                 # letting add_overlay_traces drop it silently.
-                exclusions.append((model_id, panel_result.disabled_reason))
+                exclusions.append((variant_id, panel_result.disabled_reason))
                 continue
-            overlays.append((model_id, cache[run_key]))
+            overlays.append((variant_id, cache[run_key]))
         except Exception as exc:
-            exclusions.append((model_id, f"unavailable: {exc}"))
+            exclusions.append((variant_id, f"unavailable: {exc}"))
     return overlays, exclusions
 
 
@@ -750,7 +795,7 @@ def _plot_panel_with_model_toggles(
         selected_model_dirs=selected_model_dirs,
     )
     primary_included = str(run.run_dir) in selected_model_dirs
-    primary_model_id = str(run.meta.get("model_id") or "unknown model")
+    primary_variant_id = variant_label(run.meta)
     primary_disabled_reason = (
         bundle["figures"][figure_key].disabled_reason if primary_included else None
     )
@@ -760,7 +805,7 @@ def _plot_panel_with_model_toggles(
     # excluded overlay model, instead of just quietly not appearing.
     full_exclusions = list(exclusions)
     if primary_disabled_reason:
-        full_exclusions = [(primary_model_id, primary_disabled_reason)] + full_exclusions
+        full_exclusions = [(primary_variant_id, primary_disabled_reason)] + full_exclusions
 
     if len(full_exclusions) == 1:
         model_id, reason = full_exclusions[0]
@@ -771,20 +816,20 @@ def _plot_panel_with_model_toggles(
             for model_id, reason in full_exclusions:
                 st.caption(f"- {model_id} — {reason}")
 
-    status: Dict[str, str] = {model_id: reason for model_id, reason in exclusions}
+    status: Dict[str, str] = {variant_id: reason for variant_id, reason in exclusions}
     status.update({label: "Available" for label, _ in overlays})
     if primary_included:
-        status[primary_model_id] = primary_disabled_reason or "Available"
+        status[primary_variant_id] = primary_disabled_reason or "Available"
 
     if not primary_included and not overlays:
         _plot(panels.no_model_selected_panel(model_titles[figure_key]))
         return status
 
-    ordered_ids = ([primary_model_id] if primary_included else []) + [label for label, _ in overlays]
+    ordered_ids = ([primary_variant_id] if primary_included else []) + [label for label, _ in overlays]
     result = (
         panels.label_model_traces(
             bundle["figures"][figure_key],
-            model_id=primary_model_id,
+            model_id=primary_variant_id,
             ordered_model_ids=ordered_ids,
         )
         if primary_included
@@ -839,7 +884,7 @@ def _render_advanced_compatibility_diagnostics(
         "summarizes availability so it does not repeat that text."
     )
 
-    rmse_models: list[tuple[str, VizRun]] = [(str(run.meta.get("model_id") or "base"), run)]
+    rmse_models: list[tuple[str, VizRun]] = [(variant_label(run.meta), run)]
     if selected_info.source_trajectory_id is not None and isinstance(run.meta.get("state_spec"), Mapping):
         rmse_candidates = comparison_candidates(
             run,
@@ -854,7 +899,7 @@ def _render_advanced_compatibility_diagnostics(
                 and item.compatibility.get("compatible")
                 and item.run.run_dir != run.run_dir
             ):
-                rmse_models.append((str(item.run.meta.get("model_id") or "unknown"), item.run))
+                rmse_models.append((variant_label(item.run.meta), item.run))
 
     st.markdown("**Dataset-average RMSE**")
     st.caption(
@@ -873,26 +918,28 @@ def _render_advanced_compatibility_diagnostics(
         "Selected models only. \"Available\" means that model's trace is shown in that panel; "
         "\"Blocked\" means it was excluded — see the caption under that panel above for the reason."
     )
-    model_ids: list[str] = []
+    # Keyed by variant_label (model_id + init_id), not bare model_id — two
+    # selected variants of the same model_id must appear as separate rows.
+    variant_ids: list[str] = []
     for panel_id, _title in _PANEL_MATRIX_COLUMNS:
-        for model_id in panel_status.get(panel_id, {}):
-            if model_id not in model_ids:
-                model_ids.append(model_id)
-    if not model_ids:
+        for variant_id in panel_status.get(panel_id, {}):
+            if variant_id not in variant_ids:
+                variant_ids.append(variant_id)
+    if not variant_ids:
         st.caption("No panel status is available yet.")
         return
     header = "| Model | " + " | ".join(title for _, title in _PANEL_MATRIX_COLUMNS) + " |"
     separator = "|" + "---|" * (len(_PANEL_MATRIX_COLUMNS) + 1)
     rows = [header, separator]
-    for model_id in model_ids:
+    for variant_id in variant_ids:
         cells = []
         for panel_id, _title in _PANEL_MATRIX_COLUMNS:
-            status = panel_status.get(panel_id, {}).get(model_id)
+            status = panel_status.get(panel_id, {}).get(variant_id)
             if status is None:
                 cells.append("n/a")
             else:
                 cells.append("Available" if status == "Available" else "Blocked")
-        rows.append(f"| {model_id} | " + " | ".join(cells) + " |")
+        rows.append(f"| {variant_id} | " + " | ".join(cells) + " |")
     st.markdown("\n".join(rows))
 
 
