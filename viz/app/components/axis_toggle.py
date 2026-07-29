@@ -7,7 +7,7 @@ import streamlit as st
 
 AXIS_MODE_OPTIONS: Mapping[str, str] = {
     "split": "3-axis split",
-    "overlay": "Overlay",
+    "overlay": "Combined axes",
     "norm": "Norm only",
 }
 

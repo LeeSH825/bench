@@ -16,6 +16,10 @@ MAX_RENDER_POINTS = 5000
 EMP_STD_WARNING_THRESHOLD = 0.15
 TRANSIENT_OPTIONS = ("all", "exclude_10", "exclude_20", "custom")
 
+MODEL_COLORS = (
+    "#1f77b4", "#d62728", "#2ca02c", "#9467bd", "#ff7f0e", "#17becf",
+)
+
 GAIN_SEMANTIC_LABELS = {
     "learned_combined_kalman_gain": "Learned combined Kalman gain",
     "learned_split_factor_g1": "Learned G1 factor",
@@ -115,6 +119,44 @@ def _panel_placeholder(title: str, reason: str) -> PanelResult:
         template="plotly_white",
     )
     return PanelResult(fig, disabled_reason=reason)
+
+
+def no_model_selected_panel(title: str) -> PanelResult:
+    return _panel_placeholder(title, "No models selected")
+
+
+def model_color(model_id: str, ordered_model_ids: Optional[Sequence[str]] = None) -> str:
+    """Stable Run Inspector color, shared by every panel."""
+    if ordered_model_ids:
+        try:
+            return MODEL_COLORS[list(ordered_model_ids).index(str(model_id)) % len(MODEL_COLORS)]
+        except ValueError:
+            pass
+    return MODEL_COLORS[sum(ord(char) for char in str(model_id)) % len(MODEL_COLORS)]
+
+
+def label_model_traces(
+    result: PanelResult,
+    *,
+    model_id: str,
+    ordered_model_ids: Optional[Sequence[str]] = None,
+) -> PanelResult:
+    """Label estimate/diagnostic traces without renaming neutral truth traces."""
+    if result.disabled_reason:
+        return result
+    color = model_color(model_id, ordered_model_ids)
+    figure = go.Figure(result.figure)
+    for trace in figure.data:
+        name = str(trace.name or "trace")
+        if name.lower().startswith("truth") or name in {"Event start", "Eclipse start"}:
+            continue
+        if not name.startswith(f"{model_id} ·"):
+            trace.name = f"{model_id} · {name}"
+        if trace.type == "scatter":
+            line = trace.line.to_plotly_json() if trace.line is not None else {}
+            line["color"] = color
+            trace.line = line
+    return PanelResult(figure, downsample_notice=result.downsample_notice)
 
 
 def _minmax_downsample_indices(y: np.ndarray, max_points: int = MAX_RENDER_POINTS) -> tuple[np.ndarray, bool]:
@@ -730,16 +772,29 @@ def add_overlay_traces(
     overlay: PanelResult,
     *,
     overlay_label: str,
+    overlay_color: Optional[str] = None,
 ) -> PanelResult:
-    if base.disabled_reason or overlay.disabled_reason:
+    # A primary model may not provide this panel (for example, learned models
+    # without physical P/S).  An enabled selected model must still be able to
+    # establish the panel; one model's missing capability must not hide the
+    # other selected models.
+    if base.disabled_reason:
+        return overlay if not overlay.disabled_reason else base
+    if overlay.disabled_reason:
         return base
     figure = go.Figure(base.figure)
     for trace in overlay.figure.data:
         copied = trace.to_plotly_json()
-        copied["name"] = f"{overlay_label} · {copied.get('name') or 'trace'}"
+        copied["name"] = (
+            f"{overlay_label} · {copied.get('name') or 'trace'}"
+            if overlay_label
+            else copied.get("name") or "trace"
+        )
         if copied.get("type") == "scatter":
             line = dict(copied.get("line") or {})
             line["dash"] = "dash"
+            if overlay_color:
+                line["color"] = overlay_color
             copied["line"] = line
             copied["opacity"] = 0.72
         figure.add_trace(copied)

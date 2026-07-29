@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Optional
+from typing import Any, Iterable, Mapping, Optional, Sequence
 
 import streamlit as st
 
-from viz.io.loader import VizRun, assert_overlay_compatible, load_run
+from viz.io.loader import VizRun, load_run
 
 
 def discover_runs(runs_root: str | Path) -> list[Path]:
@@ -70,18 +70,6 @@ def split_label(run: VizRun) -> str:
     return split.title()
 
 
-def run_label(run: VizRun, runs_root: str | Path) -> str:
-    root = Path(runs_root).expanduser().resolve()
-    try:
-        relative = run.run_dir.relative_to(root)
-    except ValueError:
-        relative = run.run_dir
-    return (
-        f"{split_label(run)} · {run.meta.get('suite')} · {run.meta.get('task')} · "
-        f"{run.meta.get('scenario_id')} · {run.meta.get('model_id')} · seed {run.meta.get('seed')} · {relative}"
-    )
-
-
 def _query_value(name: str) -> Optional[str]:
     value = st.query_params.get(name)
     if isinstance(value, list):
@@ -131,13 +119,27 @@ def _select_filter(
     return value, filter_run_index(candidates, {field: value})
 
 
-def render_run_picker(runs_root: str | Path) -> tuple[Optional[VizRun], Optional[VizRun], Optional[str]]:
-    runs, errors, scan_seconds = discover_run_index(runs_root)
+def render_run_picker(
+    indexed_runs: Sequence[VizRun],
+    index_errors: Sequence[str],
+    *,
+    runs_root: str | Path,
+    scan_seconds: float,
+) -> Optional[VizRun]:
+    """Render the suite/task/scenario/model/seed/track/init navigation filters.
+
+    Takes an already-discovered run index instead of scanning `runs_root`
+    itself, so a single `discover_run_index` call (made once by the caller)
+    is shared across the picker, the model toggle, the A-F panels, and the
+    Advanced compatibility diagnostics section — see VIZ-R1.3.2.
+    """
+    runs = list(indexed_runs)
+    errors = list(index_errors)
     if not runs:
         st.error(f"No valid visualization runs found under {Path(runs_root).expanduser().resolve()}")
         if errors:
             st.code("\n".join(errors))
-        return None, None, None
+        return None
     target = _run_from_query(runs, runs_root, "run") or runs[0]
     preferred = {
         "data_split": _run_field(target, "data_split"),
@@ -222,22 +224,4 @@ def render_run_picker(runs_root: str | Path) -> tuple[Optional[VizRun], Optional
         with st.expander(f"Invalid artifacts excluded ({len(errors)})"):
             st.code("\n".join(errors))
 
-    overlay_options: list[Optional[VizRun]] = [None, *[run for run in runs if run.run_dir != base.run_dir]]
-    overlay_target = _run_from_query(runs, runs_root, "overlay")
-    overlay_index = overlay_options.index(overlay_target) if overlay_target in overlay_options else 0
-    overlay = st.selectbox(
-        "Overlay artifact",
-        overlay_options,
-        index=overlay_index,
-        format_func=lambda run: "None" if run is None else run_label(run, runs_root),
-        key="overlay_run",
-    )
-    overlay_error = None
-    if overlay is not None:
-        try:
-            assert_overlay_compatible(base, overlay)
-        except Exception as exc:
-            overlay_error = str(exc)
-    base_loaded = load_run(base.run_dir)
-    overlay_loaded = load_run(overlay.run_dir) if overlay is not None else None
-    return base_loaded, overlay_loaded, overlay_error
+    return load_run(base.run_dir)
