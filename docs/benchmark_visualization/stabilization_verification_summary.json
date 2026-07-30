@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-30T18:50:00Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "baseline_commit": "d1cc4b035597bb029e0bce95a546b29b4664b5c6",
+    "implementation_commit": "ee862a2",
+    "implementation_commits": [
+      "355b6ca feat(benchmark-viz): add read-only execution control plane",
+      "179a42d test(benchmark-viz): stabilize full-suite collection and real-adapter parity",
+      "ee862a2 fix(benchmark-viz): track viz fixtures required by tracked release tests"
+    ],
+    "branch": "benchmark-viz/stabilize-release-baseline",
+    "pushed_to_remote": false,
+    "verification_worktree": "/tmp/bench-viz-stabilization-179a42d",
+    "clean_worktree": true
+  },
+  "verdict": "READY_FOR_NEXT_TRANCHE",
+  "blockers": {
+    "V-001": "CLOSED",
+    "V-002": "CLOSED",
+    "V-003": "CLOSED"
+  },
+  "findings": {
+    "V-004": "CLOSED",
+    "V-005": "DOCUMENTED",
+    "V-006": "CLOSED",
+    "V-007": "CLOSED"
+  },
+  "tests": {
+    "collected": 449,
+    "collection_errors": 0,
+    "passed": 448,
+    "failed": 0,
+    "skipped": 1,
+    "subtests_passed": 12,
+    "identity_regression_passed": 28,
+    "control_targeted_passed": 163,
+    "working_tree_collected": 590,
+    "working_tree_passed": 588,
+    "working_tree_skipped": 2,
+    "collected_delta_note": "clean checkout collects 449 and the working tree 590; the 141-test difference is 27 untracked test files belonging to unrelated in-progress user work (ADCS, Phase 5c-7 replay/checkpoint, Vizard, spike/SNN) that was deliberately not committed"
+  },
+  "real_adapter_parity": {
+    "kalmannet_tsp": {
+      "observer_only": "PASS",
+      "telemetry_only": "PASS",
+      "observer_and_telemetry": "PASS",
+      "equality": "bitwise"
+    },
+    "split_knet": {
+      "observer_only": "PASS",
+      "telemetry_only": "PASS",
+      "observer_and_telemetry": "PASS",
+      "equality": "bitwise"
+    },
+    "third_party_modules_confirmed_loaded": [
+      "KNet.KalmanNet_nn",
+      "GSSFiltering.dnn",
+      "GSSFiltering.filtering",
+      "GSSFiltering.model"
+    ],
+    "compared_fields": [
+      "dataset_fingerprint",
+      "initial_state_dict_hash",
+      "final_state_dict_hash",
+      "prediction_hash",
+      "optimizer_update_count",
+      "best_step",
+      "final_train_loss",
+      "validation_history"
+    ],
+    "mutation_probe": "seed perturbation under observer_on makes both adapters FAIL on initial_hash and final_hash, confirming the equality assertions are not vacuous"
+  },
+  "e2e": {
+    "normal": "PASS",
+    "api_restart": "PASS",
+    "ordinary_failure": "PASS",
+    "sigkill_orphan": "PASS",
+    "playwright_dom": "PASS"
+  },
+  "e2e_detail": {
+    "normal": {"final_state": "COMPLETED", "exit_code": 0, "events": 27},
+    "ordinary_failure": {"final_state": "FAILED", "exit_code": 40, "traceback_event": true},
+    "api_restart": {
+      "run_state_after_restart": "RUNNING",
+      "worker_state_after_restart": "RUNNING",
+      "worker_pid_alive": true,
+      "worker_survived_api_shutdown": true,
+      "steps_progressed_while_api_down": [248800, 461650],
+      "run_id_stable": true,
+      "event_cursor": [21325, 657215]
+    },
+    "sigkill_orphan": {
+      "state_before_reconcile": "RUNNING",
+      "state_after_reconcile": "ORPHANED",
+      "false_completed": false,
+      "worker_identity_verified_before_signal": true
+    },
+    "browser": {
+      "title": "Benchmark Control Plane",
+      "states_rendered": ["COMPLETED", "FAILED", "ORPHANED"],
+      "read_only_marker": true,
+      "action_buttons_exposed": 0
+    }
+  },
+  "scale": {
+    "runs_1000": "MEASURED",
+    "runs_10000": "MEASURED",
+    "list_first_page_50_p50_ms": {"runs_1000": 2.85, "runs_10000": 4.76},
+    "list_first_page_50_p95_ms": {"runs_1000": 3.36, "runs_10000": 5.04},
+    "run_detail_p50_ms": {"runs_1000": 1.52, "runs_10000": 1.50},
+    "events_cursor_p50_ms": {"runs_1000": 1.24, "runs_10000": 1.20},
+    "dash_runs_page_load_p50_ms": {"runs_10000": 1079.3},
+    "peak_rss_mb": {"runs_1000": 36.1, "runs_10000": 39.7},
+    "limit_capped_server_side": 1000,
+    "oversized_limit_rejected_http": 422,
+    "ui_rows_rendered_at_10000": 50,
+    "system_health_p50_ms": {
+      "runs_1000": 13.37,
+      "runs_10000_with_2500_running": 110.41,
+      "runs_10000_all_terminal": 4.06,
+      "note": "cost is find_orphan_candidates() probing every non-terminal run's PID; scales with concurrent live runs, not registry size"
+    }
+  },
+  "security_boundary": {
+    "default_bind": "127.0.0.1",
+    "non_loopback_bind_refused_without_override": true,
+    "override_env": "BENCH_CONTROL_ALLOW_PUBLIC_BIND",
+    "http_methods_exposed": ["GET"],
+    "absolute_paths_returned": true,
+    "path_redaction_applied": false,
+    "path_redaction_rationale": "would break the response contract consumed by the Dash UI and the legacy deep-link, for no gain under the single-trusted-operator loopback threat model; documented in operator_quickstart.md instead",
+    "authentication_implemented": false
+  },
+  "deferred_capabilities": {
+    "graceful_stop": false,
+    "exact_resume": false,
+    "config_gui_launch": false,
+    "gpu_queue": false,
+    "authentication": false,
+    "warm_start_api": false,
+    "force_terminate_api": false,
+    "shared_gpu_execution": false
+  },
+  "third_party": {
+    "submodules_dirty_after_cleanup": 0,
+    "submodule_commits_changed": false,
+    "tracked_vendored_source_modified": false,
+    "note": "an over-broad __pycache__ sweep briefly deleted cpython-39 .pyc files that MAML_KalmanNet tracks upstream; detected in the post-cleanup status check and reverted with 'git checkout -- .' in that submodule"
+  },
+  "remaining_risks": [
+    "27 untracked test files plus their bench/visualization modules, spike/SNN adapters and ADCS replay work remain uncommitted in the working tree — the same failure mode as V-001",
+    "adaptive_knet.py and maml_knet.py in the working tree remove preds_test.npz writing with no central replacement; uncommitted, so the baseline is unaffected",
+    "test fixtures live under the gitignored runs/ directory via force-add (17,640 files)",
+    "parity covers the tiny-budget CPU path only; GPU is deliberately not an exact-parity gate",
+    "/system/health degrades with many concurrent live runs; characterized, not optimized"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_visualization_stabilization/20260730T182502Z"
+}
