@@ -1,0 +1,72 @@
+{
+  "artifact_version": "1.1",
+  "created_at": "2026-07-28T01:49:25.066232+09:00",
+  "commit": "3cab581ba4e2558974dc412a425c0ff2e1cb80d4",
+  "worktree_dirty": true,
+  "config_hash": null,
+  "suite": "viz_v4a_fixtures",
+  "task": "full_kf_linear_v0",
+  "task_family": "linear_gaussian_v0",
+  "scenario_id": "scenario_v4a_fixture",
+  "model_id": "oracle_kf",
+  "seed": 0,
+  "track_id": "frozen",
+  "init_id": "pretrained",
+  "formulation": "linear_gaussian_v0_formulation",
+  "sanity_benchmark_only": false,
+  "state_spec": {
+    "layout": [
+      {
+        "name": "x",
+        "dim": 2,
+        "unit": "unknown",
+        "kind": "state"
+      }
+    ],
+    "attitude_repr": null,
+    "covariance_space": "mrp",
+    "shadow_set": false,
+    "nominal_attitude_stored": false,
+    "rpy_reference_frame": null
+  },
+  "meas_spec": {
+    "channels": [
+      {
+        "name": "y",
+        "dim": 1,
+        "unit": "unknown",
+        "role": "measurement"
+      }
+    ]
+  },
+  "capabilities": {
+    "covariance": true,
+    "gain": true,
+    "innovation": true,
+    "innovation_cov": true,
+    "context": false,
+    "regime_labels": false,
+    "bias_state": false
+  },
+  "source_key_map": {},
+  "traj_index": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "dt": 1.0,
+  "time": {
+    "time_source": "synthetic_fixture",
+    "time_unit": "s",
+    "dt_s": 1.0
+  },
+  "T": 48,
+  "N_test": 4,
+  "run_status": "ok",
+  "d1_error_state_implemented": false,
+  "validation_scope": "v0_contract_structure_only_d1_not_implemented",
+  "adapter_meta": {
+    "adapter_id": "synthetic_fixture"
+  }
+}

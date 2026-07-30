@@ -1,0 +1,36 @@
+{
+  "suite_name": "split_train_smoke",
+  "task_id": "A_linear_split_train_smoke_v0",
+  "scenario_id": "1a547ae6bce5",
+  "seed": 0,
+  "model_id": "kalmannet_tsp",
+  "track_id": "frozen",
+  "init_id": "pretrained",
+  "source_split": "test",
+  "time_source": "sample_index_fallback",
+  "time_unit": "sample_index",
+  "time_warning": "No task timestamp or sampling interval was available; time_s stores sample indices.",
+  "schema_version": "pred_artifact_v1",
+  "layout": "NTD",
+  "required_keys": [
+    "time_s",
+    "x_true",
+    "y_obs",
+    "x_hat",
+    "trajectory_id"
+  ],
+  "x_shape": [
+    4,
+    16,
+    2
+  ],
+  "y_shape": [
+    4,
+    16,
+    2
+  ],
+  "time_shape": [
+    16
+  ],
+  "notes": "Prediction artifact for benchmark visualization and downstream analysis."
+}

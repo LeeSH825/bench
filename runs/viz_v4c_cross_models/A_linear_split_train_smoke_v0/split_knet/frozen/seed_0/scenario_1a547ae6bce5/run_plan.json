@@ -1,0 +1,47 @@
+{
+  "plan_id": "pretrained__frozen",
+  "init_id": "pretrained",
+  "track_id": "frozen",
+  "official_benchmark_eligible": true,
+  "suite_name": "split_train_smoke",
+  "task_id": "A_linear_split_train_smoke_v0",
+  "scenario_id": "1a547ae6bce5",
+  "seed": 0,
+  "model_id": "split_knet",
+  "deterministic": true,
+  "device_requested": "cpu",
+  "device_resolved": "cpu",
+  "precision": "fp32",
+  "logging": {
+    "level": "INFO",
+    "log_to_file": false,
+    "log_file": null,
+    "debug_every": 0
+  },
+  "budgets": {
+    "train_max_updates": 6,
+    "adapt_max_updates": 0,
+    "adapt_max_updates_per_step": 0,
+    "t0_gate_enabled": false,
+    "adaptation_budget": {}
+  },
+  "artifacts": {
+    "save_predictions": true,
+    "save_predictions_default": true,
+    "visualization_enabled": false
+  },
+  "shift": {
+    "t0": null
+  },
+  "adaptation": {
+    "enabled": false,
+    "allowed_after_t0_only": false,
+    "max_updates": 0,
+    "max_updates_per_step": 0
+  },
+  "cache": {
+    "enabled": false,
+    "cache_hit": false,
+    "train_skipped": false
+  }
+}

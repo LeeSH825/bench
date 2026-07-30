@@ -1,0 +1,182 @@
+{
+  "artifact_version": "1.1",
+  "created_at": "2026-07-28T05:22:58.649630+09:00",
+  "commit": "3cab581ba4e2558974dc412a425c0ff2e1cb80d4",
+  "worktree_dirty": true,
+  "config_hash": null,
+  "suite": "split_train_smoke",
+  "task": "A_linear_split_train_smoke_v0",
+  "task_family": "linear_gaussian_v0",
+  "scenario_id": "1a547ae6bce5",
+  "scenario": {
+    "display_name": null,
+    "parameters": {}
+  },
+  "model_id": "split_knet_mismatch",
+  "seed": 0,
+  "track_id": "frozen",
+  "init_id": "synthetic_fixture",
+  "formulation": "linear_gaussian_v0_formulation",
+  "sanity_benchmark_only": false,
+  "state_spec": {
+    "layout": [
+      {
+        "name": "x",
+        "dim": 2,
+        "unit": "unknown",
+        "kind": "state"
+      }
+    ],
+    "attitude_repr": null,
+    "covariance_space": "mrp",
+    "shadow_set": false,
+    "nominal_attitude_stored": false,
+    "rpy_reference_frame": null
+  },
+  "meas_spec": {
+    "channels": [
+      {
+        "name": "y",
+        "dim": 2,
+        "unit": "unknown",
+        "role": "measurement"
+      }
+    ]
+  },
+  "capabilities": {
+    "covariance": false,
+    "gain": true,
+    "innovation": true,
+    "innovation_cov": false,
+    "context": false,
+    "regime_labels": false,
+    "bias_state": false
+  },
+  "diagnostic_semantics": {
+    "gain": "learned_combined_kalman_gain",
+    "gain_g1": "learned_split_factor_g1",
+    "gain_g2": "learned_split_factor_g2",
+    "innov": "measurement_residual_used_by_update",
+    "validity_mask": "innov_valid",
+    "combination": "gain_g1 @ H.T @ gain_g2",
+    "observation_jacobian": "fixed_system_info_H_not_stored_per_trajectory"
+  },
+  "source_key_map": {},
+  "traj_index": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "data_spec": {
+    "split": "test",
+    "split_source": "explicit",
+    "num_trajectories": 4,
+    "num_stored_trajectories": 4,
+    "trajectory_selection": "deterministic_uniform",
+    "source_trajectory_id_source": "synthetic_fixture_id",
+    "is_live": false
+  },
+  "trajectories": [
+    {
+      "stored_index": 0,
+      "source_trajectory_id": 100,
+      "source_trajectory_id_source": "synthetic_fixture_id",
+      "selection_row_index": 0,
+      "file": "series/traj_0000.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 1,
+      "source_trajectory_id": 101,
+      "source_trajectory_id_source": "synthetic_fixture_id",
+      "selection_row_index": 1,
+      "file": "series/traj_0001.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 2,
+      "source_trajectory_id": 102,
+      "source_trajectory_id_source": "synthetic_fixture_id",
+      "selection_row_index": 2,
+      "file": "series/traj_0002.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 3,
+      "source_trajectory_id": 103,
+      "source_trajectory_id_source": "synthetic_fixture_id",
+      "selection_row_index": 3,
+      "file": "series/traj_0003.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    }
+  ],
+  "dt": null,
+  "time": {
+    "time_source": "copied_actual_fixture",
+    "time_unit": "sample_index"
+  },
+  "T": 16,
+  "N_test": 4,
+  "run_status": "ok",
+  "d1_error_state_implemented": false,
+  "validation_scope": "v0_contract_structure_only_d1_not_implemented",
+  "adapter_meta": {
+    "adapter_id": "split_knet",
+    "adapter_version": "s8_gpu_device_v1",
+    "runtime_device": "cpu",
+    "integration_mode": "import_model_only",
+    "covariance_support": false,
+    "viz_diagnostics_version": "split_gain_components_v1",
+    "diagnostic_semantics": {
+      "gain": "learned_combined_kalman_gain",
+      "gain_g1": "learned_split_factor_g1",
+      "gain_g2": "learned_split_factor_g2",
+      "innov": "measurement_residual_used_by_update",
+      "validity_mask": "innov_valid",
+      "combination": "gain_g1 @ H.T @ gain_g2",
+      "observation_jacobian": "fixed_system_info_H_not_stored_per_trajectory"
+    },
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "stepwise_colvec",
+    "class_path": "GSSFiltering.filtering.Split_KalmanNet_Filter",
+    "entrypoints": {
+      "filter": "GSSFiltering/filtering.py::Split_KalmanNet_Filter",
+      "network": "GSSFiltering/dnn.py::DNN_SKalmanNet_GSS",
+      "script_train_ref": "(SyntheticNL) main.py",
+      "script_eval_ref": "GSSFiltering/tester.py::Tester"
+    },
+    "assumptions": {
+      "A_input_layout": "repo filtering is step-wise [Dy,1] per time step; adapter converts BTD->stepwise",
+      "B_cli_bias": "repo mains are config.ini/script-centric; bench uses import-mode class reuse",
+      "C_adapt_support": "no principled test-time adaptation exposed for FAIRNESS budgeted track in this adapter"
+    },
+    "how_to_verify": {
+      "A_input_layout": "third_party/Split_KalmanNet/GSSFiltering/filtering.py::Split_KalmanNet_Filter.filtering",
+      "B_cli_bias": "third_party/Split_KalmanNet/(SyntheticNL) main.py and config.ini",
+      "C_adapt_support": "search in third_party/Split_KalmanNet for online update/adapt routines beyond offline Trainer"
+    },
+    "selected_layout": "bench_BTD_to_repo_stepwise_colvec",
+    "selected_class": "GSSFiltering.filtering.Split_KalmanNet_Filter"
+  }
+}

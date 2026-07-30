@@ -1,0 +1,168 @@
+{
+  "artifact_version": "1.1",
+  "created_at": "2026-07-28T05:22:08.753669+09:00",
+  "commit": "3cab581ba4e2558974dc412a425c0ff2e1cb80d4",
+  "worktree_dirty": true,
+  "config_hash": "aa4a4478ba95057bbc4f25e66abd884557aee0ba",
+  "suite": "split_train_smoke",
+  "task": "A_linear_split_train_smoke_v0",
+  "task_family": "linear_gaussian_v0",
+  "scenario_id": "1a547ae6bce5",
+  "scenario": {
+    "display_name": null,
+    "parameters": {}
+  },
+  "model_id": "oracle_kf",
+  "seed": 0,
+  "track_id": "frozen",
+  "init_id": "pretrained",
+  "formulation": "linear_gaussian_v0_formulation",
+  "sanity_benchmark_only": false,
+  "state_spec": {
+    "layout": [
+      {
+        "name": "x",
+        "dim": 2,
+        "unit": "unknown",
+        "kind": "state"
+      }
+    ],
+    "attitude_repr": null,
+    "covariance_space": "mrp",
+    "shadow_set": false,
+    "nominal_attitude_stored": false,
+    "rpy_reference_frame": null
+  },
+  "meas_spec": {
+    "channels": [
+      {
+        "name": "y",
+        "dim": 2,
+        "unit": "unknown",
+        "role": "measurement"
+      }
+    ]
+  },
+  "capabilities": {
+    "covariance": true,
+    "gain": true,
+    "innovation": true,
+    "innovation_cov": true,
+    "context": false,
+    "regime_labels": false,
+    "bias_state": false
+  },
+  "diagnostic_semantics": {},
+  "source_key_map": {},
+  "traj_index": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "data_spec": {
+    "split": "test",
+    "split_source": "explicit",
+    "num_trajectories": 4,
+    "num_stored_trajectories": 4,
+    "trajectory_selection": "deterministic_uniform",
+    "source_trajectory_id_source": "test_split_row_index_fallback",
+    "is_live": false
+  },
+  "trajectories": [
+    {
+      "stored_index": 0,
+      "source_trajectory_id": 0,
+      "source_trajectory_id_source": "test_split_row_index_fallback",
+      "selection_row_index": 0,
+      "file": "series/traj_0000.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 1,
+      "source_trajectory_id": 1,
+      "source_trajectory_id_source": "test_split_row_index_fallback",
+      "selection_row_index": 1,
+      "file": "series/traj_0001.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 2,
+      "source_trajectory_id": 2,
+      "source_trajectory_id_source": "test_split_row_index_fallback",
+      "selection_row_index": 2,
+      "file": "series/traj_0002.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    },
+    {
+      "stored_index": 3,
+      "source_trajectory_id": 3,
+      "source_trajectory_id_source": "test_split_row_index_fallback",
+      "selection_row_index": 3,
+      "file": "series/traj_0003.npz",
+      "length_T": 16,
+      "time_start": 0.0,
+      "time_end": 15.0,
+      "has_event": null,
+      "has_eclipse": null,
+      "run_status": "ok"
+    }
+  ],
+  "dt": null,
+  "time": {
+    "time_source": "sample_index_fallback",
+    "time_unit": "sample_index",
+    "time_warning": "No task timestamp or sampling interval was available; time_s stores sample indices."
+  },
+  "T": 16,
+  "N_test": 4,
+  "run_status": "ok",
+  "d1_error_state_implemented": false,
+  "validation_scope": "v0_contract_structure_only_d1_not_implemented",
+  "adapter_meta": {
+    "adapter_id": "mb_kf",
+    "adapter_version": "s10_kf_baseline_v1",
+    "runtime_device": "cpu",
+    "baseline": "mb_kf",
+    "mode": "oracle",
+    "uses_shift_meta": false,
+    "t0_shift": null,
+    "R_scale": 1.0,
+    "covariance_support": false,
+    "input_layout_bench": "BTD",
+    "internal_layout_repo": "BTD_batched_linear_kf",
+    "capabilities": {
+      "train_supported": false,
+      "eval_supported": true,
+      "adapt_supported": false,
+      "supports_budgeted": false
+    },
+    "assumptions": {
+      "A_linear_system": "F/H are linear system matrices from bench-generated NPZ/system_info.",
+      "B_oracle_shift_info": "oracle_shift mode uses shift meta (t0,R_scale) from D15 meta_json.",
+      "C_metrics_ownership": "official metrics are computed by bench layer only."
+    },
+    "how_to_verify": {
+      "A_linear_system": "bench/tasks/bench_generated.py (save_npz_split_v0 includes F/H/meta_json).",
+      "B_oracle_shift_info": "bench/tasks/bench_generated.py noise_meta['shift']['post_shift']['R_scale'] and t0.",
+      "C_metrics_ownership": "bench/runners/run_suite.py metrics block and adapter eval()/predict() outputs."
+    },
+    "selected_layout": "bench_BTD_to_repo_BTD",
+    "selected_class": "bench.models.mb_kf:ModelBasedKFAdapter"
+  }
+}
