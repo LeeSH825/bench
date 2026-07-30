@@ -67,6 +67,24 @@ from bench.utils.sweep import expand_sweep_grid
 
 logger = get_logger(__name__)
 
+# Control-plane observability. `active_observer()` returns a NullObserver unless a
+# control-plane worker installed one, so every call below is a no-op under the
+# existing CLI and changes no runner behaviour. Phase boundaries are emitted here,
+# at the runner level, so that even an adapter with no internal instrumentation
+# still reports setup/train/test transitions to the dashboard.
+try:
+    from bench.control.events.observer import active_observer  # type: ignore
+except Exception:  # pragma: no cover - control plane is optional
+
+    def active_observer():  # type: ignore[misc]
+        class _Null:
+            def status(self, *args: Any, **kwargs: Any) -> None: ...
+            def metric(self, *args: Any, **kwargs: Any) -> None: ...
+            def log(self, *args: Any, **kwargs: Any) -> None: ...
+            def artifact(self, *args: Any, **kwargs: Any) -> None: ...
+
+        return _Null()
+
 
 # Optional: use existing bench utils if available
 def _try_import_utils():
@@ -1410,16 +1428,21 @@ def _predict_batches(
 
 
 def _try_call_setup(adapter: Any, model_cfg: Dict[str, Any], system_info: Dict[str, Any], run_ctx: Dict[str, Any]) -> None:
+    observer = active_observer()
+    observer.status("PHASE_START", phase="setup", message=f"adapter setup: {type(adapter).__name__}")
     try:
-        adapter.setup(model_cfg, system_info, run_ctx)  # type: ignore
-        return
-    except TypeError:
-        pass
-    try:
-        adapter.setup(model_cfg, system_info)  # type: ignore
-        return
-    except TypeError:
-        adapter.setup(model_cfg)  # type: ignore
+        try:
+            adapter.setup(model_cfg, system_info, run_ctx)  # type: ignore
+            return
+        except TypeError:
+            pass
+        try:
+            adapter.setup(model_cfg, system_info)  # type: ignore
+            return
+        except TypeError:
+            adapter.setup(model_cfg)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="setup")
 
 
 def _try_call_train(
@@ -1429,10 +1452,19 @@ def _try_call_train(
     budget: Dict[str, Any],
     ckpt_dir: Path,
 ) -> Any:
+    observer = active_observer()
+    observer.status(
+        "PHASE_START",
+        phase="train",
+        message=f"adapter train: {type(adapter).__name__} budget={budget.get('train_max_updates')}",
+    )
     try:
-        return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore
-    except TypeError:
-        return adapter.train(train_loader, val_loader)  # type: ignore
+        try:
+            return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore
+        except TypeError:
+            return adapter.train(train_loader, val_loader)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="train")
 
 
 def _try_call_eval(
@@ -1441,19 +1473,24 @@ def _try_call_eval(
     ckpt_path: Optional[Path],
     track_cfg: Dict[str, Any],
 ) -> Any:
-    if ckpt_path is not None:
-        try:
-            return adapter.eval(test_loader, ckpt_path=ckpt_path, track_cfg=track_cfg)  # type: ignore
-        except TypeError:
-            pass
-        try:
-            return adapter.eval(test_loader, str(ckpt_path), track_cfg)  # type: ignore
-        except TypeError:
-            pass
+    observer = active_observer()
+    observer.status("PHASE_START", phase="test", message=f"adapter eval: {type(adapter).__name__}")
     try:
-        return adapter.eval(test_loader, ckpt_path=None, track_cfg=track_cfg)  # type: ignore
-    except TypeError:
-        return adapter.eval(test_loader)  # type: ignore
+        if ckpt_path is not None:
+            try:
+                return adapter.eval(test_loader, ckpt_path=ckpt_path, track_cfg=track_cfg)  # type: ignore
+            except TypeError:
+                pass
+            try:
+                return adapter.eval(test_loader, str(ckpt_path), track_cfg)  # type: ignore
+            except TypeError:
+                pass
+        try:
+            return adapter.eval(test_loader, ckpt_path=None, track_cfg=track_cfg)  # type: ignore
+        except TypeError:
+            return adapter.eval(test_loader)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="test")
 
 
 def _adapter_supports_viz_diagnostics(adapter: Any) -> bool:

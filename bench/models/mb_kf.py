@@ -13,6 +13,23 @@ from bench.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+# Control-plane observability. `active_observer()` returns a NullObserver unless a
+# control-plane worker has installed one, so these calls are no-ops under the
+# existing CLI and add no dependency to it. The fallback keeps the adapter
+# importable if bench.control is unavailable.
+try:
+    from bench.control.events.observer import active_observer  # type: ignore
+except Exception:  # pragma: no cover - control plane is optional
+
+    def active_observer():  # type: ignore[misc]
+        class _Null:
+            def status(self, *args: Any, **kwargs: Any) -> None: ...
+            def metric(self, *args: Any, **kwargs: Any) -> None: ...
+            def log(self, *args: Any, **kwargs: Any) -> None: ...
+            def artifact(self, *args: Any, **kwargs: Any) -> None: ...
+
+        return _Null()
+
 
 try:
     from .base import ModelAdapter  # type: ignore
@@ -382,6 +399,17 @@ class ModelBasedKFAdapter(ModelAdapter):
         # No-op by design (model-based baseline).
         budget = dict(budget or {})
         max_updates = int(budget.get("train_max_updates", 0))
+
+        # Reported explicitly so the dashboard shows "0 updates, by design" rather
+        # than an empty training chart that reads as a failure to instrument.
+        active_observer().status(
+            "PHASE_SKIPPED",
+            phase="train",
+            message=(
+                "Model-based Kalman filter has no learning lifecycle; the train phase "
+                "writes a zero-update state and performs no optimization."
+            ),
+        )
 
         out_ckpt_dir = Path(ckpt_dir).expanduser().resolve() if ckpt_dir is not None else self._ckpt_dir
         if out_ckpt_dir is None:
