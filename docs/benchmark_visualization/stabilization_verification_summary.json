@@ -4,16 +4,20 @@
   "repository": {
     "root": "/home/dss-pc-05/bench",
     "baseline_commit": "d1cc4b035597bb029e0bce95a546b29b4664b5c6",
-    "implementation_commit": "ee862a2",
+    "implementation_commit": "5010c98",
     "implementation_commits": [
       "355b6ca feat(benchmark-viz): add read-only execution control plane",
       "179a42d test(benchmark-viz): stabilize full-suite collection and real-adapter parity",
-      "ee862a2 fix(benchmark-viz): track viz fixtures required by tracked release tests"
+      "ee862a2 fix(benchmark-viz): track viz fixtures required by tracked release tests",
+      "791ab3b docs(benchmark-viz): record reproducible baseline and operator limits",
+      "5010c98 docs(benchmark-viz): record V-008 test-suite write side effects"
     ],
     "branch": "benchmark-viz/stabilize-release-baseline",
     "pushed_to_remote": false,
     "verification_worktree": "/tmp/bench-viz-stabilization-179a42d",
-    "clean_worktree": true
+    "clean_worktree": true,
+    "clean_worktree_note": "no source modification in the verification worktree; a full test run does mutate tracked runs/gpu_models_smoke and reports/summary_*.csv data plus tracked .pyc (pre-existing, V-008)",
+    "verification_worktree_head": "791ab3b (gate run); docs-only commits follow"
   },
   "verdict": "READY_FOR_NEXT_TRANCHE",
   "blockers": {
