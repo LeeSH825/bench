@@ -25,7 +25,8 @@
     "V-004": "CLOSED",
     "V-005": "DOCUMENTED",
     "V-006": "CLOSED",
-    "V-007": "CLOSED"
+    "V-007": "CLOSED",
+    "V-008": "DOCUMENTED"
   },
   "tests": {
     "collected": 449,
@@ -80,16 +81,30 @@
     "playwright_dom": "PASS"
   },
   "e2e_detail": {
-    "normal": {"final_state": "COMPLETED", "exit_code": 0, "events": 27},
-    "ordinary_failure": {"final_state": "FAILED", "exit_code": 40, "traceback_event": true},
+    "normal": {
+      "final_state": "COMPLETED",
+      "exit_code": 0,
+      "events": 27
+    },
+    "ordinary_failure": {
+      "final_state": "FAILED",
+      "exit_code": 40,
+      "traceback_event": true
+    },
     "api_restart": {
       "run_state_after_restart": "RUNNING",
       "worker_state_after_restart": "RUNNING",
       "worker_pid_alive": true,
       "worker_survived_api_shutdown": true,
-      "steps_progressed_while_api_down": [248800, 461650],
+      "steps_progressed_while_api_down": [
+        248800,
+        461650
+      ],
       "run_id_stable": true,
-      "event_cursor": [21325, 657215]
+      "event_cursor": [
+        21325,
+        657215
+      ]
     },
     "sigkill_orphan": {
       "state_before_reconcile": "RUNNING",
@@ -99,7 +114,11 @@
     },
     "browser": {
       "title": "Benchmark Control Plane",
-      "states_rendered": ["COMPLETED", "FAILED", "ORPHANED"],
+      "states_rendered": [
+        "COMPLETED",
+        "FAILED",
+        "ORPHANED"
+      ],
       "read_only_marker": true,
       "action_buttons_exposed": 0
     }
@@ -107,12 +126,29 @@
   "scale": {
     "runs_1000": "MEASURED",
     "runs_10000": "MEASURED",
-    "list_first_page_50_p50_ms": {"runs_1000": 2.85, "runs_10000": 4.76},
-    "list_first_page_50_p95_ms": {"runs_1000": 3.36, "runs_10000": 5.04},
-    "run_detail_p50_ms": {"runs_1000": 1.52, "runs_10000": 1.50},
-    "events_cursor_p50_ms": {"runs_1000": 1.24, "runs_10000": 1.20},
-    "dash_runs_page_load_p50_ms": {"runs_10000": 1079.3},
-    "peak_rss_mb": {"runs_1000": 36.1, "runs_10000": 39.7},
+    "list_first_page_50_p50_ms": {
+      "runs_1000": 2.85,
+      "runs_10000": 4.76
+    },
+    "list_first_page_50_p95_ms": {
+      "runs_1000": 3.36,
+      "runs_10000": 5.04
+    },
+    "run_detail_p50_ms": {
+      "runs_1000": 1.52,
+      "runs_10000": 1.5
+    },
+    "events_cursor_p50_ms": {
+      "runs_1000": 1.24,
+      "runs_10000": 1.2
+    },
+    "dash_runs_page_load_p50_ms": {
+      "runs_10000": 1079.3
+    },
+    "peak_rss_mb": {
+      "runs_1000": 36.1,
+      "runs_10000": 39.7
+    },
     "limit_capped_server_side": 1000,
     "oversized_limit_rejected_http": 422,
     "ui_rows_rendered_at_10000": 50,
@@ -127,7 +163,9 @@
     "default_bind": "127.0.0.1",
     "non_loopback_bind_refused_without_override": true,
     "override_env": "BENCH_CONTROL_ALLOW_PUBLIC_BIND",
-    "http_methods_exposed": ["GET"],
+    "http_methods_exposed": [
+      "GET"
+    ],
     "absolute_paths_returned": true,
     "path_redaction_applied": false,
     "path_redaction_rationale": "would break the response contract consumed by the Dash UI and the legacy deep-link, for no gain under the single-trusted-operator loopback threat model; documented in operator_quickstart.md instead",
@@ -150,11 +188,13 @@
     "note": "an over-broad __pycache__ sweep briefly deleted cpython-39 .pyc files that MAML_KalmanNet tracks upstream; detected in the post-cleanup status check and reverted with 'git checkout -- .' in that submodule"
   },
   "remaining_risks": [
-    "27 untracked test files plus their bench/visualization modules, spike/SNN adapters and ADCS replay work remain uncommitted in the working tree — the same failure mode as V-001",
+    "27 untracked test files plus their bench/visualization modules, spike/SNN adapters and ADCS replay work remain uncommitted in the working tree \u2014 the same failure mode as V-001",
     "adaptive_knet.py and maml_knet.py in the working tree remove preds_test.npz writing with no central replacement; uncommitted, so the baseline is unaffected",
     "test fixtures live under the gitignored runs/ directory via force-add (17,640 files)",
     "parity covers the tiny-budget CPU path only; GPU is deliberately not an exact-parity gate",
-    "/system/health degrades with many concurrent live runs; characterized, not optimized"
+    "/system/health degrades with many concurrent live runs; characterized, not optimized",
+    "V-008: smoke-plan tests write into the repository (runs/gpu_models_smoke, reports/summary_*.csv) and recompile tracked .pyc, so a clean checkout cannot stay clean across a test run; pre-existing, confirmed present in the preflight snapshot",
+    "an early E2E attempt briefly bound port 8791, which one of the user's running dashboards points at; the port was unoccupied at the time, the API was read-only, and it has been stopped"
   ],
   "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_visualization_stabilization/20260730T182502Z"
 }

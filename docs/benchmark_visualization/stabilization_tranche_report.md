@@ -135,7 +135,20 @@ submodules initialized recursively to the four expected commits.
 - `python -m bench.control.cli --help` → OK (subcommands `launch`,
   `launch-synthetic`, `list`, `show`, `import-legacy`, `reconcile`)
 - FastAPI and Dash both start and serve (§13, §14)
-- `git status --short` clean apart from ignored generated files
+- `git status --short` shows no source modification
+
+One qualification on that last point, stated plainly rather than glossed:
+**running the suite mutates tracked files.** After a full run the worktree
+reports ~33 modified tracked `.pyc` files plus modified/deleted tracked data
+under `runs/gpu_models_smoke/**` and `reports/summary_*.csv`. Several smoke-plan
+tests write their output into the repository instead of `tmp_path`.
+
+This is pre-existing, not introduced here: the preflight snapshot taken before
+any change already contained 217 modified `runs/`/`reports/` entries, including
+the very same `reports/summary_gpu_models_smoke.csv` — which is also the main
+reason the working tree was carrying ~850 modified data files to begin with. No
+test added in this tranche writes into the repository. Tracked as **V-008** in
+§19.
 
 The environment is `pyenv` 3.10.13; see `reproducible_release_baseline.md` §5 for
 why bare `python` does not resolve on this machine and what to do about it. That
@@ -482,8 +495,23 @@ is separate from the implementation commits and is not itself committed.
    training. GPU was deliberately not used as an exact-parity gate.
 5. **`/system/health` under many concurrent live runs.** Characterized (§16), not
    optimized.
-6. **The user has a Dash app running on port 8802** against API 8801. Verification
-   was moved to ports 18901+ to avoid disturbing it; it was left running.
+6. **V-008 — the test suite writes into the repository.** Smoke-plan tests mutate
+   tracked data under `runs/gpu_models_smoke/**` and `reports/summary_*.csv`, and
+   recompile tracked `.pyc` files, so a clean checkout cannot stay clean across a
+   test run. Pre-existing (see §6) and the reason the working tree accumulates
+   hundreds of modified data files. It makes "is my tree clean?" useless as a
+   review signal and should be fixed by pointing those tests at `tmp_path`. Not
+   blocking, and deliberately not changed here — it touches unrelated tests that
+   this tranche was told not to reorganize.
+
+7. **Two of the user's Dash apps were running throughout** (ports 8792→API 8791,
+   and 8802→API 8801); both were left running. Disclosure: an early E2E attempt
+   bound port 8791 before verification was moved to the 18901+ range. Port 8791
+   was unoccupied at the time — the user's API for that dashboard was already
+   down — so nothing was displaced, but for a few minutes that dashboard would
+   have rendered the temporary synthetic registry instead of showing
+   "unreachable". The API was read-only, it has been stopped, and no user data
+   was touched.
 
 ## 20. Explicitly Deferred Features
 
