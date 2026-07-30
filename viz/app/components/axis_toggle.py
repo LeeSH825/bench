@@ -4,6 +4,8 @@ from typing import Mapping
 
 import streamlit as st
 
+from viz.app.help_content import HELP_TEXT
+
 
 AXIS_MODE_OPTIONS: Mapping[str, str] = {
     "split": "3-axis split",
@@ -22,5 +24,6 @@ def render_axis_toggle(default: str = "split") -> str:
         index=keys.index(default_key),
         horizontal=True,
         key="axis_mode",
+        help=HELP_TEXT["axis_mode"],
     )
     return keys[labels.index(selected)]

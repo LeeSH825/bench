@@ -10,6 +10,7 @@ import streamlit as st
 
 from viz.app.components.axis_toggle import AXIS_MODE_OPTIONS, render_axis_toggle
 from viz.app.components.comparison_picker import comparison_candidates
+from viz.app.components.help_guide import render_help_popover
 from viz.app.components.model_toggle_picker import (
     model_context_key,
     reconcile_selection,
@@ -18,6 +19,7 @@ from viz.app.components.model_toggle_picker import (
 )
 from viz.app.components.overlay_picker import discover_run_index, render_run_picker
 from viz.app.components.regime_strip import render_regime_strip
+from viz.app.help_content import HELP_TEXT
 from viz.analysis import comparison
 from viz.figures import panels
 from viz.io.loader import TrajectoryInfo, VizRun, load_run
@@ -131,6 +133,7 @@ def _render_window_control(n_steps: int) -> Dict[str, Any]:
         index=keys.index(default),
         horizontal=True,
         key="transient_window",
+        help=HELP_TEXT["transient_window"],
     )
     mode = keys[labels.index(selected)]
     start_idx = _window_start_for_mode(mode, n_steps)
@@ -263,7 +266,8 @@ def _render_data_source(run: VizRun) -> None:
 def _render_dataset_summary(summary: Mapping[str, str], primary_model_id: str) -> None:
     st.subheader(
         f"Dataset Summary · {primary_model_id} · {summary.get('data_split', 'unknown').title()} · "
-        f"N={summary.get('num_trajectories', '0')} trajectories"
+        f"N={summary.get('num_trajectories', '0')} trajectories",
+        help=HELP_TEXT["dataset_summary"],
     )
     st.caption(
         "Reflects the primary navigation model only — unaffected by the Models to display toggles above."
@@ -352,7 +356,7 @@ def _render_summary(summary: Mapping[str, str]) -> None:
 
 def _render_trajectory_header(info: TrajectoryInfo) -> None:
     source = "Unknown (legacy artifact)" if info.source_trajectory_id is None else str(info.source_trajectory_id)
-    st.subheader(f"Selected Trajectory · Source ID {source}")
+    st.subheader(f"Selected Trajectory · Source ID {source}", help=HELP_TEXT["selected_trajectory"])
     _render_metric_cards(
         {
             "Stored index": info.stored_index,
@@ -453,9 +457,17 @@ def _render_gain_display_control(
         index=0,
         key="gain_source",
         format_func=lambda key: labels[key],
+        help=HELP_TEXT["gain_source"],
     )
     display_labels = ["Frobenius norm", "Matrix element"]
-    selected = st.radio("Gain display", display_labels, index=0, horizontal=True, key="gain_display")
+    selected = st.radio(
+        "Gain display",
+        display_labels,
+        index=0,
+        horizontal=True,
+        key="gain_display",
+        help=HELP_TEXT["gain_display"],
+    )
     if selected != "Matrix element":
         return {"gain_key": gain_key, "mode": "frobenius"}
     if gain_key not in traj:
@@ -474,8 +486,12 @@ def _render_gain_display_control(
     )
     st.session_state["gain_row"] = current_row
     st.session_state["gain_col"] = current_col
-    row = st.number_input("Gain row", min_value=0, max_value=max(0, n_rows - 1), step=1, key="gain_row")
-    col = st.number_input("Gain col", min_value=0, max_value=max(0, n_cols - 1), step=1, key="gain_col")
+    row = st.number_input(
+        "Gain row", min_value=0, max_value=max(0, n_rows - 1), step=1, key="gain_row", help=HELP_TEXT["gain_row_col"]
+    )
+    col = st.number_input(
+        "Gain col", min_value=0, max_value=max(0, n_cols - 1), step=1, key="gain_col", help=HELP_TEXT["gain_row_col"]
+    )
     return {"gain_key": gain_key, "mode": "element", "row": int(row), "col": int(col)}
 
 
@@ -545,7 +561,7 @@ def _global_panel_model_toggles(
         previous=previous,
     )
 
-    st.markdown("**Models to display**")
+    st.markdown("**Models to display**", help=HELP_TEXT["models_to_display"])
     st.caption(
         "Candidates are limited to the current suite/task/scenario/split/seed/track "
         "context (same evaluation data and protocol). Initialization and training "
@@ -597,10 +613,11 @@ def _global_panel_model_toggles(
         for offset, (column, candidate) in enumerate(zip(row_columns, row)):
             index = row_start + offset
             run_dir = candidate.run_dir
+            is_primary = run_dir == str(run.run_dir)
             key = keys[index]
-            label = candidate.label + (" · primary" if run_dir == str(run.run_dir) else "")
+            label = candidate.label + (" · primary" if is_primary else "")
             checkbox_kwargs: Dict[str, Any] = {
-                "help": "Candidate discovered from the selected Source ID; NPZ is loaded only when selected.",
+                "help": HELP_TEXT["model_checkbox_primary"] if is_primary else HELP_TEXT["model_checkbox"],
                 "key": key,
                 "on_change": _keep_at_least_one_selected,
                 "args": (key,),
@@ -647,6 +664,9 @@ def _render_provenance_notice(
             "not as identical training conditions."
         )
     with st.expander("Run provenance", expanded=False):
+        # st.expander has no `help=` parameter, so the tooltip is attached to
+        # this caption instead — it is the first thing shown once expanded.
+        st.caption("What is this?", help=HELP_TEXT["provenance"])
         header = "| Run | Model | init_id | track | seed | checkpoint |"
         separator = "|---|---|---|---|---|---|"
         rows = [header, separator]
@@ -782,6 +802,15 @@ def _plot_panel_with_model_toggles(
         "consistency": "E. NEES / NIS + chi-square",
         "gain": "F. Gain",
     }
+    panel_help_keys = {
+        "attitude_rpy": "attitude_rpy",
+        "attitude_error": "attitude_error",
+        "bias": "bias",
+        "innovation": "innovation",
+        "consistency": "nees_nis",
+        "gain": "kalman_gain",
+    }
+    st.subheader(model_titles[panel_id], help=HELP_TEXT[panel_help_keys[panel_id]])
     overlays, exclusions = _panel_overlay_bundles(
         panel_id=panel_id,
         run=run,
@@ -881,7 +910,8 @@ def _render_advanced_compatibility_diagnostics(
         "Physical Outputs compares canonical physical quantities across compatible formulations. "
         "Strict Internals retains state, measurement, residual, source, and time semantics guards. "
         "Full per-model reasons are shown under each A-F panel above; this section only "
-        "summarizes availability so it does not repeat that text."
+        "summarizes availability so it does not repeat that text.",
+        help=HELP_TEXT["advanced_diagnostics"],
     )
 
     rmse_models: list[tuple[str, VizRun]] = [(variant_label(run.meta), run)]
@@ -944,7 +974,11 @@ def _render_advanced_compatibility_diagnostics(
 
 
 def render_run_inspector(runs_root: str | Path = "runs") -> None:
-    st.title("Run Inspector")
+    title_column, help_column = st.columns([0.82, 0.18])
+    with title_column:
+        st.title("Run Inspector")
+    with help_column:
+        render_help_popover()
     # Scanned exactly once per rerun and threaded down to every consumer
     # below (the picker, the model toggle, all six A-F panels, and the
     # Advanced compatibility diagnostics section) — see VIZ-R1.3.2. Before
@@ -984,6 +1018,7 @@ def render_run_inspector(runs_root: str | Path = "runs") -> None:
         index=trajectory_options.index(default_option),
         format_func=trajectory_option_label,
         key=f"trajectory_view_{abs(hash(str(run.run_dir)))}",
+        help=HELP_TEXT["trajectory_view"],
     )
     st.session_state["viz_selected_run_dir"] = str(run.run_dir)
     st.session_state["viz_selected_aggregate"] = selected_info is None
@@ -1060,6 +1095,7 @@ def render_run_inspector(runs_root: str | Path = "runs") -> None:
                 overlay_cache=overlay_cache,
                 selected_model_dirs=selected_model_dirs,
             )
+        st.subheader("Regime Timeline", help=HELP_TEXT["regime_timeline"])
         render_regime_strip(run.meta, bundle["traj"])
     with right:
         st.markdown("**Selected-trajectory metrics**")

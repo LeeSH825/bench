@@ -6,6 +6,7 @@ from typing import Any, Iterable, Mapping, Optional, Sequence
 
 import streamlit as st
 
+from viz.app.help_content import HELP_TEXT
 from viz.io.loader import VizRun, load_run
 
 
@@ -101,6 +102,7 @@ def _select_filter(
     preferred: Any,
     key: str,
     format_func: Any = None,
+    help: Optional[str] = None,
 ) -> tuple[Any, list[VizRun]]:
     values = sorted({_run_field(run, field) for run in candidates}, key=lambda value: str(value))
     if not values:
@@ -115,6 +117,8 @@ def _select_filter(
     }
     if format_func is not None:
         selectbox_options["format_func"] = format_func
+    if help is not None:
+        selectbox_options["help"] = help
     value = st.selectbox(label, values, **selectbox_options)
     return value, filter_run_index(candidates, {field: value})
 
@@ -163,14 +167,25 @@ def render_run_picker(
             format_func=lambda value: (
                 "Unknown (legacy artifact)" if value == "unknown" else str(value).title()
             ),
+            help=HELP_TEXT["data_split"],
         )
     with nav_columns[1]:
         _, candidates = _select_filter(
-            label="Suite", field="suite", candidates=candidates, preferred=preferred["suite"], key="nav_suite"
+            label="Suite",
+            field="suite",
+            candidates=candidates,
+            preferred=preferred["suite"],
+            key="nav_suite",
+            help=HELP_TEXT["suite"],
         )
     with nav_columns[2]:
         _, candidates = _select_filter(
-            label="Task", field="task", candidates=candidates, preferred=preferred["task"], key="nav_task"
+            label="Task",
+            field="task",
+            candidates=candidates,
+            preferred=preferred["task"],
+            key="nav_task",
+            help=HELP_TEXT["task"],
         )
     scenario_runs = {run.meta.get("scenario_id"): run for run in candidates}
     with nav_columns[3]:
@@ -181,19 +196,35 @@ def render_run_picker(
             preferred=preferred["scenario_id"],
             key="nav_scenario",
             format_func=lambda value: scenario_label(scenario_runs[value]),
+            help=HELP_TEXT["scenario"],
         )
     detail_columns = st.columns(4)
     with detail_columns[0]:
         _, candidates = _select_filter(
-            label="Model", field="model_id", candidates=candidates, preferred=preferred["model_id"], key="nav_model"
+            label="Model",
+            field="model_id",
+            candidates=candidates,
+            preferred=preferred["model_id"],
+            key="nav_model",
+            help=HELP_TEXT["model"],
         )
     with detail_columns[1]:
         _, candidates = _select_filter(
-            label="Seed", field="seed", candidates=candidates, preferred=preferred["seed"], key="nav_seed"
+            label="Seed",
+            field="seed",
+            candidates=candidates,
+            preferred=preferred["seed"],
+            key="nav_seed",
+            help=HELP_TEXT["seed"],
         )
     with detail_columns[2]:
         _, candidates = _select_filter(
-            label="Track", field="track_id", candidates=candidates, preferred=preferred["track_id"], key="nav_track"
+            label="Track",
+            field="track_id",
+            candidates=candidates,
+            preferred=preferred["track_id"],
+            key="nav_track",
+            help=HELP_TEXT["track"],
         )
     with detail_columns[3]:
         _, candidates = _select_filter(
@@ -202,6 +233,7 @@ def render_run_picker(
             candidates=candidates,
             preferred=preferred["init_id"],
             key="nav_init",
+            help=HELP_TEXT["init_checkpoint"],
         )
     if len(candidates) > 1:
         preferred_run = target if target in candidates else candidates[0]

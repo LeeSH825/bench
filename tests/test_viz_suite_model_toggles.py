@@ -225,7 +225,11 @@ class SuiteModelToggleAppIntegrationTest(unittest.TestCase):
         self._run(at)
         order = self._document_order(at)
         trajectory_view_idx = next(i for i, (t, v) in enumerate(order) if t == "selectbox" and "TrajectoryInfo" in v)
-        models_idx = next(i for i, (t, v) in enumerate(order) if t == "markdown" and "Models to display" in v)
+        # Exact match, not substring: the Help & guide popover's own content
+        # (rendered right after the title) also mentions "Models to display"
+        # in prose, so a substring match could find that instead of the
+        # real "**Models to display**" heading further down the page.
+        models_idx = next(i for i, (t, v) in enumerate(order) if t == "markdown" and v == "**Models to display**")
         dataset_summary_idx = next(i for i, (t, v) in enumerate(order) if t == "subheader" and "Dataset Summary" in v)
         selected_trajectory_idx = next(i for i, (t, v) in enumerate(order) if t == "subheader" and "Selected Trajectory" in v)
         diagnostics_idx = next(i for i, (t, v) in enumerate(order) if t == "expander")
@@ -234,7 +238,7 @@ class SuiteModelToggleAppIntegrationTest(unittest.TestCase):
         self.assertLess(dataset_summary_idx, selected_trajectory_idx)
         self.assertLess(selected_trajectory_idx, diagnostics_idx)
         # Rendered exactly once — no duplicate "Models to display" block.
-        models_blocks = [i for i, (t, v) in enumerate(order) if t == "markdown" and "Models to display" in v]
+        models_blocks = [i for i, (t, v) in enumerate(order) if t == "markdown" and v == "**Models to display**"]
         self.assertEqual(len(models_blocks), 1)
 
     def test_default_selection_is_primary_only_and_others_are_not_loaded(self) -> None:
