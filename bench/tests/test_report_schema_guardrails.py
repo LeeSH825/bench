@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from .test_plan_matrix_minimal import run_plan_matrix_minimal
+from bench.tests.test_plan_matrix_minimal import run_plan_matrix_minimal
 
 
 @dataclass
