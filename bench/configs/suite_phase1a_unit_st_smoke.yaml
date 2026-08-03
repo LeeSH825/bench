@@ -1,0 +1,140 @@
+suite:
+  name: phase1a_unit_st_smoke
+  version: "1.0.0"
+  description: >
+    Representative Tier-0 CPU smoke for the Phase 1A typed-event MEKF replay
+    integration. These parameters are not flight-grade.
+
+seeds: [6101, 6102, 6103]
+
+tasks:
+  - task_id: unit_st_synthetic_tier0
+    task_name: "Analytic synthetic UNIT-ST Tier-0"
+    task_family: mekf_unit_st_v1
+    metadata:
+      validation_tier: representative_tier_0_smoke
+      flight_grade: false
+      units: SI
+    typed_event_dataset:
+      producer_id: synthetic-unit-st-v1
+      cache_namespace: p1a-cp4-unit-st-v1
+      generator_config:
+        num_trajectories: 3
+        duration_s: 0.2
+        gyro_rate_hz: 20
+        star_tracker_rate_hz: 5
+        initial_attitude_max_rad: 0.15
+        angular_rate_max_rad_s: 0.1
+        gyro_bias_max_rad_s: 0.005
+        gyro_noise_std_rad_s: 0.0005
+        star_tracker_noise_std_rad: 0.001
+        star_tracker_R_diagonal_rad2: [0.000001, 0.000001, 0.000001]
+        randomize_star_tracker_sign: true
+        train_fraction: 0.6
+        val_fraction: 0.2
+        test_fraction: 0.2
+    mekf_replay:
+      initial_time_s: 0.0
+      initial_state:
+        q_NB: [1.0, 0.0, 0.0, 0.0]
+        b_g_rad_s: [0.0, 0.0, 0.0]
+        P_diagonal: [0.001, 0.001, 0.001, 0.0001, 0.0001, 0.0001]
+      process_noise:
+        Q_c_diagonal: [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-12, 1.0e-12, 1.0e-12]
+      evaluation_split: test
+      metric_confidence_level: 0.95
+    sweep: {}
+
+  - task_id: unit_st_basilisk_tier0
+    task_name: "Basilisk UNIT-ST Tier-0"
+    task_family: mekf_unit_st_v1
+    metadata:
+      validation_tier: representative_tier_0_smoke
+      flight_grade: false
+      units: SI
+      truth_source: Basilisk spherical-inertia zero-torque rigid hub
+      sensor_source: project-owned parameterized gyro/quaternion-star-tracker layer
+    typed_event_dataset:
+      producer_id: basilisk-unit-st-v1
+      cache_namespace: p1a-cp4-unit-st-v1
+      generator_config:
+        num_trajectories: 3
+        duration_s: 0.2
+        gyro_rate_hz: 20
+        star_tracker_rate_hz: 5
+        initial_attitude_max_rad: 0.15
+        angular_rate_max_rad_s: 0.1
+        gyro_bias_max_rad_s: 0.005
+        gyro_noise_std_rad_s: 0.0005
+        star_tracker_R_rad2:
+          - [0.000001, 0.0, 0.0]
+          - [0.0, 0.000001, 0.0]
+          - [0.0, 0.0, 0.000001]
+        star_tracker_noise_scale: 1.0
+        randomize_star_tracker_sign: true
+        representative_mass_kg: 10.0
+        representative_spherical_inertia_kg_m2: 7.0
+        train_fraction: 0.6
+        val_fraction: 0.2
+        test_fraction: 0.2
+    mekf_replay:
+      initial_time_s: 0.0
+      initial_state:
+        q_NB: [1.0, 0.0, 0.0, 0.0]
+        b_g_rad_s: [0.0, 0.0, 0.0]
+        P_diagonal: [0.001, 0.001, 0.001, 0.0001, 0.0001, 0.0001]
+      process_noise:
+        Q_c_diagonal: [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-12, 1.0e-12, 1.0e-12]
+      evaluation_split: test
+      metric_confidence_level: 0.95
+    sweep: {}
+
+models:
+  - model_id: mekf_event_replay_v1
+    display_name: "Deterministic typed-event MEKF replay"
+    registry_kind: typed_event_bridge
+    supports_training: false
+    supports_adaptation: false
+    estimator_input: typed_gyro_star_tracker_events
+
+runner:
+  device: cpu
+  precision: fp32
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  typed_event_cache:
+    root_environment: BENCH_DATA_CACHE
+    default_root: bench_data_cache
+    strict_expected_generator_id: true
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  contract: p1a-canonical-mekf-metrics-v1
+  list:
+    - attitude_geodesic_rmse_rad
+    - attitude_geodesic_rmse_deg
+    - attitude_geodesic_p95
+    - attitude_geodesic_max
+    - bias_rmse
+    - nis
+    - nees
+    - spd_consistency
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    root: "runs/{suite.name}"
+    required:
+      - config_snapshot.yaml
+      - run_plan.json
+      - budget_ledger.json
+      - metrics.json
+      - artifacts/mekf_replay/manifest.json
+      - artifacts/mekf_replay/trajectory_<id>.npz
+  tables:
+    summary_csv: reports/summary_phase1a_unit_st_smoke.csv
