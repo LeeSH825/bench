@@ -1,0 +1,196 @@
+suite:
+  name: basilisk_spike_split_pilot_cuda
+  version: "0.1.0"
+  description: >
+    CUDA abstract pilot comparing Split-KalmanNet, G2-SNN Spike-Split
+    KalmanNet, and the G1-SNN insertion ablation on nominal and
+    measurement-event Basilisk IMU ADCS data.
+
+seeds: [0]
+
+tasks:
+  - task_id: Basilisk_IMU_ADCS_nominal_spike_split_pilot_cuda_v0
+    task_name: "Basilisk IMU ADCS Nominal Spike-Split CUDA Pilot"
+    task_family: basilisk_imu_adcs_v0
+    system_type: nonlinear
+    x_dim: 6
+    y_dim: 6
+    sequence_length_T: 200
+    dataset_sizes: {N_train: 100, N_val: 20, N_test: 20}
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: {type: "scaled_identity", q2: 1.0e-8}
+    observation:
+      type: basilisk_imu_sensor
+      h_type: imu_sensor_packet
+      measurement_mode: gyro_delta_angle
+    imu:
+      measurement_mode: gyro_delta_angle
+      gyro_noise_std: 2.0e-4
+      accel_noise_std: 0.0
+      gyro_bias_std: 0.0
+      accel_bias_std: 0.0
+      sensor_pos_B: [0.0, 0.0, 0.0]
+      body_to_platform_euler321_rad: [0.0, 0.0, 0.0]
+    event_disturbance:
+      enabled: false
+    control_input_u: false
+    ground_truth: {has_gt: true}
+    sweep: {}
+
+  - task_id: Basilisk_IMU_ADCS_event_spike_split_pilot_cuda_v0
+    task_name: "Basilisk IMU ADCS Measurement Event Spike-Split CUDA Pilot"
+    task_family: basilisk_imu_adcs_v0
+    system_type: nonlinear
+    x_dim: 6
+    y_dim: 6
+    sequence_length_T: 200
+    dataset_sizes: {N_train: 100, N_val: 20, N_test: 20}
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: {type: "scaled_identity", q2: 1.0e-8}
+    observation:
+      type: basilisk_imu_sensor
+      h_type: imu_sensor_packet
+      measurement_mode: gyro_delta_angle
+    imu:
+      measurement_mode: gyro_delta_angle
+      gyro_noise_std: 2.0e-4
+      accel_noise_std: 0.0
+      gyro_bias_std: 0.0
+      accel_bias_std: 0.0
+      sensor_pos_B: [0.0, 0.0, 0.0]
+      body_to_platform_euler321_rad: [0.0, 0.0, 0.0]
+    event_disturbance:
+      enabled: true
+      event_start_frac: 0.45
+      event_duration_frac: 0.10
+      gyro_noise_scale_event: 10.0
+      gyro_bias_jump_std: 0.01
+      event_type: measurement_gyro_bias_jump
+    control_input_u: false
+    ground_truth: {has_gt: true}
+    sweep: {}
+
+models:
+  - model_id: split_knet
+    display_name: "Split-KalmanNet"
+    adapter: "bench.models.split_knet:SplitKNetAdapter"
+    repo: {path: "third_party/Split_KalmanNet"}
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 10
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 50
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    gradient_clip_norm: 10.0
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: spike_split_knet
+    display_name: "Spike-Split KalmanNet (G2-SNN)"
+    adapter: "bench.models.spike_split_knet:SpikeSplitKNetAdapter"
+    repo: {path: "third_party/Split_KalmanNet"}
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 10
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 50
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    gradient_clip_norm: 10.0
+    snn_enabled: true
+    snn_target: g2
+    snn_hidden_dim: 32
+    lif_beta: 0.9
+    lif_threshold: 1.0
+    surrogate_alpha: 10.0
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+  - model_id: g1_snn_split_knet
+    display_name: "G1-SNN Split-KalmanNet Ablation"
+    adapter: "bench.models.g1_snn_split_knet:G1SNNSplitKNetAdapter"
+    repo: {path: "third_party/Split_KalmanNet"}
+    estimator_class_path: "GSSFiltering.filtering.Split_KalmanNet_Filter"
+    input_layout: "BTD"
+    batch_size: 10
+    lr: 1.0e-3
+    weight_decay: 0.0
+    val_eval_interval_updates: 50
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    gradient_clip_norm: 10.0
+    snn_enabled: true
+    snn_target: g1
+    snn_hidden_dim: 32
+    lif_beta: 0.9
+    lif_threshold: 1.0
+    surrogate_alpha: 10.0
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cuda"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/basilisk_spike_split_pilot_cuda"
+  budget:
+    train_max_updates: 500
+    train_batch_size: 10
+    eval_batch_size: 20
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 0
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    enabled: false
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+  tables:
+    summary_csv: "reports/summary_basilisk_spike_split_pilot_cuda.csv"
