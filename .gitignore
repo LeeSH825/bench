@@ -7,6 +7,15 @@ bench_data_cache/
 # Benchmark, training, and reporting outputs.
 runs/
 reports/
+
+# Canonical Phase 0-1 research reports are version-controlled evidence.
+!experiments/phase1a/reports/
+!experiments/phase1a/reports/*.md
+!experiments/phase1b/reports/
+!experiments/phase1b/reports/*.md
+!experiments/research_index/reports/
+!experiments/research_index/reports/*.md
+
 plots/
 logs/
 *.log
@@ -66,6 +75,22 @@ env/
 *.pth
 *.ckpt
 *.onnx
+
+# Reproducible research payload trees; keep top-level final summary JSON visible.
+experiments/**/results/**/records/
+experiments/**/results/**/trajectories/
+experiments/**/results/**/candidates/
+experiments/**/results/**/debug/
+experiments/**/results/**/pilot_manifest.json
+experiments/**/results/**/search/search_manifest.json
+experiments/**/manifests/
+
+# Large preflight and agent runtime captures.
+experiments/**/preflight_snapshots/**/*.patch
+experiments/**/preflight_snapshots/**/*.z
+experiments/**/preflight_snapshots/**/*.zlist
+experiments/**/preflight_snapshots/**/*.tar.gz
+experiments/**/agent_logs/**/*.patch
 
 # OS/editor noise.
 .DS_Store

@@ -1,0 +1,80 @@
+experiment_version: p1b-unit-st-classical-v1
+scope: representative-normalized-UNIT-ST-only
+
+unit_st:
+  truth_source: basilisk
+  num_trajectories: 15
+  duration_s: 10.0
+  gyro_rate_hz: 10
+  star_tracker_rate_hz: 2
+  master_seed: 20260802
+  initial_attitude_max_rad: 0.5
+  angular_rate_max_rad_s: 0.12
+  gyro_bias_max_rad_s: 0.004
+  gyro_noise_std_rad_s: 0.0005
+  star_tracker_R_rad2:
+    - [0.00000225, 0.0, 0.0]
+    - [0.0, 0.00000225, 0.0]
+    - [0.0, 0.0, 0.00000225]
+  randomize_star_tracker_sign: true
+  regime_code: 1
+  event_covariance_multiplier: 1.0
+  event_start_fraction: 0.4
+  event_end_fraction: 0.6
+  train_fraction: 0.6
+  val_fraction: 0.2
+  test_fraction: 0.2
+
+filter:
+  bias_psd: 0.000000000001
+
+debug:
+  num_trajectories: 4
+  duration_s: 4.0
+
+tuning:
+  num_trajectories: 15
+  duration_s: 6.0
+  master_seed: 20260812
+  candidate_scales: [0.25, 0.5, 1.0, 2.0, 4.0]
+  staged_budget: 42
+
+regimes:
+  mild_alpha: 2.0
+  medium_alpha: 4.0
+  severe_alpha: 8.0
+
+c5:
+  A: C2-GYRO-MEDIUM
+  candidate_alpha_R: [1.0, 1.01, 1.02, 1.04, 1.08, 1.16, 1.32, 2.0, 4.0]
+  rms_match_tolerance_fraction: 0.05
+
+pilot:
+  generated_trajectories: 84
+  required_test_trajectories_per_condition: 50
+  duration_s: 10.0
+  master_seed: 20260822
+  train_fraction: 0.2
+  val_fraction: 0.2
+  test_fraction: 0.6
+
+long_horizon:
+  num_trajectories: 10
+  duration_s: 600.0
+  gyro_rate_hz: 5
+  star_tracker_rate_hz: 1
+  master_seed: 20260832
+
+metrics:
+  recovery_absolute_floor_rad: 0.001
+  recovery_multiplier: 1.2
+  recovery_sustained_samples: 3
+  divergence_threshold_rad: 0.5
+
+statistics:
+  bootstrap_resamples: 2000
+  bootstrap_seed: 20260842
+
+paths:
+  results_root: experiments/phase1b/results/unit_st_classical_v1
+  manifests_root: experiments/phase1b/manifests/unit_st_classical_v1

@@ -1,6 +1,6 @@
 # Phase 0A 파일 Manifest 및 QA Report
 
-> 작성일: 2026-07-30  
+> 작성일: 2026-07-30
 > 목적: 요구 산출물 존재, 공통 header, Decision status, Markdown fence, 핵심 수학 reference test와 파일 hash를 확인한다.
 
 ## QA summary

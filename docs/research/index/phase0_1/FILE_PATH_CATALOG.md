@@ -126,7 +126,7 @@ tests/test_mekf_runner_integration.py
 | report | `experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md` | C4 oracle/wrong-side |
 | report | `experiments/phase1b/reports/P1B_STEP2_VALIDATION_REPORT.md` | tests/commands/integrity |
 | manifest root | `experiments/phase1b/manifests/sensor_fusion_c4_v1/` | scenario sensor/oracle artifacts |
-| command log | `experiments/phase1b/agent_logs/02_20260802T020512Z_COMMAND_LOG.md` | Step 2 execution commands |
+| command evidence | `experiments/phase1b/reports/P1B_STEP2_VALIDATION_REPORT.md` | Step 2 execution and regression summary |
 
 ## P1 Exit original review and covariance closure
 
@@ -138,7 +138,7 @@ tests/test_mekf_runner_integration.py
 | config | `bench/configs/suite_p1_exit_covariance_closure.yaml` | allowed scales and acceptance |
 | tests | `tests/test_p1_exit_covariance_closure.py` | 17 closure tests |
 | diagnosis | `experiments/phase1b/results/p1_exit_covariance_closure_v1/diagnosis.json` | independent split, marginals, whitened/cross diagnostics |
-| search | `experiments/phase1b/results/p1_exit_covariance_closure_v1/search/search_manifest.json` | candidate selection/freeze evidence |
+| frozen selection | `experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json` | bounded selected-candidate, freeze-hash, scale, and search-manifest-hash evidence |
 | confirmation | `experiments/phase1b/results/p1_exit_covariance_closure_v1/confirmation/confirmation_summary.json` | stationary/C4 N=50 independent confirmation |
 | machine review | `experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json` | current exact values and decision |
 | regression | `experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json` | final suite command outcomes |
@@ -147,14 +147,14 @@ tests/test_mekf_runner_integration.py
 | validation report | `experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md` | independent stationary/C4 acceptance |
 | current review | `experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md` | current canonical `CONDITIONAL_GO` |
 | manifest root | `experiments/phase1b/manifests/p1_exit_covariance_closure_v1/` | independent train/confirmation sensor/oracle artifacts |
-| command log | `experiments/phase1b/agent_logs/03_20260802T032016Z_COMMAND_LOG.md` | closure commands |
+| command evidence | `experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md` | closure execution, regression, and integrity summary |
 
 ## Provenance and this index
 
 | 경로 | 역할 |
 |---|---|
-| `experiments/phase1b/preflight_snapshots/03_20260802T032016Z/FINAL_INTEGRITY.md` | closure dirty-tree integrity |
-| `experiments/research_index/preflight_snapshots/01_20260802T_currentZ/` | indexing entry status/patch/hash/runtime snapshot |
+| `experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json` | bounded closure frozen-integrity summary |
+| `experiments/research_index/reports/PHASE0_1_REPOSITORY_INDEX_VALIDATION_REPORT.md` | audited indexing entry/final integrity summary |
 | `docs/research/index/phase0_1/phase0_1_evidence_index.json` | machine canonical index |
 | `tools/research/validate_phase0_1_evidence_index.py` | stdlib-only validator |
 | `tests/test_phase0_1_evidence_index.py` | index regression and 20 lookup self-tests |

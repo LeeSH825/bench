@@ -178,4 +178,3 @@ Nonzero latency, outages, false solutions, magnetometer, sun sensor,
 orbit/environment truth, canonical metrics, runner/registry integration,
 visualization, and neural models are outside Gate B2. No Gate C implementation
 is authorized by this contract.
-
