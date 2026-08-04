@@ -1,0 +1,2541 @@
+{
+  "current_phase_status": {
+    "decision": "CONDITIONAL_GO",
+    "phase": "Phase 1 exit",
+    "phase2_authorized": false,
+    "phase2_design_review_status": "requires_explicit_user_request",
+    "phase2_implementation_status": "not_started_not_authorized",
+    "reason": "Stationary covariance closure passed, but the independent C4 confirmation remains outside the declared accuracy and sensor-NIS acceptance envelope.",
+    "source": {
+      "locator": "Decision and ## 8. Updated P1 Exit decision",
+      "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md"
+    }
+  },
+  "decisions": [
+    {
+      "decision": "Estimator quality is primary; closed-loop is final validation",
+      "domain": "P0",
+      "id": "D-P0-ESTIMATOR-FIRST",
+      "source": {
+        "locator": "Decision Table row D01",
+        "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "Kinematic right-error MEKF with active scalar-first q_NB",
+      "domain": "P0",
+      "id": "D-P0-MEKF-CONVENTION",
+      "source": {
+        "locator": "Decision Table rows D03-D08",
+        "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "Truth/oracle remain outside deployable estimator inputs",
+      "domain": "P0",
+      "id": "D-P0-BOUNDARY",
+      "source": {
+        "locator": "## 4 and ## 5",
+        "path": "docs/research/phase0a/decision_lock/P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "GO",
+      "domain": "P1A_GATE_A",
+      "id": "D-P1A-GATE-A",
+      "source": {
+        "locator": "## 1. Final decision",
+        "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "GO after Amendment A1",
+      "domain": "P1A_GATE_B1",
+      "id": "D-P1A-GATE-B1",
+      "source": {
+        "locator": "Final decision",
+        "path": "experiments/phase1a/reports/P1A_GATE_B1_AMENDMENT_A1_REPORT.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "q_NB wording corrected to active body-to-navigation without code/schema/hash migration",
+      "domain": "P1A_GATE_B1",
+      "id": "D-P1A-QNB-ERRATUM",
+      "source": {
+        "locator": "Gate B2 convention erratum",
+        "path": "docs/research/phase1a/P1A_EVENT_SCHEMA_CONTRACT.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "GO",
+      "domain": "P1A_GATE_B2",
+      "id": "D-P1A-GATE-B2",
+      "source": {
+        "locator": "Final decision",
+        "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "GO",
+      "domain": "P1A_GATE_C",
+      "id": "D-P1A-GATE-C",
+      "source": {
+        "locator": "Final decision",
+        "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "GO",
+      "domain": "P1A_CP4",
+      "id": "D-P1A-CP4",
+      "source": {
+        "locator": "Final decision",
+        "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "PASS_P1B_STEP1_UNIT_ST_CLASSICAL; F-BASE primary and F-TUNED sensitivity-only",
+      "domain": "P1B_STEP1",
+      "id": "D-P1B-STEP1",
+      "source": {
+        "locator": "## 1 and ## 2",
+        "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "PASS_P1B_STEP2_SENSOR_FUSION_C4",
+      "domain": "P1B_STEP2",
+      "id": "D-P1B-STEP2",
+      "source": {
+        "locator": "Header and ## 1",
+        "path": "docs/research/phase1b/P1_EXIT_CONDITIONAL_GO_AND_CLOSURE_HANDOFF.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "CONDITIONAL_GO pending covariance closure",
+      "domain": "P1_EXIT",
+      "id": "D-P1-EXIT-ORIGINAL",
+      "source": {
+        "locator": "## 7. P1 Exit decision",
+        "path": "experiments/phase1b/reports/P1_EXIT_REVIEW.md"
+      },
+      "status": "historical",
+      "supersedes": null
+    },
+    {
+      "decision": "Freeze F-CALIBRATED-v1 at P0_att=2, P0_bias=4, Qg=2, Qb=8 with sensor R unchanged",
+      "domain": "P1_EXIT_CLOSURE",
+      "id": "D-P1-FCAL-FREEZE",
+      "source": {
+        "locator": "Frozen candidate",
+        "path": "experiments/phase1b/reports/P1_EXIT_COVARIANCE_CALIBRATION_REPORT.md"
+      },
+      "status": "current",
+      "supersedes": null
+    },
+    {
+      "decision": "CONDITIONAL_GO",
+      "domain": "P1_EXIT",
+      "id": "D-P1-EXIT-UPDATED",
+      "rationale": "Stationary closure passed but C4 closure failed.",
+      "source": {
+        "locator": "Decision and ## 8. Updated P1 Exit decision",
+        "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md"
+      },
+      "status": "current",
+      "supersedes": "D-P1-EXIT-ORIGINAL"
+    },
+    {
+      "decision": "Phase 2 implementation is not authorized by current Phase 1 evidence",
+      "domain": "PHASE2_ENTRY",
+      "id": "D-PHASE2-NOT-AUTHORIZED",
+      "source": {
+        "locator": "Header and final decision",
+        "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md"
+      },
+      "status": "current",
+      "supersedes": null
+    }
+  ],
+  "files": [
+    {
+      "id": "F-MASTER-SUMMARY",
+      "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md",
+      "role": "audited Phase 0-1 navigation and Phase 2 lookup handoff; not numeric or decision authority",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-LEDGER",
+      "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md",
+      "role": "canonical Phase 0 decision ledger",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-BOUNDARY",
+      "path": "docs/research/phase0a/decision_lock/P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md",
+      "role": "canonical information boundary",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-TRUTH",
+      "path": "docs/research/phase0a/decision_lock/P0_03_TRUTH_MODEL_SPEC.md",
+      "role": "truth model specification",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-SENSORS",
+      "path": "docs/research/phase0a/decision_lock/P0_04_SENSOR_ROLE_AND_MODEL_SPEC.md",
+      "role": "sensor role specification",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-MEKF",
+      "path": "docs/research/phase0a/decision_lock/P0_05_MEKF_MATH_CONTRACT.md",
+      "role": "MEKF math contract",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-NEURAL",
+      "path": "docs/research/phase0a/decision_lock/P0_06_NEURAL_INSERTION_OPTIONS.md",
+      "role": "historical Phase 0 neural options, not an implementation authorization",
+      "status": "historical"
+    },
+    {
+      "id": "F-P0-CONTEXT",
+      "path": "docs/research/phase0a/decision_lock/P0_07_CONTEXT_CONTRACT.md",
+      "role": "context taxonomy and leakage contract",
+      "status": "current"
+    },
+    {
+      "id": "F-P0-SYNTHESIS",
+      "path": "docs/research/phase0a/decision_lock/P0A_PHASE_0A_SYNTHESIS.md",
+      "role": "Phase 0 synthesis",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-A-APPROVAL",
+      "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md",
+      "role": "Gate A final decision",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-B1-CONTRACT",
+      "path": "docs/research/phase1a/P1A_EVENT_SCHEMA_CONTRACT.md",
+      "role": "typed event contract including q_NB erratum",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-B1-APPROVAL",
+      "path": "docs/research/phase1a/P1A_GATE_B1_FINAL_APPROVAL.md",
+      "role": "Gate B1 final decision",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-B1-A1",
+      "path": "docs/research/phase1a/P1A_GATE_B1_AMENDMENT_A1_CONTRACT.md",
+      "role": "generator identity amendment",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-B2-FRAME",
+      "path": "docs/research/phase1a/P1A_BASILISK_FRAME_CONVENTION_PROOF.md",
+      "role": "Basilisk frame proof contract",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-B2-APPROVAL",
+      "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md",
+      "role": "Gate B2 final decision",
+      "status": "current"
+    },
+    {
+      "id": "F-GATE-C-APPROVAL",
+      "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md",
+      "role": "Gate C final decision",
+      "status": "current"
+    },
+    {
+      "id": "F-CP4-APPROVAL",
+      "path": "docs/research/phase1a/P1A_CP4_STEP1_FINAL_APPROVAL.md",
+      "role": "D1 and CP4 Step 1 approval",
+      "status": "current"
+    },
+    {
+      "id": "F-P1A-HANDOFF",
+      "path": "docs/research/phase1a/P1A_FOUNDATION_FINAL_APPROVAL_AND_P1B_HANDOFF.md",
+      "role": "Phase 1A foundation approval and Step 1 handoff",
+      "status": "historical"
+    },
+    {
+      "id": "F-STEP1-HANDOFF",
+      "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md",
+      "role": "Step 1 final approval and frozen baseline roles",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-HANDOFF",
+      "path": "docs/research/phase1b/P1_EXIT_CONDITIONAL_GO_AND_CLOSURE_HANDOFF.md",
+      "role": "original exit condition and closure contract handoff",
+      "status": "historical"
+    },
+    {
+      "id": "F-MEKF-SOURCE",
+      "path": "bench/estimators/mekf.py",
+      "role": "canonical MEKF implementation",
+      "status": "current"
+    },
+    {
+      "id": "F-EVENT-SOURCE",
+      "path": "bench/tasks/generator/mekf_events.py",
+      "role": "Gate B1 event schema, hash, split, replay implementation",
+      "status": "current"
+    },
+    {
+      "id": "F-BASILISK-SOURCE",
+      "path": "bench/tasks/generator/basilisk_unit_st.py",
+      "role": "Basilisk UNIT-ST generator and executable proofs",
+      "status": "current"
+    },
+    {
+      "id": "F-METRIC-SOURCE",
+      "path": "bench/metrics/mekf.py",
+      "role": "canonical Gate C metrics",
+      "status": "current"
+    },
+    {
+      "id": "F-BRIDGE-SOURCE",
+      "path": "bench/models/mekf.py",
+      "role": "MEKF event replay bridge",
+      "status": "current"
+    },
+    {
+      "id": "F-RUNNER-SOURCE",
+      "path": "bench/runners/run_suite.py",
+      "role": "CP4 exact task/model runner branch",
+      "status": "current"
+    },
+    {
+      "id": "F-FUSION-EVENT-SOURCE",
+      "path": "bench/tasks/generator/mekf_fusion_events.py",
+      "role": "Phase 1B fusion typed schema",
+      "status": "current"
+    },
+    {
+      "id": "F-FUSION-GEN-SOURCE",
+      "path": "bench/tasks/generator/phase1b_sensor_fusion.py",
+      "role": "parameterized magnetic and sun generator",
+      "status": "current"
+    },
+    {
+      "id": "F-FUSION-METRIC-SOURCE",
+      "path": "bench/metrics/mekf_fusion.py",
+      "role": "magnetic and sun NIS metrics",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP1-SOURCE",
+      "path": "bench/experiments/phase1b_unit_st_classical.py",
+      "role": "Step 1 classical experiment implementation",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP2-SOURCE",
+      "path": "bench/experiments/phase1b_sensor_fusion_c4.py",
+      "role": "Step 2 replay and experiment implementation",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-SOURCE",
+      "path": "bench/experiments/p1_exit_covariance_closure.py",
+      "role": "covariance closure implementation",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP1-CONFIG",
+      "path": "bench/configs/suite_phase1b_unit_st_classical.yaml",
+      "role": "Step 1 frozen experiment configuration",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP2-CONFIG",
+      "path": "bench/configs/suite_phase1b_sensor_fusion_c4.yaml",
+      "role": "Step 2 frozen experiment configuration",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-CONFIG",
+      "path": "bench/configs/suite_p1_exit_covariance_closure.yaml",
+      "role": "closure configuration and acceptance criteria",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP1-TUNING",
+      "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json",
+      "role": "machine-frozen F-TUNED and C5 selection",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP1-SUMMARY",
+      "path": "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json",
+      "role": "Step 1 machine result summary",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP1-LONG",
+      "path": "experiments/phase1b/results/unit_st_classical_v1/long_horizon.json",
+      "role": "Step 1 long-horizon machine results",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP2-SUMMARY",
+      "path": "experiments/phase1b/results/sensor_fusion_c4_v1/pilot_summary.json",
+      "role": "Step 2 machine result summary",
+      "status": "current"
+    },
+    {
+      "id": "F-STEP2-SETTLED",
+      "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json",
+      "role": "original MAIN-FUSION settled consistency",
+      "status": "current"
+    },
+    {
+      "id": "F-EXIT-ORIGINAL",
+      "path": "experiments/phase1b/reports/P1_EXIT_REVIEW.md",
+      "role": "original pre-closure P1 Exit review",
+      "status": "historical"
+    },
+    {
+      "id": "F-CLOSURE-DIAGNOSIS",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/diagnosis.json",
+      "role": "closure machine diagnostics",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-SEARCH",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/search/search_manifest.json",
+      "role": "calibration search and freeze evidence",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-CONFIRM",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/confirmation/confirmation_summary.json",
+      "role": "independent stationary and C4 confirmation results",
+      "status": "current"
+    },
+    {
+      "id": "F-EXIT-UPDATED-JSON",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json",
+      "role": "machine current P1 Exit decision and scoped values",
+      "status": "current"
+    },
+    {
+      "id": "F-EXIT-UPDATED-MD",
+      "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md",
+      "role": "human current P1 Exit decision",
+      "status": "current"
+    },
+    {
+      "id": "F-CLOSURE-VALIDATION",
+      "path": "experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md",
+      "role": "closure validation report",
+      "status": "current"
+    },
+    {
+      "id": "F-REGRESSION-EVIDENCE",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json",
+      "role": "final regression command evidence",
+      "status": "current"
+    },
+    {
+      "id": "F-PREFLIGHT-CLOSURE",
+      "path": "experiments/phase1b/preflight_snapshots/03_20260802T032016Z/FINAL_INTEGRITY.md",
+      "role": "prior closure dirty-tree integrity evidence",
+      "status": "current"
+    },
+    {
+      "id": "F-PREFLIGHT-INDEX",
+      "path": "experiments/research_index/preflight_snapshots/01_20260802T_currentZ/README.md",
+      "role": "indexing entry snapshot description",
+      "status": "current"
+    }
+  ],
+  "master_summary": {
+    "authority": "navigation_handoff_only",
+    "canonical_numeric_authority": false,
+    "claim_audit_status": "complete",
+    "expected_input_sha256": "657b956362457472c25ba03177e521114d1d92082cc30e10cf5f4170f52b96a2",
+    "final_sha256": "8827f4a3996b0e1f6b736de13a33a738bab06bee30e789bc1e85876e8dd40526",
+    "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md",
+    "phase2_design_review": "requires_explicit_user_request",
+    "phase2_implementation": "not_started_not_authorized"
+  },
+  "metadata": {
+    "generated_date": "2026-08-02",
+    "repository_root": "/home/dss-pc-05/bench",
+    "scope": "Phase 0 through Phase 1 condition closure; repository evidence indexing only",
+    "validation_disposition": "PASS_PHASE0_1_REPOSITORY_EVIDENCE_INDEX"
+  },
+  "representative_lookups": [
+    {
+      "first_source": {
+        "locator": "Decision Table rows D04-D08",
+        "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md"
+      },
+      "id": "L01",
+      "question": "What is the locked q_NB convention?",
+      "topic_id": "P0-STATE-CONVENTION"
+    },
+    {
+      "first_source": {
+        "locator": "## 4 and ## 5",
+        "path": "docs/research/phase0a/decision_lock/P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md"
+      },
+      "id": "L02",
+      "question": "What information is forbidden to a deployable estimator?",
+      "topic_id": "P0-TRUTH-BOUNDARY"
+    },
+    {
+      "first_source": {
+        "locator": "## 2. Exact-pi sign invariance",
+        "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+      },
+      "id": "L03",
+      "question": "Where is exact-pi q/-q invariance implemented and proved?",
+      "topic_id": "P1A-EXACT-PI-IMMUTABILITY"
+    },
+    {
+      "first_source": {
+        "locator": "Same-time ordering",
+        "path": "docs/research/phase1a/P1A_EVENT_SCHEMA_CONTRACT.md"
+      },
+      "id": "L04",
+      "question": "What is the Gate B1 event ordering?",
+      "topic_id": "P1A-TYPED-EVENTS"
+    },
+    {
+      "first_source": {
+        "locator": "## 2. Locked frame relation",
+        "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+      },
+      "id": "L05",
+      "question": "How is Basilisk sigma_BN converted to q_NB?",
+      "topic_id": "P1A-BASILISK-FRAME"
+    },
+    {
+      "first_source": {
+        "locator": "## 2. Canonical metric contract",
+        "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md"
+      },
+      "id": "L06",
+      "question": "Where are canonical NIS and NEES implemented?",
+      "topic_id": "P1A-CANONICAL-METRICS"
+    },
+    {
+      "first_source": {
+        "locator": "Task/model identity and runner routing",
+        "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+      },
+      "id": "L07",
+      "question": "What exact task/model pair enters event replay?",
+      "topic_id": "P1A-ADAPTER-RUNNER"
+    },
+    {
+      "first_source": {
+        "locator": "/fixed_tuning/selected_policy",
+        "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+      },
+      "id": "L08",
+      "question": "What are the frozen F-TUNED scales?",
+      "topic_id": "P1B-STEP1-FROZEN-BASELINES"
+    },
+    {
+      "first_source": {
+        "locator": "Stationary matched results row F-BASE",
+        "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+      },
+      "id": "L09",
+      "question": "What is the C1 matched F-BASE result?",
+      "topic_id": "P1B-C1-STATIONARY"
+    },
+    {
+      "first_source": {
+        "locator": "C2 process uncertainty",
+        "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+      },
+      "id": "L10",
+      "question": "What did C2 establish about process mismatch?",
+      "topic_id": "P1B-C2-PROCESS"
+    },
+    {
+      "first_source": {
+        "locator": "C3 star-tracker reliability",
+        "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+      },
+      "id": "L11",
+      "question": "What did C3 establish about ST covariance mismatch?",
+      "topic_id": "P1B-C3-MEASUREMENT"
+    },
+    {
+      "first_source": {
+        "locator": "Interpretation and limitations",
+        "path": "experiments/phase1b/reports/P1B_IDENTIFIABILITY_PILOT_REPORT.md"
+      },
+      "id": "L12",
+      "question": "What exactly does C5 support?",
+      "topic_id": "P1B-C5-IDENTIFIABILITY"
+    },
+    {
+      "first_source": {
+        "locator": "Long-horizon stationary subset",
+        "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+      },
+      "id": "L13",
+      "question": "What happened at 600 seconds?",
+      "topic_id": "P1B-LONG-HORIZON"
+    },
+    {
+      "first_source": {
+        "locator": "Same-time order",
+        "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md"
+      },
+      "id": "L14",
+      "question": "What is the four-sensor same-time ordering?",
+      "topic_id": "P1B-STEP2-FUSION-SCHEMA"
+    },
+    {
+      "first_source": {
+        "locator": "/main_fusion_stationary_F_BASE/nees/normalized_mean",
+        "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+      },
+      "id": "L15",
+      "question": "What is the original MAIN-FUSION settled NEES?",
+      "topic_id": "P1B-MAIN-FUSION"
+    },
+    {
+      "first_source": {
+        "locator": "Observability decomposition",
+        "path": "experiments/phase1b/reports/P1B_STRESS_MAG_REPORT.md"
+      },
+      "id": "L16",
+      "question": "Why is STRESS-MAG not a full-attitude claim?",
+      "topic_id": "P1B-STRESS-MAG"
+    },
+    {
+      "first_source": {
+        "locator": "Primary event and oracle comparison",
+        "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+      },
+      "id": "L17",
+      "question": "What are the original C4 event and oracle effects?",
+      "topic_id": "P1B-C4-COMBINED"
+    },
+    {
+      "first_source": {
+        "locator": "Transient and marginal decomposition",
+        "path": "experiments/phase1b/reports/P1_EXIT_TRANSIENT_DIAGNOSTIC_REPORT.md"
+      },
+      "id": "L18",
+      "question": "What caused covariance inconsistency?",
+      "topic_id": "P1B-CLOSURE-DIAGNOSTICS"
+    },
+    {
+      "first_source": {
+        "locator": "/F_CALIBRATED_status",
+        "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+      },
+      "id": "L19",
+      "question": "What is frozen F-CALIBRATED-v1?",
+      "topic_id": "P1B-F-CALIBRATED"
+    },
+    {
+      "first_source": {
+        "locator": "Decision and ## 8. Updated P1 Exit decision",
+        "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md"
+      },
+      "id": "L20",
+      "question": "What is the current P1 Exit decision and is Phase 2 authorized?",
+      "topic_id": "P1B-CURRENT-EXIT"
+    },
+    {
+      "first_source": {
+        "locator": "Authority note and ## 9. Phase 2 Design-Review and Implementation Boundary",
+        "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+      },
+      "id": "L21",
+      "question": "Where should an agent start for the audited Phase 0-1 overview, and what authority does it have?",
+      "topic_id": "NAV-MASTER-SUMMARY"
+    }
+  ],
+  "resolved_ambiguities": [
+    {
+      "evidence": "Expected-digest artifact restored at the exact path, all mandatory claim families audited, documentation-only conflicts corrected, index references updated, and validator/tests passed.",
+      "id": "A-MISSING-MASTER-SUMMARY",
+      "resolution_date": "2026-08-02",
+      "resolution_status": "resolved",
+      "source": {
+        "locator": "Master provenance, claim matrix, and corrections",
+        "path": "experiments/research_index/reports/PHASE0_1_MASTER_SUMMARY_AUDIT_REPORT.md"
+      }
+    }
+  ],
+  "schema_version": "phase0-1-evidence-index-v1",
+  "topics": [
+    {
+      "canonical_sources": [
+        {
+          "locator": "Authority note and sections 1 through 9",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "NAV-MASTER-SUMMARY",
+      "implementation_paths": [],
+      "numeric_facts": [],
+      "question_patterns": [
+        "Phase 0-1 전체 요약을 먼저 어디서 읽는가?",
+        "master summary와 exact numeric source가 다르면 무엇이 우선하는가?",
+        "Phase 2 Design Review와 Phase 2 implementation authorization은 어떻게 다른가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [],
+      "title": "Audited Phase 0-1 master navigation and authority boundary"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Decision Table rows D01-D03",
+          "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md"
+        },
+        {
+          "locator": "## 1. Phase 0A objective and ## 10. Exit criteria",
+          "path": "docs/research/phase0a/decision_lock/P0A_PHASE_0A_SYNTHESIS.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P0-OBJECTIVE",
+      "implementation_paths": [],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 1-2",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "Phase 0의 연구 목적은 무엇인가?",
+        "Phase 0에서 어떤 검증 순서를 잠갔는가?",
+        "closed-loop 검증은 언제 수행하도록 결정했는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [],
+      "title": "Phase 0 objective and scope"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Decision Table rows D04-D08",
+          "path": "docs/research/phase0a/decision_lock/P0_01_DECISION_LEDGER.md"
+        },
+        {
+          "locator": "## 2. Locked notation and ## 3. Error-state definition",
+          "path": "docs/research/phase0a/decision_lock/P0_05_MEKF_MATH_CONTRACT.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P0-STATE-CONVENTION",
+      "implementation_paths": [
+        "bench/estimators/mekf.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "MEKF nominal state는 무엇인가?",
+        "오차 상태 차원과 성분은 무엇인가?",
+        "quaternion scalar 순서는 무엇인가?",
+        "q_NB는 어느 방향의 active rotation인가?",
+        "R_NB와 C_BN의 관계는 무엇인가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_conventions.py",
+        "tests/test_mekf_core.py"
+      ],
+      "title": "MEKF state, quaternion, frame, and error convention"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 1. Boundary diagram, ## 4. Estimator-visible information, ## 5. Forbidden leakage",
+          "path": "docs/research/phase0a/decision_lock/P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P0-TRUTH-BOUNDARY",
+      "implementation_paths": [
+        "bench/tasks/generator/mekf_events.py",
+        "bench/tasks/generator/mekf_fusion_events.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "truth와 sensor output은 어떻게 분리되는가?",
+        "deployable estimator가 볼 수 없는 정보는 무엇인가?",
+        "oracle은 어떤 목적으로만 허용되는가?",
+        "truth가 measurement에 직접 섞이는 것을 무엇이 금지하는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_events.py",
+        "tests/test_mekf_fusion_events.py"
+      ],
+      "title": "Truth, sensor, estimator, and oracle information boundary"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Gyroscope, Magnetometer, Sun sensor, and Star tracker sections",
+          "path": "docs/research/phase0a/decision_lock/P0_04_SENSOR_ROLE_AND_MODEL_SPEC.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P0-SENSOR-ROLES",
+      "implementation_paths": [
+        "bench/tasks/generator/basilisk_unit_st.py",
+        "bench/tasks/generator/phase1b_sensor_fusion.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "gyro는 MEKF에서 어떤 역할을 하는가?",
+        "magnetometer measurement model은 무엇인가?",
+        "sun sensor가 invalid일 때 무엇을 하는가?",
+        "star tracker는 어떤 자세량을 측정하는가?",
+        "Phase 1 sensor model이 flight product claim인가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_basilisk_unit_st_generator.py",
+        "tests/test_phase1b_sensor_fusion.py"
+      ],
+      "title": "Gyro, magnetometer, sun, and star-tracker roles"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 1. Context taxonomy, ## 2. Event-local context, ## 8. Forbidden inputs, ## 9. Identifiability",
+          "path": "docs/research/phase0a/decision_lock/P0_07_CONTEXT_CONTRACT.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P0-CONTEXT-CONTRACT",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py",
+        "bench/experiments/phase1b_sensor_fusion_c4.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "physical context와 oracle context의 차이는 무엇인가?",
+        "estimated context는 어떤 정보만 사용해야 하는가?",
+        "latent context가 true label과 다른 이유는 무엇인가?",
+        "event-local process context와 measurement context는 어떻게 분리되는가?",
+        "identifiability claim의 한계는 무엇인가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_regimes.py",
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "Physical, oracle, estimated, and latent context"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 1. Final decision and ## 4. Test evidence",
+          "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+        },
+        {
+          "locator": "Gate A result and validation tables",
+          "path": "experiments/phase1a/reports/P1A_MATH_VALIDATION_REPORT.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-GATE-A-CORE",
+      "implementation_paths": [
+        "bench/estimators/mekf.py"
+      ],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 3.1 MEKF math/core",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-GATE-A-TESTS",
+          "scope": "Gate A full new suite at final approval",
+          "source": {
+            "locator": "## 4. Test evidence",
+            "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+          },
+          "unit": "passed tests",
+          "value": 55
+        },
+        {
+          "id": "N-GATE-A-LEGACY",
+          "scope": "Gate A designated legacy regression, excluding five subtests",
+          "source": {
+            "locator": "## 4. Test evidence",
+            "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+          },
+          "unit": "passed tests",
+          "value": 18
+        }
+      ],
+      "question_patterns": [
+        "Gate A 최종 판정은 무엇인가?",
+        "MEKF propagation과 ST update 구현은 어디에 있는가?",
+        "Gate A에서 어떤 수치 안전 계약을 검증했는가?",
+        "Gate A 신규 및 legacy test 수는 몇 개인가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_core.py",
+        "tests/test_mekf_conventions.py"
+      ],
+      "title": "Gate A MEKF math core"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 2. Exact-pi sign invariance and ## 3. MEKFState immutability",
+          "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-EXACT-PI-IMMUTABILITY",
+      "implementation_paths": [
+        "bench/estimators/mekf.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-EXACT-PI-ORDINARY-SWEEP",
+          "scope": "ordinary-angle q/-q invariance sweep",
+          "source": {
+            "locator": "## 4. Test evidence",
+            "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+          },
+          "unit": "quaternion pairs",
+          "value": 1000
+        },
+        {
+          "id": "N-EXACT-PI-NEAR-SWEEP",
+          "scope": "near-pi q/-q invariance sweep",
+          "source": {
+            "locator": "## 4. Test evidence",
+            "path": "docs/research/phase1a/P1A_GATE_A_FINAL_APPROVAL.md"
+          },
+          "unit": "quaternion pairs",
+          "value": 256
+        }
+      ],
+      "question_patterns": [
+        "exact-pi에서 q와 -q residual이 같은가?",
+        "exact-pi tie-break 구현은 어느 함수에 있는가?",
+        "MEKFState 내부 배열을 직접 수정할 수 있는가?",
+        "ordinary 및 near-pi sweep 규모는 얼마인가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_core.py"
+      ],
+      "title": "Exact-pi quaternion tie-break and MEKFState immutability"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## Versioned schema, ordering, serialization, and Gate B2 convention erratum",
+          "path": "docs/research/phase1a/P1A_EVENT_SCHEMA_CONTRACT.md"
+        },
+        {
+          "locator": "Final decision and approved contract",
+          "path": "docs/research/phase1a/P1A_GATE_B1_FINAL_APPROVAL.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-TYPED-EVENTS",
+      "implementation_paths": [
+        "bench/tasks/generator/mekf_events.py",
+        "bench/tasks/generator/unit_st_synthetic.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-GATE-B1-TESTS",
+          "scope": "Gate B1 after manifest-identity amendment",
+          "source": {
+            "locator": "Regression results",
+            "path": "experiments/phase1a/reports/P1A_GATE_B1_AMENDMENT_A1_REPORT.md"
+          },
+          "unit": "passed tests",
+          "value": 55
+        },
+        {
+          "id": "N-GATE-B1-LATENCY",
+          "scope": "Gate B1 valid-event arrival minus measurement time",
+          "source": {
+            "locator": "Zero-latency rule",
+            "path": "docs/research/phase1a/P1A_EVENT_SCHEMA_CONTRACT.md"
+          },
+          "unit": "seconds",
+          "value": 0
+        }
+      ],
+      "question_patterns": [
+        "Gate B1 schema version은 무엇인가?",
+        "UNIT-ST synthetic generator ID는 무엇인가?",
+        "valid event의 latency 계약은 무엇인가?",
+        "동일 timestamp event 순서는 무엇인가?",
+        "semantic hash와 whole-trajectory split은 어디서 구현되는가?",
+        "direct replay는 어느 함수를 호출하는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_events.py",
+        "tests/test_mekf_replay.py",
+        "tests/test_unit_st_synthetic.py"
+      ],
+      "title": "Gate B1 typed event, serialization, hash, split, and replay contract"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Identity separation and invariants",
+          "path": "docs/research/phase1a/P1A_GATE_B1_AMENDMENT_A1_CONTRACT.md"
+        },
+        {
+          "locator": "Validation result",
+          "path": "experiments/phase1a/reports/P1A_GATE_B1_AMENDMENT_A1_REPORT.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-B1-GENERATOR-IDENTITY",
+      "implementation_paths": [
+        "bench/tasks/generator/mekf_events.py",
+        "bench/tasks/generator/unit_st_synthetic.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "generator_id 변경이 어떤 hash를 바꾸는가?",
+        "strict expected generator-ID load는 어디에 정의되는가?",
+        "B1 A1이 NPZ schema나 physical hash domain을 바꾸었는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_events.py",
+        "tests/test_unit_st_synthetic.py"
+      ],
+      "title": "Schema identity versus generator identity"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 2. Locked frame relation, ## 3. Executable proofs, ## 4. Sensor-output layer",
+          "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+        },
+        {
+          "locator": "Locked q_NB erratum and executable proof contract",
+          "path": "docs/research/phase1a/P1A_BASILISK_FRAME_CONVENTION_PROOF.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-BASILISK-FRAME",
+      "implementation_paths": [
+        "bench/tasks/generator/basilisk_unit_st.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-B2-STATIC-BASIS-ERROR",
+          "scope": "Gate B2 static identity/axis/arbitrary attitude basis proof maximum",
+          "source": {
+            "locator": "## 3. Executable proof results",
+            "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+          },
+          "unit": "absolute matrix error",
+          "value": 4.440892098500626e-16
+        },
+        {
+          "id": "N-B2-SHADOW-ERROR",
+          "scope": "Gate B2 MRP shadow-set proof maximum",
+          "source": {
+            "locator": "## 3. Executable proof results",
+            "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+          },
+          "unit": "absolute matrix error",
+          "value": 4.85722573273506e-16
+        },
+        {
+          "id": "N-B2-DYNAMIC-ATT-ERROR",
+          "scope": "Gate B2 spherical-inertia zero-torque constant-rate attitude proof maximum",
+          "source": {
+            "locator": "## 3. Executable proof results",
+            "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+          },
+          "unit": "radian",
+          "value": 4.872566201647101e-16
+        },
+        {
+          "id": "N-B2-DYNAMIC-RATE-ERROR",
+          "scope": "Gate B2 body-rate proof maximum",
+          "source": {
+            "locator": "## 3. Executable proof results",
+            "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+          },
+          "unit": "radian/second",
+          "value": 3.219646771412954e-14
+        },
+        {
+          "id": "N-GATE-B2-TESTS",
+          "scope": "Gate B2 final suite",
+          "source": {
+            "locator": "Validation evidence",
+            "path": "docs/research/phase1a/P1A_GATE_B2_FINAL_APPROVAL.md"
+          },
+          "unit": "passed tests",
+          "value": 67
+        }
+      ],
+      "question_patterns": [
+        "Basilisk sigma_BN은 q_NB로 어떻게 변환되는가?",
+        "MRP2C와 R_NB/C_BN 관계는 무엇인가?",
+        "omega_BN_B의 frame, sign, unit은 무엇인가?",
+        "basis-vector proof는 어떤 축과 shadow set을 포함하는가?",
+        "constant-rate dynamics proof의 수치 오차는 얼마인가?",
+        "built-in Basilisk star tracker를 사용했는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_basilisk_unit_st_generator.py"
+      ],
+      "title": "Gate B2 Basilisk frame and constant-rate proof"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 2. Canonical metric contract and ## 3. Validation evidence",
+          "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "P1A-CANONICAL-METRICS",
+      "implementation_paths": [
+        "bench/metrics/mekf.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-GATE-C-TESTS",
+          "scope": "Gate C complete test suite",
+          "source": {
+            "locator": "## 3. Validation evidence",
+            "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md"
+          },
+          "unit": "passed tests",
+          "value": 43
+        },
+        {
+          "id": "N-GATE-C-NEES-QSIGN-DIFF",
+          "scope": "Gate C q versus -q invariant NEES check",
+          "source": {
+            "locator": "## 3. Validation evidence",
+            "path": "docs/research/phase1a/P1A_GATE_C_FINAL_APPROVAL.md"
+          },
+          "unit": "normalized NEES difference",
+          "value": 0
+        }
+      ],
+      "question_patterns": [
+        "canonical attitude geodesic metric은 어디에 있는가?",
+        "bias error summary는 어떻게 계산되는가?",
+        "ST NIS와 right-local NEES 구현은 어디에 있는가?",
+        "SPD consistency는 inverse 대신 무엇을 사용하는가?",
+        "Gate C q/-q metric invariance가 검증되었는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_metrics.py"
+      ],
+      "title": "Gate C canonical MEKF metrics"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "D1 approval and exact D2 file shortlist",
+          "path": "docs/research/phase1a/P1A_CP4_STEP1_FINAL_APPROVAL.md"
+        },
+        {
+          "locator": "## 5. Fresh and verified cache-hit CLI evidence",
+          "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1a_unit_st_smoke.yaml"
+      ],
+      "id": "P1A-ADAPTER-RUNNER",
+      "implementation_paths": [
+        "bench/models/mekf.py",
+        "bench/tasks/bench_generated.py",
+        "bench/models/registry.py",
+        "bench/runners/run_suite.py"
+      ],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 3.5 Adapter and runner integration",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-D1-TESTS",
+          "scope": "Gate D1 adapter test suite",
+          "source": {
+            "locator": "Test results",
+            "path": "experiments/phase1a/reports/P1A_GATE_D1_VALIDATION_REPORT.md"
+          },
+          "unit": "passed tests",
+          "value": 24
+        },
+        {
+          "id": "N-CP4-TESTS",
+          "scope": "CP4 runner integration suite",
+          "source": {
+            "locator": "Regression summary",
+            "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+          },
+          "unit": "passed tests",
+          "value": 22
+        },
+        {
+          "id": "N-CP4-PRODUCER-SEEDS",
+          "scope": "CP4 synthetic and Basilisk smoke, seeds 6101 through 6103",
+          "source": {
+            "locator": "## 5. Fresh and verified cache-hit CLI evidence",
+            "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+          },
+          "unit": "seeds per producer",
+          "value": 3
+        }
+      ],
+      "question_patterns": [
+        "MEKF event-replay bridge는 어디에 있는가?",
+        "direct replay와 bridge artifact는 무엇이 동일한가?",
+        "고정 task_family와 model_id는 무엇인가?",
+        "runner는 dense sequence path보다 먼저 어디서 분기하는가?",
+        "fresh generation과 verified cache hit는 어떻게 검증되었는가?",
+        "truth는 estimation 후 어떤 key로 join되는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_adapter.py",
+        "tests/test_mekf_runner_integration.py"
+      ],
+      "title": "D1 bridge and CP4 runner integration"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 2. Step 1 locked interpretation",
+          "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md"
+        },
+        {
+          "locator": "/fixed_tuning and /test_split_accessed",
+          "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-STEP1-FROZEN-BASELINES",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 4. Phase 1B Step 1",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-FTUNED-QG",
+          "scope": "frozen F-TUNED gyro white-noise process scale",
+          "source": {
+            "locator": "/fixed_tuning/selected_policy/qg_scale",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+          },
+          "unit": "scale",
+          "value": 0.125
+        },
+        {
+          "id": "N-FTUNED-QB",
+          "scope": "frozen F-TUNED gyro-bias random-walk process scale",
+          "source": {
+            "locator": "/fixed_tuning/selected_policy/qb_scale",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+          },
+          "unit": "scale",
+          "value": 0.125
+        },
+        {
+          "id": "N-FTUNED-RST",
+          "scope": "frozen F-TUNED star-tracker covariance scale",
+          "source": {
+            "locator": "/fixed_tuning/selected_policy/r_scale",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+          },
+          "unit": "scale",
+          "value": 8
+        }
+      ],
+      "question_patterns": [
+        "Phase 1 primary classical baseline은 무엇인가?",
+        "F-TUNED의 Qg scale은 얼마인가?",
+        "F-TUNED의 Qb scale은 얼마인가?",
+        "F-TUNED의 ST R scale은 얼마인가?",
+        "F-TUNED이 primary가 아닌 이유는 무엇인가?",
+        "tuning이 test split을 보았는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_classical.py",
+        "tests/test_phase1b_unit_st_regimes.py"
+      ],
+      "title": "Step 1 F-BASE and frozen F-TUNED roles"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## Stationary matched C1 results",
+          "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+        },
+        {
+          "locator": "/summary/C1-STATIONARY-MATCHED/F-BASE",
+          "path": "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-C1-STATIONARY",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-C1-N",
+          "scope": "C1 stationary matched test",
+          "source": {
+            "locator": "/completed_paired_N_per_condition",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+          },
+          "unit": "paired trajectories",
+          "value": 50
+        },
+        {
+          "id": "N-C1-FBASE-ATT-RMSE",
+          "scope": "C1 F-BASE attitude event RMSE",
+          "source": {
+            "locator": "Stationary matched results row F-BASE",
+            "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.0016615
+        },
+        {
+          "id": "N-C1-FBASE-NIS",
+          "scope": "C1 F-BASE normalized innovation consistency",
+          "source": {
+            "locator": "Stationary matched results row F-BASE",
+            "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+          },
+          "unit": "NIS/DOF",
+          "value": 0.924
+        },
+        {
+          "id": "N-C1-FBASE-NEES",
+          "scope": "C1 F-BASE normalized posterior consistency",
+          "source": {
+            "locator": "Stationary matched results row F-BASE",
+            "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+          },
+          "unit": "NEES/DOF",
+          "value": 0.967
+        }
+      ],
+      "question_patterns": [
+        "C1 F-BASE attitude event RMSE는 얼마인가?",
+        "C1 F-BASE bias RMSE는 얼마인가?",
+        "C1 F-BASE NIS/DOF는 얼마인가?",
+        "C1 F-BASE NEES/DOF는 얼마인가?",
+        "C1 paired trajectory 수는 몇 개인가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_classical.py"
+      ],
+      "title": "C1 stationary matched UNIT-ST baseline"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## C2 process uncertainty and interpretation",
+          "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-C2-PROCESS",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-C2-A8-ATT-RMSE",
+          "scope": "C2 F-BASE at process uncertainty alpha 8 attitude event RMSE",
+          "source": {
+            "locator": "C2 severity table alpha 8",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.001752
+        },
+        {
+          "id": "N-C2-A8-NEES",
+          "scope": "C2 F-BASE at process uncertainty alpha 8",
+          "source": {
+            "locator": "C2 severity table alpha 8",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.187
+        },
+        {
+          "id": "N-C2-A8-ORACLE-NEES",
+          "scope": "C2 correct-side oracle at process uncertainty alpha 8",
+          "source": {
+            "locator": "C2 oracle comparison",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "NEES/DOF",
+          "value": 0.968
+        }
+      ],
+      "question_patterns": [
+        "C2 process event는 어떤 물리량을 바꾸는가?",
+        "alpha_Q 2, 4, 8에서 F-BASE 성능은 어떻게 변하는가?",
+        "C2 correct-side oracle이 attitude RMSE를 개선했는가?",
+        "C2가 H1/H2에 제공한 근거의 한계는 무엇인가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_regimes.py"
+      ],
+      "title": "C2 gyro process-uncertainty event"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## C3 star-tracker reliability and oracle effect",
+          "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-C3-MEASUREMENT",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-C3-A8-ATT-RMSE",
+          "scope": "C3 F-BASE at ST covariance alpha 8 attitude event RMSE",
+          "source": {
+            "locator": "C3 severity table alpha 8",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.0036859
+        },
+        {
+          "id": "N-C3-A8-NIS",
+          "scope": "C3 F-BASE at ST covariance alpha 8",
+          "source": {
+            "locator": "C3 severity table alpha 8",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "NIS/DOF",
+          "value": 2.245
+        },
+        {
+          "id": "N-C3-A8-ORACLE-ATT-DELTA",
+          "scope": "C3 alpha 8 oracle-minus-fixed attitude event RMSE",
+          "source": {
+            "locator": "C3 oracle severe-case comparison",
+            "path": "experiments/phase1b/reports/P1B_PROBLEM_EXISTENCE_REPORT.md"
+          },
+          "unit": "radian",
+          "value": -0.001318
+        }
+      ],
+      "question_patterns": [
+        "C3 event는 outlier인가 covariance 변화인가?",
+        "alpha_R 2, 4, 8에서 F-BASE 성능은 어떻게 변하는가?",
+        "C3 correct-side oracle의 severe-case 이득은 얼마인가?",
+        "C3가 H1/H2를 어떻게 지원하는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_regimes.py"
+      ],
+      "title": "C3 star-tracker inlier-reliability event"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## C5 pair, matching, and interpretation",
+          "path": "experiments/phase1b/reports/P1B_IDENTIFIABILITY_PILOT_REPORT.md"
+        },
+        {
+          "locator": "/c5_matching and /frozen_c5_B_alpha_R",
+          "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-C5-IDENTIFIABILITY",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-C5-ALPHA-R",
+          "scope": "frozen C5 B-pair star-tracker covariance multiplier",
+          "source": {
+            "locator": "/frozen_c5_B_alpha_R",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+          },
+          "unit": "scale",
+          "value": 1.08
+        },
+        {
+          "id": "N-C5-VALIDATION-RMS-DIFF",
+          "scope": "C5 train/validation selection innovation-RMS relative difference",
+          "source": {
+            "locator": "/c5_matching/selected/validation_rms_relative_difference",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+          },
+          "unit": "relative fraction",
+          "value": 0.00396231189955448
+        },
+        {
+          "id": "N-C5-TEST-RMS-DIFF",
+          "scope": "C5 F-BASE independent paired test innovation-RMS relative difference",
+          "source": {
+            "locator": "/c5_AB_independent_test/F-BASE/independent_test_rms_relative_difference",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json"
+          },
+          "unit": "relative fraction",
+          "value": 0.014851094915976358
+        }
+      ],
+      "question_patterns": [
+        "C5 frozen alpha_R_ST는 얼마인가?",
+        "C5 validation RMS 상대 차이는 얼마인가?",
+        "C5 independent test RMS 상대 차이는 얼마인가?",
+        "C5는 어떤 범위의 identifiability claim만 지원하는가?",
+        "C5 A/B pair가 같은 raw stream을 사용하는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/pilot_summary.json",
+        "experiments/phase1b/results/unit_st_classical_v1/tuning.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_regimes.py"
+      ],
+      "title": "C5 innovation-RMS-matched A/B identifiability pilot"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## Long-horizon stationary subset",
+          "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+        },
+        {
+          "locator": "/duration_s, /num_trajectories, and /records",
+          "path": "experiments/phase1b/results/unit_st_classical_v1/long_horizon.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_unit_st_classical.yaml"
+      ],
+      "id": "P1B-LONG-HORIZON",
+      "implementation_paths": [
+        "bench/experiments/phase1b_unit_st_classical.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-LONG-DURATION",
+          "scope": "Step 1 stationary long-horizon duration per trajectory",
+          "source": {
+            "locator": "/duration_s",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/long_horizon.json"
+          },
+          "unit": "seconds",
+          "value": 600
+        },
+        {
+          "id": "N-LONG-N",
+          "scope": "Step 1 stationary long-horizon subset",
+          "source": {
+            "locator": "/num_trajectories",
+            "path": "experiments/phase1b/results/unit_st_classical_v1/long_horizon.json"
+          },
+          "unit": "trajectories",
+          "value": 10
+        },
+        {
+          "id": "N-LONG-FBASE-NEES",
+          "scope": "Step 1 aggregated long-horizon F-BASE",
+          "source": {
+            "locator": "Long-horizon aggregate row F-BASE",
+            "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+          },
+          "unit": "NEES/DOF",
+          "value": 0.854
+        },
+        {
+          "id": "N-LONG-FTUNED-NEES",
+          "scope": "Step 1 aggregated long-horizon F-TUNED",
+          "source": {
+            "locator": "Long-horizon aggregate row F-TUNED",
+            "path": "experiments/phase1b/reports/P1B_UNIT_ST_BASELINE_REPORT.md"
+          },
+          "unit": "NEES/DOF",
+          "value": 2.252
+        }
+      ],
+      "question_patterns": [
+        "long-horizon duration은 얼마인가?",
+        "long-horizon trajectory 수는 몇 개인가?",
+        "F-BASE long-horizon NIS/NEES는 얼마인가?",
+        "F-TUNED long-horizon attitude penalty는 얼마인가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/unit_st_classical_v1/long_horizon.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_unit_st_classical.py"
+      ],
+      "title": "Step 1 long-horizon stationary subset"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 4. Step 2 design decisions",
+          "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md"
+        },
+        {
+          "locator": "Typed schema, ordering, and information-boundary validation",
+          "path": "experiments/phase1b/reports/P1B_STEP2_VALIDATION_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-STEP2-FUSION-SCHEMA",
+      "implementation_paths": [
+        "bench/tasks/generator/mekf_fusion_events.py",
+        "bench/experiments/phase1b_sensor_fusion_c4.py"
+      ],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 5. Phase 1B Step 2",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-STEP2-TESTS",
+          "scope": "new Step 2 test suite",
+          "source": {
+            "locator": "Post-implementation regression table",
+            "path": "experiments/phase1b/reports/P1B_STEP2_VALIDATION_REPORT.md"
+          },
+          "unit": "passed tests",
+          "value": 38
+        }
+      ],
+      "question_patterns": [
+        "fusion event schema version은 무엇인가?",
+        "fusion oracle sidecar schema는 무엇인가?",
+        "same-time gyro/mag/sun/ST 순서는 무엇인가?",
+        "invalid sun event는 zero measurement인가 skip인가?",
+        "fixed estimator가 oracle sidecar를 볼 수 있는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/sensor_fusion_c4_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_fusion_events.py",
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "Step 2 fusion typed schema and deterministic ordering"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 4. Truth, Magnetometer, and Sun sensor",
+          "path": "docs/research/phase1b/P1B_STEP1_FINAL_APPROVAL_AND_STEP2_HANDOFF.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-FUSION-SENSORS",
+      "implementation_paths": [
+        "bench/tasks/generator/phase1b_sensor_fusion.py",
+        "bench/metrics/mekf_fusion.py",
+        "bench/estimators/mekf.py"
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "magnetic reference는 WMM flight claim인가?",
+        "sun reference와 validity는 어디서 생성되는가?",
+        "magnetometer primary event가 mean bias인가 inlier covariance인가?",
+        "sun tangent update와 NIS는 어디에 구현되는가?",
+        "Basilisk는 fusion에서 어떤 truth만 제공하는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_sensor_fusion.py",
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "Parameterized magnetic and sun benchmark sensors"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "MAIN-FUSION stationary and settled consistency tables",
+          "path": "experiments/phase1b/reports/P1B_SENSOR_FUSION_BASELINE_REPORT.md"
+        },
+        {
+          "locator": "/main_fusion_stationary_F_BASE",
+          "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-MAIN-FUSION",
+      "implementation_paths": [
+        "bench/experiments/phase1b_sensor_fusion_c4.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-MAIN-N",
+          "scope": "original Phase 1B Step 2 MAIN-FUSION stationary test",
+          "source": {
+            "locator": "Scenario scope",
+            "path": "experiments/phase1b/reports/P1B_SENSOR_FUSION_BASELINE_REPORT.md"
+          },
+          "unit": "paired trajectories",
+          "value": 50
+        },
+        {
+          "id": "N-MAIN-MAG-NIS",
+          "scope": "original MAIN-FUSION F-BASE settled 20%-cut magnetometer samples",
+          "source": {
+            "locator": "/main_fusion_stationary_F_BASE/mag_nis/normalized_mean",
+            "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 1.0228982708948622
+        },
+        {
+          "id": "N-MAIN-SUN-NIS",
+          "scope": "original MAIN-FUSION F-BASE settled 20%-cut sun samples",
+          "source": {
+            "locator": "/main_fusion_stationary_F_BASE/sun_nis/normalized_mean",
+            "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 1.0004866247227868
+        },
+        {
+          "id": "N-MAIN-ST-NIS",
+          "scope": "original MAIN-FUSION F-BASE settled 20%-cut star-tracker samples",
+          "source": {
+            "locator": "/main_fusion_stationary_F_BASE/star_tracker_nis/normalized_mean",
+            "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 1.0918889105362812
+        },
+        {
+          "id": "N-MAIN-ORIGINAL-SETTLED-NEES",
+          "scope": "original Phase 1B Step 2 MAIN-FUSION F-BASE settled 20%-cut posterior, N=50",
+          "source": {
+            "locator": "/main_fusion_stationary_F_BASE/nees/normalized_mean",
+            "path": "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.8730178719854724
+        }
+      ],
+      "question_patterns": [
+        "MAIN-FUSION paired N은 얼마인가?",
+        "original MAIN-FUSION whole attitude RMSE는 얼마인가?",
+        "settled mag/sun/ST NIS/DOF는 얼마인가?",
+        "original settled posterior NEES/DOF는 얼마인가?",
+        "F-TUNED이 MAIN-FUSION에서 개선했는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/sensor_fusion_c4_v1/settled_consistency.json",
+        "experiments/phase1b/results/sensor_fusion_c4_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "MAIN-FUSION stationary baseline"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Scenario, aggregate metrics, and observability decomposition",
+          "path": "experiments/phase1b/reports/P1B_STRESS_MAG_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-STRESS-MAG",
+      "implementation_paths": [
+        "bench/experiments/phase1b_sensor_fusion_c4.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-STRESS-ATT-RMSE",
+          "scope": "STRESS-MAG F-BASE whole-trajectory attitude RMSE, N=50",
+          "source": {
+            "locator": "Aggregate results row F-BASE",
+            "path": "experiments/phase1b/reports/P1B_STRESS_MAG_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.197681
+        },
+        {
+          "id": "N-STRESS-WEAK",
+          "scope": "STRESS-MAG weak magnetic-axis-parallel attitude component",
+          "source": {
+            "locator": "Observability decomposition",
+            "path": "experiments/phase1b/reports/P1B_STRESS_MAG_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.195676
+        },
+        {
+          "id": "N-STRESS-PLANE",
+          "scope": "STRESS-MAG observable-plane attitude component",
+          "source": {
+            "locator": "Observability decomposition",
+            "path": "experiments/phase1b/reports/P1B_STRESS_MAG_REPORT.md"
+          },
+          "unit": "radian",
+          "value": 0.00133072
+        }
+      ],
+      "question_patterns": [
+        "STRESS-MAG은 어떤 observability limitation을 노출하는가?",
+        "STRESS-MAG F-BASE attitude RMSE는 얼마인가?",
+        "weak parallel 성분과 observable-plane 성분은 얼마인가?",
+        "한 개 magnetic vector로 full attitude observability를 주장하는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/sensor_fusion_c4_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "STRESS-MAG observability stress case"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Primary event definition, paired results, and oracle interpretation",
+          "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-C4-COMBINED",
+      "implementation_paths": [
+        "bench/experiments/phase1b_sensor_fusion_c4.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-C4-ALPHA-B",
+          "scope": "original C4 gyro bias random-walk intensity multiplier during slow process window",
+          "source": {
+            "locator": "Primary C4 event definition",
+            "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+          },
+          "unit": "scale",
+          "value": 100000
+        },
+        {
+          "id": "N-C4-ALPHA-RMAG",
+          "scope": "original C4 magnetometer inlier covariance multiplier during fast measurement window",
+          "source": {
+            "locator": "Primary C4 event definition",
+            "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+          },
+          "unit": "scale",
+          "value": 16
+        },
+        {
+          "id": "N-C4-ORIGINAL-FULL-SLOW-IMPROVE",
+          "scope": "original Step 2 C4 full-oracle slow bias RMSE versus F-BASE, N=50",
+          "source": {
+            "locator": "Oracle comparison",
+            "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+          },
+          "unit": "improvement fraction",
+          "value": 0.2856
+        },
+        {
+          "id": "N-C4-ORIGINAL-FULL-FAST-IMPROVE",
+          "scope": "original Step 2 C4 full-oracle fast attitude peak versus F-BASE, N=50",
+          "source": {
+            "locator": "Oracle comparison",
+            "path": "experiments/phase1b/reports/P1B_C4_COMBINED_EVENT_REPORT.md"
+          },
+          "unit": "improvement fraction",
+          "value": 0.3257
+        }
+      ],
+      "question_patterns": [
+        "C4 slow process event는 무엇인가?",
+        "C4 fast measurement event는 무엇인가?",
+        "C4 alpha_b와 alpha_R_mag는 얼마인가?",
+        "original C4 full oracle의 slow bias 및 fast peak 개선은 얼마인가?",
+        "wrong-side comparisons는 어떤 결과를 보였는가?",
+        "C4 oracle은 future window label을 보는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/sensor_fusion_c4_v1/pilot_summary.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_phase1b_sensor_fusion_experiments.py"
+      ],
+      "title": "C4 slow-process plus fast-measurement event"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 7. P1 Exit decision",
+          "path": "experiments/phase1b/reports/P1_EXIT_REVIEW.md"
+        },
+        {
+          "locator": "## 2. Exact condition",
+          "path": "docs/research/phase1b/P1_EXIT_CONDITIONAL_GO_AND_CLOSURE_HANDOFF.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml"
+      ],
+      "id": "P1B-INITIAL-EXIT",
+      "implementation_paths": [],
+      "numeric_facts": [],
+      "question_patterns": [
+        "original P1 Exit decision은 무엇이었는가?",
+        "original condition은 어떤 NEES 수치 때문에 생겼는가?",
+        "original review가 Phase 2를 승인했는가?",
+        "original review는 현재 canonical decision인가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/sensor_fusion_c4_v1/exit_review.json"
+      ],
+      "status": "historical",
+      "test_paths": [],
+      "title": "Original Phase 1 Exit review"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Split integrity, transient decomposition, marginal and cross-covariance diagnostics",
+          "path": "experiments/phase1b/reports/P1_EXIT_TRANSIENT_DIAGNOSTIC_REPORT.md"
+        },
+        {
+          "locator": "/split, /groups, and /likely_source_ranking_by_settled_marginal_distance",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/diagnosis.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_p1_exit_covariance_closure.yaml"
+      ],
+      "id": "P1B-CLOSURE-DIAGNOSTICS",
+      "implementation_paths": [
+        "bench/experiments/p1_exit_covariance_closure.py"
+      ],
+      "navigation_sources": [
+        {
+          "locator": "Authority note and ## 6. P1 Exit Condition Closure",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-CLOSURE-TRAIN",
+          "scope": "independent covariance-calibration train split",
+          "source": {
+            "locator": "Dataset split table",
+            "path": "experiments/phase1b/reports/P1_EXIT_TRANSIENT_DIAGNOSTIC_REPORT.md"
+          },
+          "unit": "trajectories",
+          "value": 30
+        },
+        {
+          "id": "N-CLOSURE-VALIDATION",
+          "scope": "independent covariance-calibration validation split",
+          "source": {
+            "locator": "Dataset split table",
+            "path": "experiments/phase1b/reports/P1_EXIT_TRANSIENT_DIAGNOSTIC_REPORT.md"
+          },
+          "unit": "trajectories",
+          "value": 20
+        },
+        {
+          "id": "N-CLOSURE-INITIAL-NEES",
+          "scope": "closure independent validation F-BASE initial partition full whitened error",
+          "source": {
+            "locator": "/diagnosed_cause/validation_initial_full_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 15.55804512442473
+        },
+        {
+          "id": "N-CLOSURE-VALIDATION-SETTLED-ATT",
+          "scope": "closure independent validation F-BASE settled attitude marginal",
+          "source": {
+            "locator": "/diagnosed_cause/validation_settled_attitude_marginal_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.4348134637382222
+        },
+        {
+          "id": "N-CLOSURE-VALIDATION-SETTLED-BIAS",
+          "scope": "closure independent validation F-BASE settled bias marginal",
+          "source": {
+            "locator": "/diagnosed_cause/validation_settled_bias_marginal_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 2.7448526382517784
+        },
+        {
+          "id": "N-CLOSURE-VALIDATION-SETTLED-NEES",
+          "scope": "closure independent validation F-BASE settled full posterior aggregate",
+          "source": {
+            "locator": "/groups/validation/aggregate/partitions/settled/full_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/diagnosis.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.9062451467732702
+        }
+      ],
+      "question_patterns": [
+        "closure가 기존 Phase 1 test data를 tuning에 사용했는가?",
+        "closure train/validation/confirmation 크기는 얼마인가?",
+        "초기 full whitened NEES/DOF는 얼마인가?",
+        "settled attitude marginal NEES/DOF는 얼마인가?",
+        "settled bias marginal NEES/DOF는 얼마인가?",
+        "cross covariance는 어떻게 진단되었는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/diagnosis.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_p1_exit_covariance_closure.py"
+      ],
+      "title": "Independent covariance-closure diagnostics"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Frozen candidate and leakage controls",
+          "path": "experiments/phase1b/reports/P1_EXIT_COVARIANCE_CALIBRATION_REPORT.md"
+        },
+        {
+          "locator": "/F_CALIBRATED_status",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_p1_exit_covariance_closure.yaml"
+      ],
+      "id": "P1B-F-CALIBRATED",
+      "implementation_paths": [
+        "bench/experiments/p1_exit_covariance_closure.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-FCAL-P0-ATT",
+          "scope": "frozen F-CALIBRATED-v1 initial attitude covariance scale",
+          "source": {
+            "locator": "/F_CALIBRATED_status/scales/s_P0_att",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "scale",
+          "value": 2
+        },
+        {
+          "id": "N-FCAL-P0-BIAS",
+          "scope": "frozen F-CALIBRATED-v1 initial gyro-bias covariance scale",
+          "source": {
+            "locator": "/F_CALIBRATED_status/scales/s_P0_bias",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "scale",
+          "value": 4
+        },
+        {
+          "id": "N-FCAL-QG",
+          "scope": "frozen F-CALIBRATED-v1 gyro white-noise process covariance scale",
+          "source": {
+            "locator": "/F_CALIBRATED_status/scales/s_Qg",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "scale",
+          "value": 2
+        },
+        {
+          "id": "N-FCAL-QB",
+          "scope": "frozen F-CALIBRATED-v1 gyro-bias random-walk process covariance scale",
+          "source": {
+            "locator": "/F_CALIBRATED_status/scales/s_Qb",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "scale",
+          "value": 8
+        },
+        {
+          "id": "N-FCAL-R",
+          "scope": "frozen F-CALIBRATED-v1 mag/sun/ST sensor covariance scales, all unchanged",
+          "source": {
+            "locator": "/F_CALIBRATED_status/sensor_R_scales",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "scale",
+          "value": 1
+        }
+      ],
+      "question_patterns": [
+        "F-CALIBRATED-v1의 P0 attitude scale은 얼마인가?",
+        "P0 bias scale은 얼마인가?",
+        "Qg와 Qb scale은 얼마인가?",
+        "sensor R scale을 변경했는가?",
+        "candidate 선택 전에 confirmation set을 보았는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/search/search_manifest.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_p1_exit_covariance_closure.py"
+      ],
+      "title": "Frozen F-CALIBRATED-v1 policy"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Stationary confirmation, C4 confirmation, and acceptance matrix",
+          "path": "experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md"
+        },
+        {
+          "locator": "/confirmation_F_BASE_settled, /confirmation_F_CALIBRATED_settled, /acceptance, /remaining_classical_limitation",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_p1_exit_covariance_closure.yaml"
+      ],
+      "id": "P1B-CLOSURE-CONFIRMATION",
+      "implementation_paths": [
+        "bench/experiments/p1_exit_covariance_closure.py"
+      ],
+      "numeric_facts": [
+        {
+          "id": "N-CLOSURE-CONFIRM-N",
+          "scope": "closure independent stationary and C4 confirmation groups",
+          "source": {
+            "locator": "/completed_N",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/confirmation/confirmation_summary.json"
+          },
+          "unit": "paired trajectories per scenario",
+          "value": 50
+        },
+        {
+          "id": "N-CLOSURE-FBASE-CONFIRM-NEES",
+          "scope": "closure independent stationary confirmation F-BASE settled posterior, N=50",
+          "source": {
+            "locator": "/confirmation_F_BASE_settled/full_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.4180268635870965
+        },
+        {
+          "id": "N-CLOSURE-FCAL-CONFIRM-NEES",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled posterior, N=50",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/full_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.0206761630935368
+        },
+        {
+          "id": "N-CLOSURE-FCAL-ATT-NEES",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled attitude marginal",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/attitude_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 0.9708331280650667
+        },
+        {
+          "id": "N-CLOSURE-FCAL-BIAS-NEES",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled bias marginal",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/bias_nees_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NEES/DOF",
+          "value": 1.3115928705043793
+        },
+        {
+          "id": "N-CLOSURE-FCAL-MAG-NIS",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled magnetometer",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/mag_nis_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 0.9852891819339538
+        },
+        {
+          "id": "N-CLOSURE-FCAL-SUN-NIS",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled sun",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/sun_nis_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 0.9704377843299701
+        },
+        {
+          "id": "N-CLOSURE-FCAL-ST-NIS",
+          "scope": "closure independent stationary confirmation F-CALIBRATED-v1 settled star tracker",
+          "source": {
+            "locator": "/confirmation_F_CALIBRATED_settled/st_nis_normalized",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "NIS/DOF",
+          "value": 0.9899380635161372
+        },
+        {
+          "id": "N-CLOSURE-C4-BIAS-DEGRADE",
+          "scope": "closure independent C4 confirmation F-CALIBRATED-v1 whole bias RMSE versus F-BASE",
+          "source": {
+            "locator": "/remaining_classical_limitation/c4_calibrated_whole_bias_degradation_fraction",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "degradation fraction",
+          "value": 0.5807472544511563
+        },
+        {
+          "id": "N-CLOSURE-C4-FULL-FAST-IMPROVE",
+          "scope": "closure independent C4 confirmation full-oracle fast attitude peak versus F-BASE",
+          "source": {
+            "locator": "/acceptance/full_oracle_fast_peak_improvement_fraction",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "improvement fraction",
+          "value": 0.4132085082893989
+        },
+        {
+          "id": "N-CLOSURE-C4-FULL-SLOW-IMPROVE",
+          "scope": "closure independent C4 confirmation full-oracle slow bias versus F-BASE",
+          "source": {
+            "locator": "/acceptance/full_oracle_slow_bias_improvement_fraction",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+          },
+          "unit": "improvement fraction",
+          "value": 0.3208727762378273
+        }
+      ],
+      "question_patterns": [
+        "closure stationary confirmation N은 얼마인가?",
+        "confirmation F-BASE settled NEES/DOF는 얼마인가?",
+        "F-CALIBRATED settled NEES/DOF와 marginal NEES는 얼마인가?",
+        "F-CALIBRATED settled sensor NIS는 얼마인가?",
+        "closure C4 confirmation은 왜 실패했는가?",
+        "closure C4 full-oracle benefit은 original C4 수치와 같은 scope인가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/confirmation/confirmation_summary.json",
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_p1_exit_covariance_closure.py"
+      ],
+      "title": "Independent stationary and C4 closure confirmation"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Decision and ## 8. Updated P1 Exit decision",
+          "path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md"
+        },
+        {
+          "locator": "/decision, /acceptance, /phase2_implemented",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_p1_exit_covariance_closure.yaml"
+      ],
+      "id": "P1B-CURRENT-EXIT",
+      "implementation_paths": [],
+      "navigation_sources": [
+        {
+          "locator": "Authority note, ## 6 Updated P1 Exit, and ## 9 boundary",
+          "path": "docs/research/phase1b/AI_ADCS_PHASE0_1_MASTER_SUMMARY_AND_PHASE2_HANDOFF.md"
+        }
+      ],
+      "numeric_facts": [],
+      "question_patterns": [
+        "현재 P1 Exit decision은 무엇인가?",
+        "stationary closure가 통과했는가?",
+        "C4 closure acceptance가 통과했는가?",
+        "Phase 2 구현이 승인되었는가?",
+        "current review가 어떤 historical review를 supersede하는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_p1_exit_covariance_closure.py"
+      ],
+      "title": "Current updated Phase 1 Exit decision"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "/commands and /status",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json"
+        },
+        {
+          "locator": "Regression evidence",
+          "path": "experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "PROVENANCE-TESTS",
+      "implementation_paths": [],
+      "numeric_facts": [
+        {
+          "id": "N-STEP1-TESTS",
+          "scope": "Phase 1B Step 1 new test suite",
+          "source": {
+            "locator": "Regression table",
+            "path": "experiments/phase1b/reports/P1B_STEP1_VALIDATION_REPORT.md"
+          },
+          "unit": "passed tests",
+          "value": 52
+        },
+        {
+          "id": "N-CLOSURE-TESTS",
+          "scope": "P1 exit covariance closure test suite",
+          "source": {
+            "locator": "/commands/closure_tests/passed",
+            "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json"
+          },
+          "unit": "passed tests",
+          "value": 17
+        }
+      ],
+      "question_patterns": [
+        "Gate A/B1/B2/C/D1/CP4 test counts는 무엇인가?",
+        "Step 1/Step 2/closure test counts는 무엇인가?",
+        "legacy regression evidence는 어디에 있는가?",
+        "최종 closure regression이 모두 통과했는가?"
+      ],
+      "result_paths": [
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json"
+      ],
+      "status": "current",
+      "test_paths": [
+        "tests/test_mekf_core.py",
+        "tests/test_mekf_events.py",
+        "tests/test_basilisk_unit_st_generator.py",
+        "tests/test_mekf_metrics.py",
+        "tests/test_mekf_adapter.py",
+        "tests/test_mekf_runner_integration.py",
+        "tests/test_phase1b_unit_st_classical.py",
+        "tests/test_phase1b_sensor_fusion_experiments.py",
+        "tests/test_p1_exit_covariance_closure.py"
+      ],
+      "title": "Regression and test evidence"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "## 5. Fresh and verified cache-hit CLI evidence",
+          "path": "experiments/phase1a/reports/P1A_CP4_VALIDATION_REPORT.md"
+        },
+        {
+          "locator": "Executed commands and validation sequence",
+          "path": "experiments/phase1b/reports/P1B_STEP1_VALIDATION_REPORT.md"
+        },
+        {
+          "locator": "Phase 1B Step 2 commands",
+          "path": "experiments/phase1b/agent_logs/02_20260802T020512Z_COMMAND_LOG.md"
+        },
+        {
+          "locator": "P1 Exit closure commands",
+          "path": "experiments/phase1b/agent_logs/03_20260802T032016Z_COMMAND_LOG.md"
+        }
+      ],
+      "config_paths": [
+        "bench/configs/suite_phase1a_unit_st_smoke.yaml",
+        "bench/configs/suite_phase1b_unit_st_classical.yaml",
+        "bench/configs/suite_phase1b_sensor_fusion_c4.yaml",
+        "bench/configs/suite_p1_exit_covariance_closure.yaml"
+      ],
+      "id": "PROVENANCE-COMMANDS",
+      "implementation_paths": [],
+      "numeric_facts": [],
+      "question_patterns": [
+        "Phase 1A smoke fresh/cache command는 어디에 있는가?",
+        "Step 1 classical study rerun command는 어디에 있는가?",
+        "Step 2 fusion study rerun command는 어디에 있는가?",
+        "closure diagnose/search/confirm/report commands는 어디에 있는가?"
+      ],
+      "result_paths": [],
+      "status": "current",
+      "test_paths": [],
+      "title": "Canonical rerun command provenance"
+    },
+    {
+      "canonical_sources": [
+        {
+          "locator": "Post-run integrity summary",
+          "path": "experiments/phase1b/preflight_snapshots/03_20260802T032016Z/FINAL_INTEGRITY.md"
+        },
+        {
+          "locator": "Snapshot contents and entry invariants",
+          "path": "experiments/research_index/preflight_snapshots/01_20260802T_currentZ/README.md"
+        }
+      ],
+      "config_paths": [],
+      "id": "PROVENANCE-DIRTY-TREE",
+      "implementation_paths": [],
+      "numeric_facts": [],
+      "question_patterns": [
+        "각 Phase 1 작업이 기존 dirty tree를 보존했는가?",
+        "closure baseline snapshot과 post-run integrity는 어디에 있는가?",
+        "이번 indexing 작업의 entry snapshot은 어디에 있는가?",
+        "Phase 0–1 frozen files를 이번 작업이 수정했는가?"
+      ],
+      "result_paths": [
+        "experiments/research_index/preflight_snapshots/01_20260802T_currentZ"
+      ],
+      "status": "current",
+      "test_paths": [],
+      "title": "Dirty-tree and scope integrity evidence"
+    }
+  ],
+  "unresolved_ambiguities": [
+    {
+      "claim": "The updated review leaves a named C4 classical limitation and does not authorize Phase 2 implementation; a Design Review may begin only on explicit user request.",
+      "evidence": "Current updated review remains CONDITIONAL_GO with phase2_implemented=false, while the audited master explicitly separates a user-authorized Design Review from implementation approval.",
+      "expected_path": "experiments/phase1b/reports/P1_EXIT_REVIEW_UPDATED.md",
+      "id": "A-PHASE2-ENTRY-CONDITION",
+      "impact": "Future agents may start Design Review only on explicit user request and must not infer implementation authorization from Phase 1 completion, stationary closure, or the master handoff.",
+      "resolution_status": "unresolved"
+    }
+  ]
+}
