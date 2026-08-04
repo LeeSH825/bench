@@ -434,8 +434,8 @@
     },
     {
       "id": "F-CLOSURE-SEARCH",
-      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/search/search_manifest.json",
-      "role": "calibration search and freeze evidence",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json",
+      "role": "bounded calibration selection and freeze evidence",
       "status": "current"
     },
     {
@@ -470,14 +470,14 @@
     },
     {
       "id": "F-PREFLIGHT-CLOSURE",
-      "path": "experiments/phase1b/preflight_snapshots/03_20260802T032016Z/FINAL_INTEGRITY.md",
-      "role": "prior closure dirty-tree integrity evidence",
+      "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json",
+      "role": "bounded closure frozen-integrity evidence",
       "status": "current"
     },
     {
       "id": "F-PREFLIGHT-INDEX",
-      "path": "experiments/research_index/preflight_snapshots/01_20260802T_currentZ/README.md",
-      "role": "indexing entry snapshot description",
+      "path": "experiments/research_index/reports/PHASE0_1_REPOSITORY_INDEX_VALIDATION_REPORT.md",
+      "role": "audited indexing entry and final integrity summary",
       "status": "current"
     }
   ],
@@ -2206,7 +2206,7 @@
         "candidate 선택 전에 confirmation set을 보았는가?"
       ],
       "result_paths": [
-        "experiments/phase1b/results/p1_exit_covariance_closure_v1/search/search_manifest.json"
+        "experiments/phase1b/results/p1_exit_covariance_closure_v1/updated_exit_review.json"
       ],
       "status": "current",
       "test_paths": [
@@ -2471,12 +2471,12 @@
           "path": "experiments/phase1b/reports/P1B_STEP1_VALIDATION_REPORT.md"
         },
         {
-          "locator": "Phase 1B Step 2 commands",
-          "path": "experiments/phase1b/agent_logs/02_20260802T020512Z_COMMAND_LOG.md"
+          "locator": "## Implementation and experiment evidence; ## Post-implementation regression",
+          "path": "experiments/phase1b/reports/P1B_STEP2_VALIDATION_REPORT.md"
         },
         {
-          "locator": "P1 Exit closure commands",
-          "path": "experiments/phase1b/agent_logs/03_20260802T032016Z_COMMAND_LOG.md"
+          "locator": "## Regression and integrity evidence",
+          "path": "experiments/phase1b/reports/P1_EXIT_CLOSURE_VALIDATION_REPORT.md"
         }
       ],
       "config_paths": [
@@ -2502,12 +2502,12 @@
     {
       "canonical_sources": [
         {
-          "locator": "Post-run integrity summary",
-          "path": "experiments/phase1b/preflight_snapshots/03_20260802T032016Z/FINAL_INTEGRITY.md"
+          "locator": "/frozen_integrity",
+          "path": "experiments/phase1b/results/p1_exit_covariance_closure_v1/regression_evidence.json"
         },
         {
-          "locator": "Snapshot contents and entry invariants",
-          "path": "experiments/research_index/preflight_snapshots/01_20260802T_currentZ/README.md"
+          "locator": "## 1. Contract and preflight; ## Amendment validation and integrity",
+          "path": "experiments/research_index/reports/PHASE0_1_REPOSITORY_INDEX_VALIDATION_REPORT.md"
         }
       ],
       "config_paths": [],
@@ -2521,7 +2521,7 @@
         "Phase 0–1 frozen files를 이번 작업이 수정했는가?"
       ],
       "result_paths": [
-        "experiments/research_index/preflight_snapshots/01_20260802T_currentZ"
+        "experiments/research_index/reports/PHASE0_1_REPOSITORY_INDEX_VALIDATION_REPORT.md"
       ],
       "status": "current",
       "test_paths": [],

@@ -193,7 +193,7 @@ stationary confirmation은 통과했지만 C4 confirmation은 실패했다. 이 
 | original MAIN settled consistency | `sensor_fusion_c4_v1/settled_consistency.json` | `/main_fusion_stationary_F_BASE` |
 | original MAIN/STRESS/C4 paired data | `sensor_fusion_c4_v1/pilot_summary.json` | `/summary` and `/paired_differences` |
 | closure cause | `p1_exit_covariance_closure_v1/diagnosis.json` | `/groups`, `/likely_source_ranking...` |
-| frozen calibration | `.../search/search_manifest.json` then updated JSON | selected/freeze fields |
+| frozen calibration | `.../updated_exit_review.json` | `/F_CALIBRATED_status` selected/freeze fields and source search-manifest hash |
 | stationary/C4 closure | `.../confirmation/confirmation_summary.json` | `/groups`, `/acceptance` |
 | current decision/scoped headline values | `.../updated_exit_review.json` | named top-level fields |
 

@@ -1,0 +1,1 @@
+{"cut_fraction":0.2,"main_fusion_stationary_F_BASE":{"mag_nis":{"count":6050,"normalized_mean":1.0228982708948622},"nees":{"count":21800,"normalized_mean":1.8730178719854724},"star_tracker_nis":{"count":1250,"normalized_mean":1.0918889105362812},"sun_nis":{"count":2215,"normalized_mean":1.0004866247227868}},"status":"PASS_SENSOR_NIS_WITH_NAMED_NEES_LIMITATION"}

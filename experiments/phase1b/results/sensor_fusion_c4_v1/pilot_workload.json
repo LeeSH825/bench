@@ -1,0 +1,1 @@
+{"ablation_N":20,"checkpoint_unit":"scenario/policy/trajectory canonical JSON","duration_s":30.0,"estimated_runtime_s":300,"estimated_storage_bytes":100000000,"events_per_full_trajectory":540,"generated_trajectories":84,"policy_trajectory_records":680,"primary_paired_N":50,"upper_bound_filter_event_steps":367200}

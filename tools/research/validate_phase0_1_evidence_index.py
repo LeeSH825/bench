@@ -117,7 +117,15 @@ def load_and_validate(repo_root: Path) -> dict[str, Any]:
 
     _require(data.get("schema_version") == "phase0-1-evidence-index-v1", "schema version")
     metadata = data.get("metadata", {})
-    _require(metadata.get("repository_root") == str(repo_root), "repository_root metadata")
+    # The recorded root is audit-time provenance, not the validation target.
+    # Requiring it to equal the current checkout made the otherwise portable
+    # index fail in every clean worktree and clone.  All paths below are still
+    # resolved and validated against the explicit ``repo_root`` argument.
+    recorded_root = metadata.get("repository_root")
+    _require(
+        isinstance(recorded_root, str) and Path(recorded_root).is_absolute(),
+        "repository_root metadata",
+    )
     _require(
         metadata.get("validation_disposition")
         == "PASS_PHASE0_1_REPOSITORY_EVIDENCE_INDEX",

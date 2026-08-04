@@ -1,0 +1,86 @@
+experiment_version: p1-exit-covariance-closure-v1
+scope: classical-posterior-covariance-condition-closure-only
+
+frozen_foundation:
+  step2_config: bench/configs/suite_phase1b_sensor_fusion_c4.yaml
+  step2_config_sha256: 4aec25d1ded0fa7745dbb6c62a4fac1708bdedb18dba175055304eadf3e11d77
+  fixed_primary: F-BASE
+  frozen_sensitivity:
+    policy_id: F-TUNED
+    s_Qg: 0.125
+    s_Qb: 0.125
+    s_R_ST: 8.0
+  sensor_R_scales:
+    magnetometer: 1.0
+    sun: 1.0
+    star_tracker: 1.0
+
+data:
+  seed_namespace: p1-exit-covariance-closure-independent-v1
+  calibration_master_seed: 20261031
+  confirmation_master_seed: 20261032
+  split_seed: 20261033
+  calibration_pool_N: 50
+  train_N: 30
+  validation_N: 20
+  confirmation_stationary_N: 50
+  confirmation_c4_N: 50
+  duration_s: 30.0
+  generator_internal_split: [0.6, 0.2, 0.2]
+
+partitions:
+  initial: [0.0, 0.2]
+  middle: [0.2, 0.6]
+  settled: [0.6, 1.0]
+  boundary_semantics: left-closed-right-open-except-settled-includes-T
+
+settling_diagnostic:
+  time_bin_fraction: 0.05
+  consecutive_bins: 3
+  attitude_rmse_max_rad: 0.01
+  bias_rmse_max_rad_s: 0.0015
+  full_nees_normalized_band: [0.5, 3.0]
+  sensor_nis_normalized_band: [0.7, 1.4]
+
+calibration:
+  candidate_policy_id: F-CALIBRATED-CANDIDATE
+  frozen_policy_id: F-CALIBRATED-v1
+  scales: [0.5, 1.0, 2.0, 4.0, 8.0]
+  coordinate_candidate_count: 20
+  local_grid_candidate_count: 81
+  maximum_candidate_count: 101
+  scale_change_metric: sum-absolute-log2
+  local_grid_boundary_rule: nearest-three-locked-scales-preserve-81
+  validation_guards:
+    sensor_nis_normalized_band: [0.8, 1.25]
+    attitude_rmse_max_degradation_fraction: 0.05
+    bias_rmse_max_degradation_fraction: 0.10
+    maximum_divergence_count: 0
+    require_strict_P_and_S_SPD: true
+
+confirmation:
+  recommended_full_nees_normalized_band: [0.8, 1.25]
+  sensor_nis_normalized_band: [0.8, 1.25]
+  attitude_rmse_max_degradation_fraction: 0.05
+  bias_rmse_max_degradation_fraction: 0.10
+  maximum_divergence_count: 0
+  bootstrap_resamples: 2000
+  bootstrap_seed: 20261034
+  require_paired_nees_distance_ci_upper_below_zero: true
+  c4_full_oracle_min_improvement_fraction: 0.02
+  c4_calibrated_accuracy_max_degradation_fraction: 0.10
+  c4_wrong_side_ordering:
+    - process_slow_bias_better_than_wrong_process
+    - full_slow_bias_better_than_wrong_measurement
+    - full_fast_peak_better_than_wrong_measurement
+    - wrong_measurement_state_worse_than_f_base
+
+numerics:
+  divergence_threshold_rad: 0.75
+  confidence_level: 0.95
+  forbid_inverse_pinv_jitter_clipping_repair: true
+
+paths:
+  results_root: experiments/phase1b/results/p1_exit_covariance_closure_v1
+  manifests_root: experiments/phase1b/manifests/p1_exit_covariance_closure_v1
+  reports_root: experiments/phase1b/reports
