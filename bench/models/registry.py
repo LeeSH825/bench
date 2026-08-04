@@ -57,3 +57,26 @@ def get_model_adapter_class(model_id: str) -> Type[ModelAdapter]:
 
 def list_model_ids():
     return sorted(_REGISTRY.keys())
+
+
+# P1A-CP4 keeps typed event replay out of the legacy ModelAdapter registry.
+# The separate table prevents accidental entry into predict(float32 y_seq).
+from .mekf import MEKFEventReplayBridge
+
+
+_TYPED_EVENT_BRIDGE_REGISTRY: Dict[str, Type[MEKFEventReplayBridge]] = {
+    "mekf_event_replay_v1": MEKFEventReplayBridge,
+}
+
+
+def get_typed_event_bridge_class(model_id: str) -> Type[MEKFEventReplayBridge]:
+    if model_id not in _TYPED_EVENT_BRIDGE_REGISTRY:
+        raise KeyError(
+            f"Unknown typed-event model_id={model_id}. "
+            f"Available: {sorted(_TYPED_EVENT_BRIDGE_REGISTRY.keys())}"
+        )
+    return _TYPED_EVENT_BRIDGE_REGISTRY[model_id]
+
+
+def list_typed_event_bridge_ids():
+    return sorted(_TYPED_EVENT_BRIDGE_REGISTRY.keys())

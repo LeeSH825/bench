@@ -1139,3 +1139,362 @@ def prepare_bench_generated_v0(
         )
         out.append(art)
     return out
+
+
+# P1A-CP4 typed-event integration.  This path is deliberately separate from the
+# legacy float32 x/y cache and its DatasetArtifactsV0 contract.
+P1A_MEKF_TASK_FAMILY = "mekf_unit_st_v1"
+P1A_SYNTHETIC_GENERATOR_ID = "synthetic-unit-st-v1"
+P1A_BASILISK_GENERATOR_ID = "basilisk-unit-st-v1"
+P1A_TYPED_CACHE_VERSION = "p1a-cp4-typed-event-cache-v1"
+
+
+@dataclass(frozen=True)
+class MEKFTypedDatasetArtifacts:
+    """Strict three-file UNIT-ST sidecar plus its verified identity."""
+
+    suite_name: str
+    task_id: str
+    scenario_id: str
+    seed: int
+    producer_id: str
+    cache_state: str
+    cache_dir: Path
+    dataset_dir: Path
+    dataset: Any
+    manifest: Dict[str, Any]
+    semantic_hashes: Any
+    trajectory_split: Any
+    dataset_config_hash: str
+
+
+def _p1a_cp4_canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    except (TypeError, ValueError) as error:
+        raise ValueError("CP4 configuration must be finite canonical-JSON data") from error
+
+
+def _p1a_cp4_path_component(value: Any, name: str) -> str:
+    import re
+
+    component = str(value)
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", component) is None:
+        raise ValueError(f"{name} must be a safe nonempty path component")
+    return component
+
+
+def _p1a_cp4_resolve_dataset_config(
+    task_cfg: Mapping[str, Any],
+    *,
+    seed: int,
+    scenario_overrides: Optional[Mapping[str, Any]],
+) -> tuple[str, Any, Dict[str, Any], str, str]:
+    from dataclasses import asdict
+
+    if str(task_cfg.get("task_family", "")) != P1A_MEKF_TASK_FAMILY:
+        raise ValueError(f"task_family must equal {P1A_MEKF_TASK_FAMILY!r}")
+    raw = task_cfg.get("typed_event_dataset")
+    if not isinstance(raw, Mapping):
+        raise ValueError("mekf_unit_st_v1 requires a typed_event_dataset mapping")
+    resolved = copy.deepcopy(dict(raw))
+    if scenario_overrides:
+        override = scenario_overrides.get("typed_event_dataset", scenario_overrides)
+        if not isinstance(override, Mapping):
+            raise ValueError("typed event scenario override must be a mapping")
+        resolved = _deep_merge_dicts(resolved, copy.deepcopy(dict(override)))
+
+    allowed = {"producer_id", "generator_config", "cache_namespace"}
+    unexpected = set(resolved) - allowed
+    if unexpected:
+        raise ValueError(f"unexpected typed_event_dataset keys: {sorted(unexpected)}")
+    producer_id = str(resolved.get("producer_id", ""))
+    generator_config = resolved.get("generator_config", {})
+    if not isinstance(generator_config, Mapping):
+        raise ValueError("generator_config must be a mapping")
+    generator_kwargs = copy.deepcopy(dict(generator_config))
+    if "master_seed" in generator_kwargs and int(generator_kwargs["master_seed"]) != int(seed):
+        raise ValueError("generator_config.master_seed must equal the suite seed")
+    generator_kwargs["master_seed"] = int(seed)
+
+    if producer_id == P1A_SYNTHETIC_GENERATOR_ID:
+        from bench.tasks.generator.unit_st_synthetic import UnitSTSyntheticConfig
+
+        config = UnitSTSyntheticConfig(**generator_kwargs)
+    elif producer_id == P1A_BASILISK_GENERATOR_ID:
+        from bench.tasks.generator.basilisk_unit_st import BasiliskUnitSTConfig
+
+        config = BasiliskUnitSTConfig(**generator_kwargs)
+    else:
+        raise ValueError(
+            "producer_id must be synthetic-unit-st-v1 or basilisk-unit-st-v1"
+        )
+
+    canonical_config = json.loads(_p1a_cp4_canonical_json_bytes(asdict(config)).decode("ascii"))
+    cache_namespace = _p1a_cp4_path_component(
+        resolved.get("cache_namespace", P1A_TYPED_CACHE_VERSION), "cache_namespace"
+    )
+    identity = {
+        "cache_contract": P1A_TYPED_CACHE_VERSION,
+        "generator_config": canonical_config,
+        "producer_id": producer_id,
+        "task_family": P1A_MEKF_TASK_FAMILY,
+    }
+    config_hash = hashlib.sha256(_p1a_cp4_canonical_json_bytes(identity)).hexdigest()
+    scenario_id = config_hash[:12]
+    return producer_id, config, canonical_config, cache_namespace, scenario_id
+
+
+def _p1a_cp4_expected_runtime_and_sources(producer_id: str) -> tuple[Dict[str, str], Dict[str, str]]:
+    import platform
+    import scipy
+
+    from bench.estimators import mekf as mekf_core
+    from bench.tasks.generator import mekf_events as event_schema
+
+    def digest(module_or_path: Any) -> str:
+        path = (
+            Path(module_or_path.__file__).resolve()
+            if hasattr(module_or_path, "__file__")
+            else Path(module_or_path).resolve()
+        )
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    if producer_id == P1A_SYNTHETIC_GENERATOR_ID:
+        from bench.tasks.generator import unit_st_synthetic as generator
+
+        runtime = {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "scipy": scipy.__version__,
+        }
+        sources = {
+            "bench/estimators/mekf.py": digest(mekf_core),
+            "bench/tasks/generator/mekf_events.py": digest(event_schema),
+            "bench/tasks/generator/unit_st_synthetic.py": digest(generator),
+        }
+        return runtime, sources
+
+    from bench.tasks.generator import basilisk_unit_st as generator
+
+    proof = _repo_root_from_here() / "docs/research/phase1a/P1A_BASILISK_FRAME_CONVENTION_PROOF.md"
+    sources = {
+        "bench/estimators/mekf.py": digest(mekf_core),
+        "bench/tasks/generator/mekf_events.py": digest(event_schema),
+        "bench/tasks/generator/basilisk_unit_st.py": digest(generator),
+        "docs/research/phase1a/P1A_BASILISK_FRAME_CONVENTION_PROOF.md": digest(proof),
+    }
+    return dict(generator._runtime_identity()), sources
+
+
+def _p1a_cp4_expected_seed_identity(producer_id: str, config: Any) -> tuple[list[int], Dict[str, Any]]:
+    if producer_id == P1A_SYNTHETIC_GENERATOR_ID:
+        from bench.tasks.generator import unit_st_synthetic as generator
+
+        namespaces = {
+            "truth": config.truth_seed_namespace,
+            "gyro_noise": config.gyro_noise_seed_namespace,
+            "star_tracker_noise": config.star_tracker_noise_seed_namespace,
+            "star_tracker_sign": config.star_tracker_sign_seed_namespace,
+        }
+    else:
+        from bench.tasks.generator import basilisk_unit_st as generator
+
+        namespaces = {
+            "truth_attitude": config.truth_attitude_seed_namespace,
+            "truth_rate": config.truth_rate_seed_namespace,
+            "gyro_bias": config.gyro_bias_seed_namespace,
+            "gyro_noise": config.gyro_noise_seed_namespace,
+            "star_tracker_noise": config.star_tracker_noise_seed_namespace,
+            "star_tracker_sign": config.star_tracker_sign_seed_namespace,
+        }
+    trajectory_ids = [
+        int(generator._trajectory_id(config, index)) for index in range(config.num_trajectories)
+    ]
+    stream_roots = {
+        name: int(generator._stream_seed(config, namespace))
+        for name, namespace in namespaces.items()
+    }
+    stream_roots["trajectory_split"] = int(
+        generator._stream_seed(config, config.split_seed_namespace)
+    )
+    per_trajectory = {
+        str(trajectory_id): {
+            name: int(generator._stream_seed(config, namespace, trajectory_id))
+            for name, namespace in namespaces.items()
+        }
+        for trajectory_id in trajectory_ids
+    }
+    return trajectory_ids, {"stream_roots": stream_roots, "per_trajectory": per_trajectory}
+
+
+def _p1a_cp4_validate_loaded_dataset(
+    *,
+    dataset: Any,
+    manifest: Mapping[str, Any],
+    producer_id: str,
+    config: Any,
+    canonical_config: Mapping[str, Any],
+) -> Any:
+    from bench.tasks.generator.mekf_events import (
+        CONVENTION_ID,
+        SCHEMA_VERSION,
+        SEED_POLICY_VERSION,
+        TrajectorySplit,
+        split_trajectory_ids,
+    )
+
+    required = {
+        "schema_version": SCHEMA_VERSION,
+        "generator_id": producer_id,
+        "seed_policy_version": SEED_POLICY_VERSION,
+        "convention_id": CONVENTION_ID,
+        "zero_latency": True,
+        "same_timestamp_order": ["gyro", "star_tracker"],
+    }
+    for key, expected in required.items():
+        if manifest.get(key) != expected:
+            raise ValueError(f"cached manifest {key} mismatch")
+    if manifest.get("generator_config") != dict(canonical_config):
+        raise ValueError("cached manifest generator_config mismatch")
+    if manifest.get("master_seed") != int(canonical_config["master_seed"]):
+        raise ValueError("cached manifest master_seed mismatch")
+    expected_runtime, expected_sources = _p1a_cp4_expected_runtime_and_sources(producer_id)
+    if manifest.get("software_versions") != expected_runtime:
+        raise ValueError("cached manifest runtime identity mismatch")
+    if manifest.get("source_fingerprints") != expected_sources:
+        raise ValueError("cached manifest source fingerprint mismatch")
+
+    expected_ids, expected_derived_seeds = _p1a_cp4_expected_seed_identity(
+        producer_id, config
+    )
+    if manifest.get("trajectory_ids") != expected_ids:
+        raise ValueError("cached manifest deterministic trajectory_ids mismatch")
+    if manifest.get("derived_seeds") != expected_derived_seeds:
+        raise ValueError("cached manifest derived seed identity mismatch")
+    trajectory_ids = np.asarray(manifest.get("trajectory_ids"), dtype=np.int64)
+    if not np.array_equal(trajectory_ids, dataset.truth.trajectory_id):
+        raise ValueError("cached manifest trajectory_ids mismatch")
+    split_record = manifest.get("trajectory_split")
+    if not isinstance(split_record, Mapping):
+        raise ValueError("cached manifest trajectory_split is missing")
+    expected_split = split_trajectory_ids(
+        trajectory_ids,
+        split_seed=int(split_record.get("split_seed")),
+        train_fraction=float(canonical_config["train_fraction"]),
+        val_fraction=float(canonical_config["val_fraction"]),
+        test_fraction=float(canonical_config["test_fraction"]),
+    )
+    for name in ("train_ids", "val_ids", "test_ids"):
+        recorded = np.asarray(split_record.get(name), dtype=np.int64)
+        if not np.array_equal(recorded, getattr(expected_split, name)):
+            raise ValueError(f"cached manifest {name} mismatch")
+    return TrajectorySplit(
+        train_ids=expected_split.train_ids,
+        val_ids=expected_split.val_ids,
+        test_ids=expected_split.test_ids,
+        split_seed=expected_split.split_seed,
+    )
+
+
+def prepare_mekf_unit_st_v1(
+    *,
+    suite_name: str,
+    task_cfg: Mapping[str, Any],
+    seed: int,
+    cache_root: Optional[Path] = None,
+    scenario_overrides: Optional[Mapping[str, Any]] = None,
+) -> MEKFTypedDatasetArtifacts:
+    """Generate or strictly verify a typed UNIT-ST dataset without dense coercion."""
+
+    import tempfile
+
+    from bench.tasks.generator.mekf_events import load_event_dataset, save_event_dataset
+
+    root = Path(cache_root) if cache_root is not None else default_cache_root()
+    producer_id, config, canonical_config, namespace, scenario_id = (
+        _p1a_cp4_resolve_dataset_config(
+            task_cfg, seed=int(seed), scenario_overrides=scenario_overrides
+        )
+    )
+    task_id = _p1a_cp4_path_component(task_cfg.get("task_id"), "task_id")
+    suite_component = _p1a_cp4_path_component(suite_name, "suite_name")
+    config_identity = {
+        "cache_contract": P1A_TYPED_CACHE_VERSION,
+        "generator_config": canonical_config,
+        "producer_id": producer_id,
+        "task_family": P1A_MEKF_TASK_FAMILY,
+    }
+    config_hash = hashlib.sha256(_p1a_cp4_canonical_json_bytes(config_identity)).hexdigest()
+    cache_dir = (
+        root
+        / namespace
+        / suite_component
+        / task_id
+        / producer_id
+        / config_hash
+        / f"seed_{int(seed)}"
+    )
+    dataset_dir = cache_dir / "dataset"
+
+    if dataset_dir.exists():
+        dataset, manifest, hashes = load_event_dataset(
+            dataset_dir, expected_generator_id=producer_id
+        )
+        split = _p1a_cp4_validate_loaded_dataset(
+            dataset=dataset,
+            manifest=manifest,
+            producer_id=producer_id,
+            config=config,
+            canonical_config=canonical_config,
+        )
+        cache_state = "verified_cache_hit"
+    else:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".p1a_cp4_partial_", dir=cache_dir) as temporary:
+            temporary_dataset = Path(temporary) / "dataset"
+            if producer_id == P1A_SYNTHETIC_GENERATOR_ID:
+                from bench.tasks.generator.unit_st_synthetic import generate_unit_st
+
+                generated = generate_unit_st(config)
+            else:
+                from bench.tasks.generator.basilisk_unit_st import generate_basilisk_unit_st
+
+                generated = generate_basilisk_unit_st(config)
+            save_event_dataset(temporary_dataset, generated.dataset, generated.manifest)
+            dataset, manifest, hashes = load_event_dataset(
+                temporary_dataset, expected_generator_id=producer_id
+            )
+            split = _p1a_cp4_validate_loaded_dataset(
+                dataset=dataset,
+                manifest=manifest,
+                producer_id=producer_id,
+                config=config,
+                canonical_config=canonical_config,
+            )
+            if dataset_dir.exists():
+                raise FileExistsError("typed event cache target appeared during generation")
+            os.replace(temporary_dataset, dataset_dir)
+        cache_state = "fresh_generation"
+
+    return MEKFTypedDatasetArtifacts(
+        suite_name=str(suite_name),
+        task_id=task_id,
+        scenario_id=scenario_id,
+        seed=int(seed),
+        producer_id=producer_id,
+        cache_state=cache_state,
+        cache_dir=cache_dir,
+        dataset_dir=dataset_dir,
+        dataset=dataset,
+        manifest=dict(manifest),
+        semantic_hashes=hashes,
+        trajectory_split=split,
+        dataset_config_hash=config_hash,
+    )

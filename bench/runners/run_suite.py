@@ -1606,6 +1606,536 @@ def _write_run_manifest(
     return manifest_path
 
 
+# P1A-CP4 typed-event replay is an exact-pair branch.  None of these helpers
+# accepts or creates the legacy dense float32 observation sequence.
+P1A_MEKF_TASK_FAMILY = "mekf_unit_st_v1"
+P1A_MEKF_MODEL_ID = "mekf_event_replay_v1"
+P1A_MEKF_ARTIFACT_VERSION = "p1a-cp4-mekf-replay-artifact-v1"
+P1A_MEKF_METRIC_CONTRACT = "p1a-canonical-mekf-metrics-v1"
+
+
+def _is_p1a_mekf_event_replay_pair(task: Mapping[str, Any], model: Mapping[str, Any]) -> bool:
+    return (
+        str(task.get("task_family", "")) == P1A_MEKF_TASK_FAMILY
+        and str(model.get("model_id", "")) == P1A_MEKF_MODEL_ID
+    )
+
+
+def _p1a_mekf_canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("ascii")
+    except (TypeError, ValueError) as error:
+        raise ValueError("MEKF runner metadata must be finite canonical-JSON data") from error
+
+
+def _p1a_mekf_filter_configuration(task: Mapping[str, Any]) -> tuple[Any, float, np.ndarray, Dict[str, Any]]:
+    from bench.estimators.mekf import MEKFState
+
+    raw = task.get("mekf_replay")
+    if not isinstance(raw, Mapping):
+        raise ValueError("mekf_unit_st_v1 requires a mekf_replay mapping")
+    unexpected = set(raw) - {
+        "initial_time_s",
+        "initial_state",
+        "process_noise",
+        "evaluation_split",
+        "metric_confidence_level",
+    }
+    if unexpected:
+        raise ValueError(f"unexpected mekf_replay keys: {sorted(unexpected)}")
+    initial = raw.get("initial_state")
+    process = raw.get("process_noise")
+    if not isinstance(initial, Mapping) or not isinstance(process, Mapping):
+        raise ValueError("initial_state and process_noise must be mappings")
+    if set(initial) != {"q_NB", "b_g_rad_s", "P_diagonal"}:
+        raise ValueError("initial_state must contain exactly q_NB, b_g_rad_s, P_diagonal")
+    if set(process) != {"Q_c_diagonal"}:
+        raise ValueError("process_noise must contain exactly Q_c_diagonal")
+
+    q = np.asarray(initial["q_NB"], dtype=np.float64)
+    bias = np.asarray(initial["b_g_rad_s"], dtype=np.float64)
+    p_diagonal = np.asarray(initial["P_diagonal"], dtype=np.float64)
+    q_diagonal = np.asarray(process["Q_c_diagonal"], dtype=np.float64)
+    if q.shape != (4,) or bias.shape != (3,):
+        raise ValueError("initial q_NB/b_g_rad_s must have shapes [4]/[3]")
+    if p_diagonal.shape != (6,) or not np.all(np.isfinite(p_diagonal)) or np.any(p_diagonal <= 0.0):
+        raise ValueError("P_diagonal must contain six finite positive values")
+    if q_diagonal.shape != (6,) or not np.all(np.isfinite(q_diagonal)) or np.any(q_diagonal < 0.0):
+        raise ValueError("Q_c_diagonal must contain six finite nonnegative values")
+    initial_time_s = float(raw.get("initial_time_s", 0.0))
+    if not np.isfinite(initial_time_s) or initial_time_s < 0.0:
+        raise ValueError("initial_time_s must be finite and nonnegative")
+    evaluation_split = str(raw.get("evaluation_split", "test"))
+    if evaluation_split not in {"train", "val", "test"}:
+        raise ValueError("evaluation_split must be train, val, or test")
+    confidence = float(raw.get("metric_confidence_level", 0.95))
+    if not np.isfinite(confidence) or not 0.0 < confidence < 1.0:
+        raise ValueError("metric_confidence_level must be strictly between zero and one")
+
+    P = np.diag(p_diagonal).astype(np.float64, copy=False)
+    Q_c = np.diag(q_diagonal).astype(np.float64, copy=False)
+    state = MEKFState(q_NB=q, b_g=bias, P=P)
+    resolved = {
+        "evaluation_split": evaluation_split,
+        "initial_state": {
+            "P": P.tolist(),
+            "b_g_rad_s": bias.tolist(),
+            "q_NB": q.tolist(),
+        },
+        "initial_time_s": initial_time_s,
+        "metric_confidence_level": confidence,
+        "process_noise": {
+            "Q_c": Q_c.tolist(),
+            "units": ["rad^2/s", "rad^2/s", "rad^2/s", "rad^2/s^3", "rad^2/s^3", "rad^2/s^3"],
+        },
+        "state_convention": "active scalar-first Hamilton q_NB; right-local error",
+        "bias_units": "rad/s",
+        "time_units": "s",
+    }
+    return state, initial_time_s, Q_c, resolved
+
+
+def _p1a_exact_truth_join(truth: Any, artifact: Any) -> tuple[np.ndarray, np.ndarray]:
+    """Join only after estimation by exact trajectory_id and float64 timestamp."""
+
+    trajectory_rows = np.flatnonzero(truth.trajectory_id == np.int64(artifact.trajectory_id))
+    if trajectory_rows.size != 1:
+        raise ValueError("truth join requires exactly one matching trajectory_id")
+    trajectory_index = int(trajectory_rows[0])
+    start = int(truth.truth_offsets[trajectory_index])
+    stop = int(truth.truth_offsets[trajectory_index + 1])
+    truth_time = truth.truth_time_s[start:stop]
+    locations = np.searchsorted(truth_time, artifact.timestamp_s)
+    if np.any(locations >= truth_time.size):
+        raise ValueError("exact truth join timestamp is outside the trajectory")
+    if not np.array_equal(truth_time[locations], artifact.timestamp_s):
+        raise ValueError("exact truth join timestamp mismatch; interpolation is forbidden")
+    return truth.q_true_NB[start:stop][locations], truth.gyro_bias_rad_s[start:stop][locations]
+
+
+def _p1a_consistency_dict(summary: Any) -> Dict[str, Any]:
+    return {
+        "count": int(summary.count),
+        "dof_per_sample": int(summary.dof_per_sample),
+        "sum": float(summary.sum),
+        "mean": float(summary.mean),
+        "normalized_mean": float(summary.normalized_mean),
+        "confidence_level": float(summary.confidence_level),
+        "chi_square_sum_lower": float(summary.chi_square_sum_lower),
+        "chi_square_sum_upper": float(summary.chi_square_sum_upper),
+    }
+
+
+def _p1a_spd_dict(diagnostics: Any) -> Dict[str, Any]:
+    return {
+        "count": int(diagnostics.minimum_eigenvalue.size),
+        "dimension": int(diagnostics.dimension),
+        "all_cholesky_succeeded": bool(np.all(diagnostics.cholesky_succeeded)),
+        "minimum_eigenvalue": float(np.min(diagnostics.minimum_eigenvalue)),
+        "maximum_relative_asymmetry": float(np.max(diagnostics.relative_asymmetry)),
+    }
+
+
+def _p1a_mekf_metrics(
+    *,
+    artifacts: Sequence[Any],
+    truth: Any,
+    confidence_level: float,
+) -> Dict[str, Any]:
+    from bench.metrics.mekf import (
+        attitude_geodesic_error_deg,
+        attitude_geodesic_error_rad,
+        bias_error_summary,
+        consistency_summary,
+        right_local_nees,
+        spd_diagnostics,
+        star_tracker_nis,
+    )
+
+    q_hat = np.concatenate([artifact.q_hat_NB for artifact in artifacts], axis=0)
+    b_hat = np.concatenate([artifact.b_hat_rad_s for artifact in artifacts], axis=0)
+    P = np.concatenate([artifact.P for artifact in artifacts], axis=0)
+    time_s = np.concatenate([artifact.timestamp_s for artifact in artifacts])
+    trajectory_id = np.concatenate(
+        [
+            np.full(artifact.timestamp_s.shape, artifact.trajectory_id, dtype=np.int64)
+            for artifact in artifacts
+        ]
+    )
+    joined = [_p1a_exact_truth_join(truth, artifact) for artifact in artifacts]
+    q_true = np.concatenate([item[0] for item in joined], axis=0)
+    b_true = np.concatenate([item[1] for item in joined], axis=0)
+
+    attitude_rad = attitude_geodesic_error_rad(q_hat, q_true)
+    attitude_deg = attitude_geodesic_error_deg(q_hat, q_true)
+    bias = bias_error_summary(b_hat, b_true)
+    nees = right_local_nees(
+        q_hat,
+        b_hat,
+        P,
+        q_true,
+        b_true,
+        estimate_time_s=time_s,
+        covariance_time_s=time_s,
+        truth_time_s=time_s,
+        estimate_trajectory_id=trajectory_id,
+        covariance_trajectory_id=trajectory_id,
+        truth_trajectory_id=trajectory_id,
+    )
+
+    residual = np.concatenate([artifact.st_residual for artifact in artifacts], axis=0)
+    S = np.concatenate([artifact.st_S for artifact in artifacts], axis=0)
+    st_time = np.concatenate([artifact.st_timestamp_s for artifact in artifacts])
+    st_trajectory_id = np.concatenate(
+        [
+            np.full(artifact.st_timestamp_s.shape, artifact.trajectory_id, dtype=np.int64)
+            for artifact in artifacts
+        ]
+    )
+    nis = star_tracker_nis(
+        residual,
+        S,
+        residual_time_s=st_time,
+        covariance_time_s=st_time,
+        residual_trajectory_id=st_trajectory_id,
+        covariance_trajectory_id=st_trajectory_id,
+    )
+    nis_summary = consistency_summary(
+        nis, dof_per_sample=3, confidence_level=confidence_level
+    )
+    nees_summary = consistency_summary(
+        nees, dof_per_sample=6, confidence_level=confidence_level
+    )
+    p_diagnostics = spd_diagnostics(P, name="P")
+    s_diagnostics = spd_diagnostics(S, name="S")
+
+    return {
+        "metric_contract": P1A_MEKF_METRIC_CONTRACT,
+        "attitude": {
+            "count": int(attitude_rad.size),
+            "rmse_rad": float(np.sqrt(np.mean(attitude_rad * attitude_rad))),
+            "rmse_deg": float(np.sqrt(np.mean(attitude_deg * attitude_deg))),
+            "p95_rad": float(np.percentile(attitude_rad, 95.0)),
+            "p95_deg": float(np.percentile(attitude_deg, 95.0)),
+            "max_rad": float(np.max(attitude_rad)),
+            "max_deg": float(np.max(attitude_deg)),
+        },
+        "bias": {
+            "per_axis_rmse_rad_s": bias.per_axis_rmse_rad_s.tolist(),
+            "vector_rmse_rad_s": float(bias.vector_rmse_rad_s),
+        },
+        "nis": _p1a_consistency_dict(nis_summary),
+        "nees": _p1a_consistency_dict(nees_summary),
+        "spd": {
+            "P": _p1a_spd_dict(p_diagnostics),
+            "S": _p1a_spd_dict(s_diagnostics),
+        },
+    }
+
+
+def _p1a_write_mekf_replay_artifacts(
+    *,
+    run_dir: Path,
+    artifacts: Sequence[Any],
+    dataset_artifacts: Any,
+    estimator_config: Mapping[str, Any],
+    evaluation_split: str,
+) -> Dict[str, Any]:
+    artifact_parent = run_dir / "artifacts"
+    artifact_parent.mkdir(parents=True, exist_ok=True)
+    final_dir = artifact_parent / "mekf_replay"
+    pending_dir = artifact_parent / f".mekf_replay.partial.{uuid.uuid4().hex}"
+    backup_dir = artifact_parent / f".mekf_replay.previous.{uuid.uuid4().hex}"
+    pending_dir.mkdir(parents=False, exist_ok=False)
+    trajectory_records: List[Dict[str, Any]] = []
+    expected_fields = {
+        "event_index",
+        "event_order",
+        "timestamp_s",
+        "sensor_code",
+        "q_hat_NB",
+        "b_hat_rad_s",
+        "P",
+        "st_event_index",
+        "st_event_order",
+        "st_timestamp_s",
+        "st_residual",
+        "st_S",
+    }
+    try:
+        for artifact in artifacts:
+            filename = f"trajectory_{artifact.trajectory_id}.npz"
+            arrays = {name: getattr(artifact, name) for name in sorted(expected_fields)}
+            np.savez(pending_dir / filename, **arrays)
+            with np.load(pending_dir / filename, allow_pickle=False) as archive:
+                if set(archive.files) != expected_fields:
+                    raise ValueError("runner trajectory artifact fields mismatch")
+                for name, expected in arrays.items():
+                    observed = archive[name]
+                    if observed.dtype.hasobject or not np.array_equal(observed, expected):
+                        raise ValueError(f"runner artifact round trip mismatch for {name}")
+            trajectory_records.append(
+                {
+                    "filename": filename,
+                    "trajectory_id": int(artifact.trajectory_id),
+                    "processed_event_count": int(artifact.processed_event_count),
+                    "gyro_event_count": int(artifact.gyro_event_count),
+                    "star_tracker_update_count": int(artifact.star_tracker_update_count),
+                }
+            )
+
+        estimator_config_hash = hashlib.sha256(
+            _p1a_mekf_canonical_json_bytes(dict(estimator_config))
+        ).hexdigest()
+        first = artifacts[0]
+        manifest = {
+            "artifact_contract_version": P1A_MEKF_ARTIFACT_VERSION,
+            "task_family": P1A_MEKF_TASK_FAMILY,
+            "model_id": P1A_MEKF_MODEL_ID,
+            "adapter_id": first.provenance.adapter_id,
+            "adapter_version": first.provenance.adapter_version,
+            "dataset_identity": first.provenance.dataset_identity.as_dict(),
+            "dataset_config_hash": dataset_artifacts.dataset_config_hash,
+            "producer_id": dataset_artifacts.producer_id,
+            "cache_state": dataset_artifacts.cache_state,
+            "cache_directory": str(dataset_artifacts.dataset_dir),
+            "evaluation_split": evaluation_split,
+            "trajectory_ids": [int(artifact.trajectory_id) for artifact in artifacts],
+            "processed_event_count": int(sum(item.processed_event_count for item in artifacts)),
+            "gyro_event_count": int(sum(item.gyro_event_count for item in artifacts)),
+            "star_tracker_update_count": int(
+                sum(item.star_tracker_update_count for item in artifacts)
+            ),
+            "trajectory_files": trajectory_records,
+            "estimator_config": dict(estimator_config),
+            "estimator_config_hash": estimator_config_hash,
+            "metric_contract": P1A_MEKF_METRIC_CONTRACT,
+            "truth_in_trajectory_npz": False,
+        }
+        (pending_dir / "manifest.json").write_bytes(
+            _p1a_mekf_canonical_json_bytes(manifest)
+        )
+
+        if final_dir.exists():
+            os.replace(final_dir, backup_dir)
+        try:
+            os.replace(pending_dir, final_dir)
+        except Exception:
+            if backup_dir.exists() and not final_dir.exists():
+                os.replace(backup_dir, final_dir)
+            raise
+        if backup_dir.exists():
+            shutil.rmtree(backup_dir)
+        return manifest
+    finally:
+        if pending_dir.exists():
+            shutil.rmtree(pending_dir)
+
+
+def _run_p1a_mekf_event_replay(
+    *,
+    suite: Mapping[str, Any],
+    task: Mapping[str, Any],
+    model: Mapping[str, Any],
+    scenario_settings: Mapping[str, Any],
+    seed: int,
+    track_id: str,
+    init_id: str,
+    run_dir: Path,
+    cache_root: Path,
+    scenario_id: str,
+) -> Dict[str, Any]:
+    suite_name = str(suite["suite"]["name"])
+    task_id = str(task["task_id"])
+    model_id = str(model["model_id"])
+    try:
+        if not _is_p1a_mekf_event_replay_pair(task, model):
+            raise ValueError(
+                "mekf_unit_st_v1 and mekf_event_replay_v1 must be selected as an exact pair"
+            )
+        if track_id != "frozen" or init_id != "untrained":
+            raise ValueError("mekf_event_replay_v1 disables training and adaptation; use untrained:frozen")
+        initial_state, initial_time_s, Q_c, estimator_config = (
+            _p1a_mekf_filter_configuration(task)
+        )
+        _write_yaml(
+            run_dir / "config_snapshot.yaml",
+            {
+                "suite": suite.get("suite", {}),
+                "task": dict(task),
+                "model": dict(model),
+                "scenario_settings": dict(scenario_settings),
+                "scenario_id": scenario_id,
+                "seed": int(seed),
+                "track_id": track_id,
+                "init_id": init_id,
+                "typed_event_cache_root": str(cache_root),
+                "resolved_estimator_config": estimator_config,
+            },
+        )
+        _write_json(
+            run_dir / "run_plan.json",
+            {
+                "plan_id": f"{init_id}__{track_id}",
+                "task_family": P1A_MEKF_TASK_FAMILY,
+                "model_id": P1A_MEKF_MODEL_ID,
+                "training_enabled": False,
+                "adaptation_enabled": False,
+                "truth_available_to_estimator": False,
+            },
+        )
+        _write_json(
+            run_dir / "budget_ledger.json",
+            {
+                "train_updates_used": 0,
+                "adapt_updates_used": 0,
+                "train_skipped": True,
+                "track_id": track_id,
+                "init_id": init_id,
+            },
+        )
+
+        from bench.estimators.mekf import MEKFState
+        from bench.models.mekf import DatasetIdentity
+        from bench.models.registry import get_typed_event_bridge_class
+        from bench.tasks.bench_generated import prepare_mekf_unit_st_v1
+
+        prepared = prepare_mekf_unit_st_v1(
+            suite_name=suite_name,
+            task_cfg=task,
+            seed=int(seed),
+            cache_root=cache_root,
+            scenario_overrides=scenario_settings,
+        )
+        identity = DatasetIdentity.from_verified(prepared.manifest, prepared.semantic_hashes)
+        bridge_class = get_typed_event_bridge_class(model_id)
+        bridge = bridge_class(expected_dataset_identity=identity)
+        evaluation_split = str(estimator_config["evaluation_split"])
+        trajectory_ids = getattr(prepared.trajectory_split, f"{evaluation_split}_ids")
+        if trajectory_ids.size == 0:
+            raise ValueError("selected whole-trajectory split is empty")
+
+        replay_start = time.perf_counter()
+        replay_artifacts = []
+        for trajectory_id in trajectory_ids:
+            per_trajectory_state = MEKFState(
+                q_NB=initial_state.q_NB,
+                b_g=initial_state.b_g,
+                P=initial_state.P,
+            )
+            replay_artifacts.append(
+                bridge.replay_events(
+                    prepared.dataset.events,
+                    int(trajectory_id),
+                    per_trajectory_state,
+                    initial_time_s,
+                    Q_c,
+                    identity,
+                )
+            )
+        replay_elapsed_s = time.perf_counter() - replay_start
+
+        # Truth first becomes reachable here, after every estimator replay completed.
+        canonical_metrics = _p1a_mekf_metrics(
+            artifacts=replay_artifacts,
+            truth=prepared.dataset.truth,
+            confidence_level=float(estimator_config["metric_confidence_level"]),
+        )
+        artifact_manifest = _p1a_write_mekf_replay_artifacts(
+            run_dir=run_dir,
+            artifacts=replay_artifacts,
+            dataset_artifacts=prepared,
+            estimator_config=estimator_config,
+            evaluation_split=evaluation_split,
+        )
+        attitude = canonical_metrics["attitude"]
+        mse_value = float(attitude["rmse_rad"]) ** 2
+        metrics_obj = {
+            "status": "ok",
+            "suite": suite_name,
+            "task_id": task_id,
+            "scenario_id": scenario_id,
+            "seed": int(seed),
+            "model_id": model_id,
+            "track_id": track_id,
+            "init_id": init_id,
+            "cache_state": prepared.cache_state,
+            "dataset_identity": identity.as_dict(),
+            "canonical_mekf": canonical_metrics,
+            "artifact_manifest": "artifacts/mekf_replay/manifest.json",
+        }
+        _write_json(run_dir / "metrics.json", metrics_obj)
+        stale_failure = run_dir / "failure.json"
+        if stale_failure.exists():
+            stale_failure.unlink()
+        processed_count = int(artifact_manifest["processed_event_count"])
+        logger.info(
+            "P1A-CP4 typed replay complete producer=%s cache_state=%s dataset_hash=%s trajectories=%s",
+            prepared.producer_id,
+            prepared.cache_state,
+            identity.dataset_hash,
+            len(replay_artifacts),
+        )
+        clear_logging_context()
+        return {
+            "status": "ok",
+            "run_dir": str(run_dir),
+            "suite": suite_name,
+            "task_id": task_id,
+            "scenario_id": scenario_id,
+            "seed": int(seed),
+            "model_id": model_id,
+            "track_id": track_id,
+            "init_id": init_id,
+            "mse": mse_value,
+            "rmse": float(attitude["rmse_rad"]),
+            "mse_db": float(10.0 * np.log10(mse_value)),
+            "timing_ms_per_step": float(1000.0 * replay_elapsed_s / processed_count),
+            "recovery_k": None,
+            "cache_state": prepared.cache_state,
+            "dataset_hash": identity.dataset_hash,
+        }
+    except Exception as error:
+        failure = {
+            "status": "failed",
+            "failure_type": _classify_failure(error),
+            "phase": "p1a_cp4_typed_event_replay",
+            "failure_stage": "p1a_cp4_typed_event_replay",
+            "message": f"{type(error).__name__}: {error}",
+            "traceback": traceback.format_exc(),
+            "context": {
+                "suite_name": suite_name,
+                "task_id": task_id,
+                "scenario_id": scenario_id,
+                "seed": int(seed),
+                "model_id": model_id,
+                "track_id": track_id,
+                "init_id": init_id,
+            },
+        }
+        _write_json(run_dir / "failure.json", failure)
+        clear_logging_context()
+        return {
+            "status": "failed",
+            "run_dir": str(run_dir),
+            "suite": suite_name,
+            "task_id": task_id,
+            "scenario_id": scenario_id,
+            "seed": int(seed),
+            "model_id": model_id,
+            "track_id": track_id,
+            "init_id": init_id,
+            "failure_type": failure["failure_type"],
+            "error": failure["message"],
+        }
+
+
 def run_one(
     suite: Dict[str, Any],
     task: Dict[str, Any],
@@ -1729,6 +2259,23 @@ def run_one(
             os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
             log_out("[INFO] set CUBLAS_WORKSPACE_CONFIG=:4096:8 (deterministic CUDA)")
             logger.info("Set CUBLAS_WORKSPACE_CONFIG=:4096:8 for deterministic CUDA")
+
+    if (
+        str(task.get("task_family", "")) == P1A_MEKF_TASK_FAMILY
+        or str(model.get("model_id", "")) == P1A_MEKF_MODEL_ID
+    ):
+        return _run_p1a_mekf_event_replay(
+            suite=suite,
+            task=task,
+            model=model,
+            scenario_settings=scenario_settings,
+            seed=int(seed),
+            track_id=str(track_id),
+            init_id=str(init_id),
+            run_dir=run_dir,
+            cache_root=cache_root,
+            scenario_id=str(scenario_id),
+        )
 
     # Early missing_data
     if not test_path.exists():
