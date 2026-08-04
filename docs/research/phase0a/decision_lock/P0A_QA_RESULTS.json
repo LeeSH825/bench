@@ -1,0 +1,151 @@
+{
+  "required_files_present": true,
+  "missing": [],
+  "headers": {
+    "P0_00_EVIDENCE_REGISTER.md": true,
+    "P0_00_DEPRECATED_ASSUMPTIONS.md": true,
+    "P0_01_DECISION_LEDGER.md": true,
+    "P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md": true,
+    "P0_03_TRUTH_MODEL_SPEC.md": true,
+    "P0_04_SENSOR_ROLE_AND_MODEL_SPEC.md": true,
+    "P0_04_SENSOR_ERROR_CATALOG.md": true,
+    "P0_05_MEKF_MATH_CONTRACT.md": true,
+    "P0_05_MEKF_CONVENTION_TEST_VECTORS.md": true,
+    "P0_06_NEURAL_INSERTION_OPTIONS.md": true,
+    "P0_07_CONTEXT_CONTRACT.md": true,
+    "P0A_IMMEDIATE_TEST_SPEC.md": true
+  },
+  "fences": {
+    "P0_00_EVIDENCE_REGISTER.md": true,
+    "P0_00_DEPRECATED_ASSUMPTIONS.md": true,
+    "P0_01_DECISION_LEDGER.md": true,
+    "P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md": true,
+    "P0_03_TRUTH_MODEL_SPEC.md": true,
+    "P0_04_SENSOR_ROLE_AND_MODEL_SPEC.md": true,
+    "P0_04_SENSOR_ERROR_CATALOG.md": true,
+    "P0_05_MEKF_MATH_CONTRACT.md": true,
+    "P0_05_MEKF_CONVENTION_TEST_VECTORS.md": true,
+    "P0_06_NEURAL_INSERTION_OPTIONS.md": true,
+    "P0_07_CONTEXT_CONTRACT.md": true,
+    "P0A_IMMEDIATE_TEST_SPEC.md": true
+  },
+  "P0_00_EVIDENCE_REGISTER.md_taskA_header": true,
+  "P0_00_DEPRECATED_ASSUMPTIONS.md_taskA_header": true,
+  "ledger_rows": 26,
+  "ledger_statuses_allowed": true,
+  "ledger_status_values": [
+    "LOCK",
+    "PROVISIONAL",
+    "REJECTED",
+    "TBD-BY-EXPERIMENT"
+  ],
+  "q_product_vector": 1.1102230246251565e-16,
+  "q_prop_vector": 0.0,
+  "reset_jacobian_relerr": 1.8543839232701123e-10,
+  "mag_jacobian_max_relerr": 2.8116215980383916e-09,
+  "van_loan_symmetry": 0.0,
+  "van_loan_min_eig": 9.999999749748659e-11,
+  "math_reference_pass": true,
+  "semantic": {
+    "right_error": true,
+    "unit_st": true,
+    "main_fusion": true,
+    "stress_mag": true,
+    "oracle_ann_snn": true,
+    "no_split_qr_overclaim": true,
+    "trajectory_split": true
+  },
+  "files": [
+    {
+      "file": "P0A_IMMEDIATE_TEST_SPEC.md",
+      "bytes": 26550,
+      "lines": 511,
+      "sha256": "6d7890415c12c8af7e212639a03689131c1f4a8fffb46c674c9090efa245cb73"
+    },
+    {
+      "file": "P0A_PHASE_0A_SYNTHESIS.md",
+      "bytes": 12755,
+      "lines": 209,
+      "sha256": "8501e3a3d5792242973393d467c7d15e0a0ea21b026356c725abe6e760d08b9c"
+    },
+    {
+      "file": "P0A_REFERENCE_REGISTER.md",
+      "bytes": 4969,
+      "lines": 61,
+      "sha256": "12fa7065c2a1e377b18cd83386025c8afc1743640880be41ce7732ecafdcb187"
+    },
+    {
+      "file": "P0_00_DEPRECATED_ASSUMPTIONS.md",
+      "bytes": 5546,
+      "lines": 56,
+      "sha256": "674c85f973a4eab45588d0d94e9f27487950570f8ba6701776bab07a3ebfc08c"
+    },
+    {
+      "file": "P0_00_EVIDENCE_REGISTER.md",
+      "bytes": 7399,
+      "lines": 86,
+      "sha256": "8ab17f7c585ddc659e5113f7ddd6831ec3cd609a79ab3f901e813c289df2b8e9"
+    },
+    {
+      "file": "P0_01_DECISION_LEDGER.md",
+      "bytes": 7500,
+      "lines": 60,
+      "sha256": "a08b564f83a7e19ee5c9796411b51d504e5f14ce210fe2241edee98c2a1230de"
+    },
+    {
+      "file": "P0_02_TRUTH_SENSOR_ESTIMATOR_BOUNDARY.md",
+      "bytes": 10097,
+      "lines": 139,
+      "sha256": "793bd100a519b7f6d96d19e9449615460707d9d36a20866ca36102521a21ff39"
+    },
+    {
+      "file": "P0_03_TRUTH_MODEL_SPEC.md",
+      "bytes": 13215,
+      "lines": 271,
+      "sha256": "366e08be4104010697331ade69f4aa9a595f85e5e012eb963245a679b5216b76"
+    },
+    {
+      "file": "P0_04_SENSOR_ERROR_CATALOG.md",
+      "bytes": 9709,
+      "lines": 150,
+      "sha256": "e93b1855c1019e52e3097e72a60ca0859155f86a02696ccff6005344748cfc42"
+    },
+    {
+      "file": "P0_04_SENSOR_ROLE_AND_MODEL_SPEC.md",
+      "bytes": 16664,
+      "lines": 357,
+      "sha256": "d863a01ec61c20e0840e721569ee7e2b7c33fb118ae8eb83bd09be0cdb531740"
+    },
+    {
+      "file": "P0_05_MEKF_CONVENTION_TEST_VECTORS.md",
+      "bytes": 7644,
+      "lines": 400,
+      "sha256": "55b29674eb8b4979056ad563e87837001d96fd8a44e797d8b73b802e9fd4c148"
+    },
+    {
+      "file": "P0_05_MEKF_MATH_CONTRACT.md",
+      "bytes": 16034,
+      "lines": 612,
+      "sha256": "4c20cd530d1aa27788c87cab794a8f3590ba53eb3fde873ffc96f3f1e7338dad"
+    },
+    {
+      "file": "P0_06_NEURAL_INSERTION_OPTIONS.md",
+      "bytes": 12284,
+      "lines": 324,
+      "sha256": "0153090af8483e92bf4610c4bd5fa5237344c7b266389a28d3a44431613d651e"
+    },
+    {
+      "file": "P0_07_CONTEXT_CONTRACT.md",
+      "bytes": 12665,
+      "lines": 298,
+      "sha256": "498e89d9517e52aeea73a34b2de67571df0c447407244525496967c472c49e95"
+    },
+    {
+      "file": "README.md",
+      "bytes": 1464,
+      "lines": 42,
+      "sha256": "2f89c54f5c624d5ed9c2a84a4b828e535f3501d9f155fac07715d5e7cff56050"
+    }
+  ],
+  "overall_pass": true
+}
