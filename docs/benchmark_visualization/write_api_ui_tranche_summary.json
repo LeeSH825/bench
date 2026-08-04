@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-08-01T06:00:00Z",
+  "git_common_repository": "/home/dss-pc-05/bench/.git",
+  "user_working_tree": "/home/dss-pc-05/bench",
+  "user_working_tree_untouched": true,
+  "feature_worktree": "/tmp/bench-wc-tranche",
+  "branch": "benchmark-viz/write-control",
+  "baseline_commit": "2133709",
+  "head_commit": "ca05ece978cd1f3e96fc212ff0afcbc2757d3e69",
+  "new_commits": [
+    "df9d5bb",
+    "86e6484",
+    "33992ec",
+    "ca05ece"
+  ],
+  "verification_layer": "api_ui_browser",
+  "verdict": "READY_FOR_CONFIG_GUI_LAUNCH_TRANCHE",
+  "read_only_default": {
+    "openapi_methods": [
+      "GET"
+    ],
+    "write_paths": 0,
+    "post_to_write_path": "404/405",
+    "dash_action_buttons": 0,
+    "capability_flags_false": true
+  },
+  "write_mode_security": {
+    "strict_boolean_fails_closed": true,
+    "loopback_only": true,
+    "public_bind_with_writes_refused": true,
+    "allow_public_bind_does_not_unlock_writes": true,
+    "custom_header_required": true,
+    "idempotency_key_required": true,
+    "wildcard_cors": false
+  },
+  "write_api": {
+    "endpoints": [
+      "POST /api/v1/runs/{run_id}/actions/stop",
+      "POST /api/v1/checkpoints/{checkpoint_id}/actions/resume",
+      "GET /api/v1/actions/{action_id}"
+    ],
+    "accepted_status": 202,
+    "already_complete_status": 200,
+    "idempotency_key_echoed": false,
+    "handler_delegates_only": true
+  },
+  "idempotency": {
+    "stop_5_posts": {
+      "actions": 1
+    },
+    "resume_5_posts_across_api_restart": {
+      "actions": 1,
+      "children": 1,
+      "workers": 1
+    },
+    "same_key_different_target": 409,
+    "browser_double_click_actions": 1
+  },
+  "kalmannet_tsp_api_to_worker": {
+    "result": "PASS",
+    "parent_state": "INTERRUPTED",
+    "parent_exit": 10,
+    "checkpoint_schema": 2,
+    "child_state": "COMPLETED",
+    "child_exit": 0,
+    "bitwise_parity": true
+  },
+  "split_knet_api_to_worker": {
+    "result": "PASS",
+    "parent_state": "INTERRUPTED",
+    "parent_exit": 10,
+    "child_state": "COMPLETED",
+    "child_exit": 0,
+    "child_updates": 600,
+    "bitwise_parity": true
+  },
+  "playwright_workflow": {
+    "result": "PASS",
+    "read_only_buttons": 0,
+    "double_click_actions": 1,
+    "parent_interrupted": true,
+    "child_link": true,
+    "child_completed": true,
+    "ineligible_reason_shown": true,
+    "forbidden_buttons": [],
+    "console_errors": []
+  },
+  "ui_bugs_found_and_fixed": {
+    "action_panel_lifetime": "status panel was inside the polled controls block, so every poll destroyed the element the action callback wrote into; moved outside",
+    "navbar_badge": "header claimed read-only while write control was enabled"
+  },
+  "correction_to_earlier_audits": "earlier tranches audited HTTP methods by walking app.routes, which this FastAPI version reports as opaque _IncludedRouter objects; those audits were right but unsound. This tranche audits the OpenAPI schema.",
+  "full_pytest": {
+    "baseline_collected": 547,
+    "baseline_passed": 546,
+    "collected": 582,
+    "passed": 581,
+    "failed": 0,
+    "skipped": 1,
+    "new_tests_added": 35,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0
+  },
+  "openapi_methods_disabled": [
+    "GET"
+  ],
+  "openapi_methods_enabled": [
+    "GET",
+    "POST"
+  ],
+  "third_party_tracked_diff": false,
+  "deferred": [
+    "config GUI/editor",
+    "GUI benchmark launch",
+    "force terminate",
+    "warm start",
+    "evaluate checkpoint",
+    "GPU scheduler",
+    "GPU/AMP/multi-worker exact resume",
+    "Adaptive/MAML/ME-Split resume",
+    "authentication",
+    "remote worker",
+    "WebSocket/SSE"
+  ],
+  "documents": [
+    "docs/benchmark_visualization/write_control_api_contract.md",
+    "docs/benchmark_visualization/write_control_ui_contract.md",
+    "docs/benchmark_visualization/write_control_operator_guide.md",
+    "docs/benchmark_visualization/write_api_ui_tranche_report.md",
+    "docs/benchmark_visualization/write_api_ui_tranche_summary.json"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_write_api_ui/"
+}

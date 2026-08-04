@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-08-01T02:30:00Z",
+  "git_common_repository": "/home/dss-pc-05/bench/.git",
+  "user_working_tree": "/home/dss-pc-05/bench",
+  "user_working_tree_untouched": true,
+  "feature_worktree": "/tmp/bench-wc-tranche",
+  "branch": "benchmark-viz/write-control",
+  "baseline_commit": "0b197ae",
+  "head_commit": "a869b280d92435cc09a518ac983f3643aa4b3dc6",
+  "new_commits": [
+    "cf09078",
+    "a869b28"
+  ],
+  "verification_layer": "real_process_fault_restart",
+  "verdict": "READY_FOR_WRITE_API_UI_TRANCHE",
+  "scenarios": {
+    "A_checkpoint_write_failure": {
+      "result": "PASS",
+      "run_state": "FAILED",
+      "exit_code": 50,
+      "action_state": "FAILED",
+      "valid_checkpoints": 0,
+      "interrupted_transition": false
+    },
+    "B_child_restore_failure_before_first_update": {
+      "result": "PASS",
+      "child_state": "FAILED",
+      "exit_code": 40,
+      "child_updates": 0,
+      "traceback": true,
+      "children": 1,
+      "parent_unchanged": true,
+      "action_state": "COMPLETED"
+    },
+    "C_child_ordinary_failure_after_update": {
+      "result": "PASS",
+      "resume_cursor": 17,
+      "child_updates": 120,
+      "child_state": "FAILED",
+      "exit_code": 40,
+      "parent_checkpoint_valid": true,
+      "lineage_preserved": true,
+      "action_state": "COMPLETED"
+    },
+    "D_coordinator_restart_during_running_child": {
+      "result": "PASS",
+      "pid_alive": true,
+      "updates_before": 28,
+      "updates_after": 128,
+      "same_run_id": true,
+      "same_worker_instance": true,
+      "same_pid": true,
+      "children": 1,
+      "actions": 1,
+      "second_reconcile_noop": true,
+      "final_child_state": "COMPLETED"
+    }
+  },
+  "fault_injection_method": "real conditions (unwritable checkpoint dir, truncated payload, unwritable output tree); no mocks, no SyntheticExecutor, no mocked Popen",
+  "production_bugs_found": {
+    "F-3": {
+      "summary": "SuiteExecutor passed through run_one()'s returned status='failed', so a failed run was recorded COMPLETED/exit 0",
+      "found_by": "Scenario B corrupted resume checkpoint",
+      "status": "FIXED",
+      "commit": "cf09078"
+    },
+    "F-4": {
+      "summary": "resumable path never set adapter.train_updates_used, so every resumed child tripped a trained-plan policy violation at report time",
+      "found_by": "exposed once F-3 stopped swallowing failures",
+      "status": "FIXED",
+      "commit": "cf09078"
+    }
+  },
+  "correction_to_earlier_reporting": "tranche-19 recorded resumed children as COMPLETED; those runs were passing on a swallowed failure. The bitwise parity claim still holds and is re-verified, but the terminal state reported then was wrong. Earlier report left unmodified as historical evidence.",
+  "numerics_ever_wrong": false,
+  "parity_regression": {
+    "kalmannet_tsp": "BITWISE_PASS",
+    "split_knet": "BITWISE_PASS",
+    "child_terminal_state": "COMPLETED",
+    "parent_immutable": true,
+    "lineage_complete": true
+  },
+  "idempotency": {
+    "stop_5_same_key": {
+      "actions": 1,
+      "checkpoints": 1,
+      "terminals": 1
+    },
+    "resume_5_same_key_incl_restart": {
+      "actions": 1,
+      "children": 1,
+      "workers": 1
+    }
+  },
+  "full_pytest": {
+    "baseline_collected": 541,
+    "baseline_passed": 540,
+    "collected": 547,
+    "passed": 546,
+    "failed": 0,
+    "skipped": 1,
+    "new_tests_added": 6,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0
+  },
+  "api_methods": [
+    "GET"
+  ],
+  "dash_action_buttons": 0,
+  "third_party_tracked_diff": false,
+  "certification_levels": {
+    "adapter_service_fresh_process_parity": "CERTIFIED",
+    "workermanager_real_subprocess_parity": "CERTIFIED",
+    "real_process_fault_and_restart": "CERTIFIED",
+    "public_api_ui_exposure": "NOT_IMPLEMENTED"
+  },
+  "documents": [
+    "docs/benchmark_visualization/write_control_real_process_fault_contract.md",
+    "docs/benchmark_visualization/write_control_fault_restart_report.md",
+    "docs/benchmark_visualization/write_control_fault_restart_summary.json"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_write_control_fault_restart/"
+}

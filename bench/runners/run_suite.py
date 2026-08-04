@@ -67,6 +67,24 @@ from bench.utils.sweep import expand_sweep_grid
 
 logger = get_logger(__name__)
 
+# Control-plane observability. `active_observer()` returns a NullObserver unless a
+# control-plane worker installed one, so every call below is a no-op under the
+# existing CLI and changes no runner behaviour. Phase boundaries are emitted here,
+# at the runner level, so that even an adapter with no internal instrumentation
+# still reports setup/train/test transitions to the dashboard.
+try:
+    from bench.control.events.observer import active_observer  # type: ignore
+except Exception:  # pragma: no cover - control plane is optional
+
+    def active_observer():  # type: ignore[misc]
+        class _Null:
+            def status(self, *args: Any, **kwargs: Any) -> None: ...
+            def metric(self, *args: Any, **kwargs: Any) -> None: ...
+            def log(self, *args: Any, **kwargs: Any) -> None: ...
+            def artifact(self, *args: Any, **kwargs: Any) -> None: ...
+
+        return _Null()
+
 
 # Optional: use existing bench utils if available
 def _try_import_utils():
@@ -1410,16 +1428,21 @@ def _predict_batches(
 
 
 def _try_call_setup(adapter: Any, model_cfg: Dict[str, Any], system_info: Dict[str, Any], run_ctx: Dict[str, Any]) -> None:
+    observer = active_observer()
+    observer.status("PHASE_START", phase="setup", message=f"adapter setup: {type(adapter).__name__}")
     try:
-        adapter.setup(model_cfg, system_info, run_ctx)  # type: ignore
-        return
-    except TypeError:
-        pass
-    try:
-        adapter.setup(model_cfg, system_info)  # type: ignore
-        return
-    except TypeError:
-        adapter.setup(model_cfg)  # type: ignore
+        try:
+            adapter.setup(model_cfg, system_info, run_ctx)  # type: ignore
+            return
+        except TypeError:
+            pass
+        try:
+            adapter.setup(model_cfg, system_info)  # type: ignore
+            return
+        except TypeError:
+            adapter.setup(model_cfg)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="setup")
 
 
 def _try_call_train(
@@ -1428,11 +1451,219 @@ def _try_call_train(
     val_loader: Any,
     budget: Dict[str, Any],
     ckpt_dir: Path,
+    execution_contract: Optional[Dict[str, Any]] = None,
+    train_arrays: Optional[Dict[str, Any]] = None,
+    val_arrays: Optional[Dict[str, Any]] = None,
+    seed: int = 0,
+    batch_size: int = 1,
 ) -> Any:
+    contract = dict(execution_contract or {})
+    if str(contract.get("training_path_id") or "legacy_train_v1") == "control_resumable_v1":
+        # Certified control-plane run: the resumable loop from update 0.
+        # Deliberately no except-and-fall-back-to-train(); a failure surfaces
+        # as a run failure rather than a silently legacy run (ADR-WC-003).
+        return _call_resumable_train(
+            adapter=adapter,
+            contract=contract,
+            budget=budget,
+            ckpt_dir=ckpt_dir,
+            train_arrays=train_arrays,
+            val_arrays=val_arrays,
+            seed=seed,
+            batch_size=batch_size,
+        )
+    observer = active_observer()
+    observer.status(
+        "PHASE_START",
+        phase="train",
+        message=f"adapter train: {type(adapter).__name__} budget={budget.get('train_max_updates')}",
+    )
     try:
-        return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore
-    except TypeError:
-        return adapter.train(train_loader, val_loader)  # type: ignore
+        try:
+            return adapter.train(train_loader, val_loader, budget=budget, ckpt_dir=ckpt_dir)  # type: ignore
+        except TypeError:
+            return adapter.train(train_loader, val_loader)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="train")
+
+
+def _call_resumable_train(
+    *,
+    adapter: Any,
+    contract: Dict[str, Any],
+    budget: Dict[str, Any],
+    ckpt_dir: Path,
+    train_arrays: Optional[Dict[str, Any]],
+    val_arrays: Optional[Dict[str, Any]],
+    seed: int,
+    batch_size: int,
+) -> Any:
+    """Run the certified resumable path, optionally resuming a checkpoint.
+
+    Kept in the runner so the control worker does not reimplement dataset
+    splitting or adapter setup; the loop itself lives in the adapter mixin.
+    """
+    from bench.control.checkpoints.batchplan import BatchPlan
+    from bench.control.checkpoints.training import TrainingProgress, TrainingSchedule
+
+    if not hasattr(adapter, "resumable_train"):
+        raise RuntimeError(
+            "training_path_id=control_resumable_v1 was resolved for an adapter that does "
+            f"not implement the resumable contract: {type(adapter).__name__}. Refusing to "
+            "silently fall back to train() (ADR-WC-003)."
+        )
+    if not train_arrays:
+        raise RuntimeError("control_resumable_v1 requires materialised training arrays")
+
+    observer = active_observer()
+    observer.status(
+        "PHASE_START",
+        phase="train",
+        message=(
+            f"adapter resumable_train: {type(adapter).__name__} "
+            f"path=control_resumable_v1 budget={budget.get('train_max_updates')}"
+        ),
+        training_path_id="control_resumable_v1",
+        certification_id=contract.get("certification_id"),
+        resumed_from_checkpoint_id=contract.get("resume_checkpoint_id"),
+    )
+    try:
+        max_updates = int(budget.get("train_max_updates", 0))
+        eval_interval = max(1, int(budget.get("val_eval_interval_updates", 0) or 1))
+        x = np.ascontiguousarray(train_arrays["x"])
+        y = np.ascontiguousarray(train_arrays["y"])
+        val_batches = []
+        if val_arrays:
+            val_batches = [{"x": np.ascontiguousarray(val_arrays["x"]),
+                            "y": np.ascontiguousarray(val_arrays["y"])}]
+
+        adapter.begin_resumable_training(
+            train_x=x,
+            train_y=y,
+            val_batches=val_batches,
+            lr=float(budget.get("lr", 1e-3)),
+            weight_decay=float(budget.get("weight_decay", 0.0)),
+        )
+        plan = BatchPlan(
+            dataset_length=int(x.shape[0]), batch_size=max(1, int(batch_size)), seed=int(seed)
+        )
+
+        progress = None
+        checkpoint_id = contract.get("resume_checkpoint_id")
+        if checkpoint_id:
+            progress = _restore_resume_checkpoint(
+                adapter=adapter, contract=contract, checkpoint_id=str(checkpoint_id)
+            )
+
+        schedule = TrainingSchedule(
+            max_updates=max_updates,
+            eval_interval=eval_interval,
+            patience_evals=int(budget.get("patience_evals", 0)),
+            min_delta=float(budget.get("min_delta", 0.0)),
+        )
+        stop_requested = contract.get("stop_requested")
+        result = adapter.resumable_train(
+            plan=plan,
+            schedule=schedule,
+            progress=progress,
+            observer=observer,
+            stop_requested=stop_requested,
+        )
+
+        if result.interrupted:
+            adapter.train_updates_used = int(result.progress.global_update)
+            # A graceful stop was honoured at a safe boundary. The interrupt
+            # checkpoint has to be written *here*, because this is the only
+            # place the live adapter is in scope. The worker supplies the
+            # settlement callback; the runner does not know about registries
+            # or checkpoint services.
+            on_interrupt = contract.get("on_interrupt")
+            if on_interrupt is None:
+                # Refusing is the point: continuing would let an interrupted
+                # run fall through to COMPLETED with no checkpoint, which is
+                # exactly the false-terminal state DND-CSR-004 forbids.
+                raise RuntimeError(
+                    "training was interrupted by a stop request but the execution "
+                    "contract carries no on_interrupt settlement callback; refusing "
+                    "to report an interrupted run as completed"
+                )
+            outcome = on_interrupt(
+                adapter=adapter,
+                cursor=result.cursor,
+                progress=result.progress,
+                batch_plan=plan,
+            )
+            return {
+                "status": "interrupted",
+                "training_path_id": "control_resumable_v1",
+                "updates_used": int(result.progress.global_update),
+                "best_step": int(result.progress.best_step),
+                "best_val_mse": float(result.progress.best_val),
+                "val_history": [dict(v) for v in result.progress.val_history][-20:],
+                "interrupted": True,
+                "batch_plan": plan.as_dict(),
+                "stop_outcome": dict(outcome or {}),
+            }
+
+        adapter.finish_resumable_training()
+
+        # The trained-plan policy check reads adapter.train_updates_used (and
+        # the budget ledger). Legacy train() sets it; the resumable path did
+        # not, so every resumed child tripped
+        # "policy_violation: trained plan requires positive
+        # train_outer_updates_used" at report time. The numbers were correct —
+        # only the accounting was missing.
+        adapter.train_updates_used = int(result.progress.global_update)
+        if hasattr(adapter, "_update_ledger"):
+            try:
+                adapter._update_ledger(
+                    train_updates_used=int(result.progress.global_update),
+                    adapt_updates_used=int(getattr(adapter, "adapt_updates_used", 0) or 0),
+                    train_max_updates=int(max_updates),
+                )
+            except Exception:
+                logger.warning("budget ledger update failed after resumable training",
+                               exc_info=True)
+
+        ckpt_dir.mkdir(parents=True, exist_ok=True)
+        state = {
+            "status": "ok",
+            "training_path_id": "control_resumable_v1",
+            "updates_used": int(result.progress.global_update),
+            "best_step": int(result.progress.best_step),
+            "best_val_mse": float(result.progress.best_val),
+            "last_train_loss": result.progress.last_train_loss,
+            "val_history": [dict(v) for v in result.progress.val_history][-20:],
+            "interrupted": bool(result.interrupted),
+            "batch_plan": plan.as_dict(),
+        }
+        if hasattr(adapter, "save"):
+            try:
+                adapter.save(ckpt_dir)
+            except Exception:
+                logger.warning("adapter.save() failed after resumable training", exc_info=True)
+        state["_resumable_result"] = result
+        return state
+    finally:
+        observer.status("PHASE_END", phase="train")
+
+
+def _restore_resume_checkpoint(*, adapter: Any, contract: Dict[str, Any], checkpoint_id: str):
+    """Restore a validated checkpoint before the first new optimizer update."""
+    from bench.control.checkpoints import CheckpointService, restore_rng
+    from bench.control.checkpoints.training import TrainingProgress
+
+    parent_run_dir = contract.get("parent_run_dir")
+    if not parent_run_dir:
+        raise RuntimeError("resume requires parent_run_dir in the execution contract")
+    service = CheckpointService(
+        Path(str(parent_run_dir)), control_root=contract.get("control_root")
+    )
+    _manifest, _cursor, state, rng, payload = service.load(checkpoint_id)
+    adapter.restore_training_state(state)
+    restore_rng(rng)
+    stored = dict(state.extra_state or {}).get("progress") or {}
+    return TrainingProgress.from_dict(stored)
 
 
 def _try_call_eval(
@@ -1441,19 +1672,24 @@ def _try_call_eval(
     ckpt_path: Optional[Path],
     track_cfg: Dict[str, Any],
 ) -> Any:
-    if ckpt_path is not None:
-        try:
-            return adapter.eval(test_loader, ckpt_path=ckpt_path, track_cfg=track_cfg)  # type: ignore
-        except TypeError:
-            pass
-        try:
-            return adapter.eval(test_loader, str(ckpt_path), track_cfg)  # type: ignore
-        except TypeError:
-            pass
+    observer = active_observer()
+    observer.status("PHASE_START", phase="test", message=f"adapter eval: {type(adapter).__name__}")
     try:
-        return adapter.eval(test_loader, ckpt_path=None, track_cfg=track_cfg)  # type: ignore
-    except TypeError:
-        return adapter.eval(test_loader)  # type: ignore
+        if ckpt_path is not None:
+            try:
+                return adapter.eval(test_loader, ckpt_path=ckpt_path, track_cfg=track_cfg)  # type: ignore
+            except TypeError:
+                pass
+            try:
+                return adapter.eval(test_loader, str(ckpt_path), track_cfg)  # type: ignore
+            except TypeError:
+                pass
+        try:
+            return adapter.eval(test_loader, ckpt_path=None, track_cfg=track_cfg)  # type: ignore
+        except TypeError:
+            return adapter.eval(test_loader)  # type: ignore
+    finally:
+        observer.status("PHASE_END", phase="test")
 
 
 def _adapter_supports_viz_diagnostics(adapter: Any) -> bool:
@@ -1585,7 +1821,12 @@ def run_one(
     log_file: Optional[str] = None,
     debug_every: Optional[int] = None,
     emit_viz_artifacts: Optional[bool] = None,
+    execution_contract: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
+    # `execution_contract` is the narrow internal hand-off from the control
+    # worker (ADR-WC-001). When it is None — which is every legacy CLI call —
+    # nothing below changes, so the legacy training path keeps its exact
+    # semantics (ADR-WC-002).
     bench_root = _bench_root()
     cache_root = _cache_root(bench_root)
     runner_cfg = suite.get("runner", {}) or {}
@@ -2074,6 +2315,11 @@ def run_one(
                 val_loader=val_loader,
                 budget=train_budget,
                 ckpt_dir=(run_dir / "checkpoints"),
+                execution_contract=execution_contract,
+                train_arrays=split_train,
+                val_arrays=split_val,
+                seed=int(seed),
+                batch_size=int(train_bs),
             )
             if isinstance(train_res, dict) and train_res.get("ckpt_path"):
                 return Path(str(train_res["ckpt_path"])).expanduser().resolve()

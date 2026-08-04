@@ -73,3 +73,27 @@ Thumbs.db
 *~
 *.swp
 *.swo
+# Benchmark runtime outputs
+/runs/
+/reports/
+/artifacts/
+/control/
+/bench_data_cache/
+
+# Generated numerical and model outputs
+*.npz
+*.pt
+*.pth
+*.ckpt
+
+# Runtime databases and logs
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+
+# Python and browser test outputs
+__pycache__/
+*.py[cod]
+playwright-report/
+test-results/

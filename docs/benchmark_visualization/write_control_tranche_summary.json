@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-31T04:20:00Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "authoritative_head_untouched": "d92cd0c",
+    "baseline_commit": "9454766",
+    "baseline_branch": "benchmark-viz/checkpoint-stop-resume",
+    "c0eaaf7_ancestry_confirmed": true,
+    "branch": "benchmark-viz/write-control",
+    "worktree": "/tmp/bench-wc-tranche",
+    "implementation_commit": "48b0edb",
+    "pushed_to_remote": false
+  },
+  "verdict": "NOT_READY",
+  "verdict_reason": "Step A of six implemented and verified; steps B-F (WorkerManager child resume, durable resume actions, write API, Dash controls, write E2E) not implemented. The section 16 acceptance gate requires all of them.",
+  "completion": {
+    "canonical_training_path": "DONE",
+    "direct_path_characterization": "DONE",
+    "worker_child_resume": "NOT_IMPLEMENTED",
+    "durable_resume_actions": "NOT_IMPLEMENTED",
+    "write_api": "NOT_IMPLEMENTED",
+    "dash_controls": "NOT_IMPLEMENTED",
+    "write_e2e_playwright": "NOT_IMPLEMENTED"
+  },
+  "training_path": {
+    "path_ids": ["control_resumable_v1", "legacy_train_v1", "not_applicable"],
+    "decided_once_at_resolve": true,
+    "keyed_on_full_certification_tuple": true,
+    "in_structural_config_hash": true,
+    "serialized_in_run_spec": true,
+    "old_spec_without_field_is_legacy": true,
+    "retroactive_promotion_possible": false,
+    "silent_fallback_possible": false,
+    "recorded_in": {
+      "resolved_run_spec": true,
+      "structural_config_hash": true,
+      "worker_start_event": true,
+      "runner_execution_contract": true,
+      "registry_run_row": false,
+      "checkpoint_manifest": false,
+      "api_run_detail": false,
+      "ui": false
+    },
+    "certified_examples": {
+      "kalmannet_tsp_cpu_fp32_0workers": "control_resumable_v1",
+      "split_knet_cpu_fp32_0workers": "control_resumable_v1",
+      "kalmannet_tsp_cuda": "legacy_train_v1",
+      "precision_fp16": "legacy_train_v1",
+      "num_workers_4": "legacy_train_v1",
+      "adaptive_knet_maml_knet_me_split": "legacy_train_v1",
+      "training_disabled": "not_applicable"
+    }
+  },
+  "direct_path_characterization": {
+    "method": "identical batch sequence via DataLoader(shuffle=False) vs BatchPlan(shuffle=False)",
+    "kalmannet_tsp": "BITWISE_EQUAL",
+    "split_knet": "BITWISE_EQUAL",
+    "compared": ["initial_weights", "final_weights_sha256", "update_count", "best_step"],
+    "shuffled_orders_differ": true,
+    "shuffled_difference_cause": "DataLoader.__iter__ draws a random_() for its worker base seed, and RandomSampler evaluates and discards a trailing randperm each epoch; reproducing that would pin the batch plan to torch sampler internals",
+    "conclusion": "the loops are semantically equivalent; only batch-order derivation differs, so the two paths are separated in structural provenance rather than declared interchangeable",
+    "legacy_defaults_changed": false,
+    "tolerance_widened": false
+  },
+  "tests": {
+    "baseline_collected": 497,
+    "baseline_passed": 496,
+    "baseline_skipped": 1,
+    "collected": 515,
+    "collection_errors": 0,
+    "passed": 514,
+    "failed": 0,
+    "skipped": 1,
+    "subtests_passed": 12,
+    "new_tests_added": 18,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0,
+    "new_tests_write_to_repository": false
+  },
+  "third_party": {
+    "tracked_files_modified": 0,
+    "submodule_revisions_changed": false,
+    "diff_empty": true
+  },
+  "security_boundary": {
+    "http_methods_exposed": ["GET", "HEAD"],
+    "write_routes_added": 0,
+    "write_mode_gate_implemented": false,
+    "dash_action_buttons": 0,
+    "note": "read-only remains intact trivially, because no write surface was added"
+  },
+  "remaining_risks": [
+    "five of six tranche steps are unimplemented (B-F)",
+    "training_path_id is not yet propagated to the registry run row, checkpoint manifest, or API/UI, which ADR-WC-004 requires and which capability gating for the write API depends on",
+    "_call_resumable_train is unit-tested for dispatch and refusal-to-fall-back but has not been exercised end-to-end through a real certified suite run, so its dataset-split and batch_size plumbing is unproven",
+    "shuffled legacy and shuffled control runs are not numerically comparable; enforced by differing structural hashes and documented, but relevant to anyone aggregating historical results",
+    "BatchPlan.shuffle changes plan_id inputs; no production checkpoint predates it, but a plan stored before this commit would hash differently"
+  ],
+  "recommended_next_step": "propagate training_path_id into the registry row and checkpoint manifest, then implement WorkerManager child launch, since the write API and Dash controls both depend on it",
+  "documents": [
+    "docs/benchmark_visualization/control_plane_training_path_contract.md",
+    "docs/benchmark_visualization/write_control_tranche_report.md",
+    "docs/benchmark_visualization/write_control_tranche_summary.json"
+  ],
+  "documents_not_written": [
+    "write_control_api_contract.md (no API implemented)",
+    "write_control_operator_guide.md (no operator-facing write workflow exists)"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_write_control/"
+}

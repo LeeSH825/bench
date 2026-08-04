@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-31T02:45:00Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "baseline_commit": "d92cd0c",
+    "implementation_commit": "c0eaaf7",
+    "branch": "benchmark-viz/checkpoint-stop-resume",
+    "work_worktree": "/tmp/bench-ckpt-tranche",
+    "pushed_to_remote": false,
+    "stabilization_ancestry_confirmed": [
+      "355b6ca",
+      "179a42d",
+      "ee862a2"
+    ]
+  },
+  "verdict": "READY_FOR_WRITE_CONTROL_TRANCHE",
+  "checkpoint_v1": {
+    "schema_version": 1,
+    "atomicity": "PASS",
+    "corruption_detection": "PASS",
+    "compatibility": "PASS",
+    "reconciliation": "PASS",
+    "kinds": [
+      "periodic",
+      "best",
+      "interrupt",
+      "final"
+    ],
+    "publication_order_enforced": true,
+    "registry_row_never_precedes_durable_bytes": true,
+    "trusted_local_load_only": true
+  },
+  "exact_resume": {
+    "kalmannet_tsp": "CERTIFIED",
+    "split_knet": "CERTIFIED",
+    "boundary": "optimizer_update",
+    "equality": "bitwise",
+    "certified_modes": [
+      {
+        "model_id": "kalmannet_tsp",
+        "implementation_id": "bench_kalmannet_tsp_adapter_v1",
+        "precision": "fp32",
+        "device_class": "cpu",
+        "num_workers": 0,
+        "training_mode": "supervised_single_optimizer"
+      },
+      {
+        "model_id": "split_knet",
+        "implementation_id": "bench_split_knet_adapter_v1",
+        "precision": "fp32",
+        "device_class": "cpu",
+        "num_workers": 0,
+        "training_mode": "supervised_single_optimizer_split_deviation"
+      }
+    ],
+    "fresh_process_verified": true,
+    "resume_adapter_built_with_different_seed": true,
+    "compared_fields": [
+      "final_state_dict_hash",
+      "optimizer_state_hash",
+      "per_update_train_loss_sequence",
+      "validation_history",
+      "optimizer_update_count",
+      "batch_plan_position",
+      "best_step",
+      "best_metric"
+    ],
+    "mutation_probes": {
+      "drop_optimizer_state": "DETECTED",
+      "cursor_off_by_one": "DETECTED",
+      "drop_split_gru_hidden_state": "DETECTED_AND_REFUSED"
+    },
+    "not_certified": [
+      "adaptive_knet",
+      "maml_knet",
+      "me_split_knet_v0",
+      "mb_kf"
+    ],
+    "uncertified_envelopes": {
+      "device_class": [
+        "cuda",
+        "gpu",
+        "mps"
+      ],
+      "precision": [
+        "fp16",
+        "bf16",
+        "amp"
+      ],
+      "num_workers": "any value other than 0",
+      "distributed": "any",
+      "gradient_accumulation": "any"
+    }
+  },
+  "graceful_stop": {
+    "state_ordering": "PASS",
+    "interrupt_checkpoint": "PASS",
+    "idempotency": "PASS",
+    "api_independence": "PASS",
+    "observed_sequence": [
+      "RUNNING",
+      "STOP_REQUESTED",
+      "CHECKPOINTING",
+      "INTERRUPTED"
+    ],
+    "exit_code_interrupted": 10,
+    "exit_code_checkpoint_failed": 50,
+    "checkpoint_validated_before_terminal_state": true,
+    "signal_handler_sets_flag_only": true
+  },
+  "lineage": {
+    "child_run": "PASS",
+    "parent_immutable": "PASS",
+    "variant_inherited_from_parent": true,
+    "resume_from_running_run_refused": true
+  },
+  "tests": {
+    "collected": 497,
+    "collection_errors": 0,
+    "passed": 496,
+    "failed": 0,
+    "skipped": 1,
+    "subtests_passed": 12,
+    "baseline_collected": 449,
+    "baseline_passed": 448,
+    "new_tests_added": 48,
+    "identity_regression_passed": 28,
+    "pre_existing_tests_updated": [
+      "tests/test_control_registry_events.py::MigrationTests::test_schema_version_is_recorded",
+      "tests/test_control_registry_events.py::StateTransitionTests::test_schema_only_states_are_not_produced_by_this_build",
+      "tests/test_control_api_dashboard.py::ApiTests::test_state_machine_marks_schema_only_states"
+    ],
+    "pre_existing_tests_update_reason": "registry schema is now version 2, and STOP_REQUESTED/CHECKPOINTING/INTERRUPTED are genuinely produced by this build so they are no longer schema-only; RESUMING remains schema-only because a resume creates a child run"
+  },
+  "registry_migration": {
+    "version": 2,
+    "name": "checkpoint_v1_and_stop_actions",
+    "forward_only": true,
+    "additive_only": true,
+    "v1_to_v2_upgrade_verified": true,
+    "pre_existing_rows_preserved": true,
+    "new_columns_default_to_unverified": true,
+    "automatic_backup_taken": true
+  },
+  "api_surface": {
+    "http_methods_exposed": [
+      "GET",
+      "HEAD"
+    ],
+    "post_to_checkpoint_route": 405,
+    "new_read_only_endpoints": [
+      "/api/v1/runs/{run_id}/checkpoints",
+      "/api/v1/checkpoints/{checkpoint_id}",
+      "/api/v1/runs/{run_id}/lineage",
+      "/api/v1/runs/{run_id}/actions",
+      "/api/v1/capabilities/exact-resume"
+    ],
+    "dash_action_buttons": 0,
+    "playwright_dom": "PASS"
+  },
+  "third_party": {
+    "submodules_dirty": 0,
+    "submodule_revisions_changed": false,
+    "exception_record_required": false,
+    "note": "No tracked vendored file was modified and all revisions are unchanged. Two submodules show untracked __pycache__ after the suite runs (pre-existing V-006 condition), which is byte cache, not source. Split-KalmanNet's GRU initial hidden state problem was solved in the adapter layer via _ckpt_extra_state rather than by registering buffers upstream.",
+    "submodules_with_untracked_pycache_after_tests": 2,
+    "tracked_files_modified": 0
+  },
+  "key_finding": {
+    "id": "CSR-F-001",
+    "model": "split_knet",
+    "summary": "DNN_SKalmanNet_GSS creates hn1_init/hn2_init with torch.randn as plain attributes, so state_dict() omits them even though initialize_hidden() restores every rollout from them. A checkpoint built only from state_dict() loads correct weights and still diverges after resume.",
+    "detection": "every resume builds the resuming adapter with a different seed; Split diverged while KNet did not, and matched again when the seed was held equal",
+    "resolution": "captured explicitly in extra_state, declared in required_conditional_state, and a payload lacking it is refused rather than resumed approximately",
+    "side_effect": "warm start from model.pt is also not bitwise reproducible for split_knet; pre-existing and out of scope"
+  },
+  "deferred": [
+    "public write API",
+    "Dash action controls",
+    "force terminate API",
+    "warm-start launch API",
+    "config GUI launch",
+    "GPU scheduling",
+    "shared-GPU execution",
+    "remote worker",
+    "authentication/multi-user",
+    "WebSocket migration",
+    "Adaptive/MAML/ME-Split exact resume",
+    "arbitrary batch-midpoint resume"
+  ],
+  "remaining_risks": [
+    "certification envelope is narrow by construction: CPU/fp32/0 workers, tiny fixtures, short runs",
+    "train() and resumable_train() are separate loops sharing hooks; no direct train()-vs-resumable_train() parity test exists",
+    "resume child run is planned and validated but not launched through WorkerManager; end-to-end resume is proven at adapter/service level",
+    "best_state lives in memory between checkpoints; a hard crash between them still loses it",
+    "V-008 persists: the suite mutates tracked runs/ and reports/ data",
+    "split_knet warm start from model.pt is not bitwise reproducible (CSR-F-001 side effect)",
+    "no CANCELLED-before-first-update policy: a stop requested before any update produces an interrupt checkpoint at update 0"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_checkpoint_resume/20260731T020915Z"
+}

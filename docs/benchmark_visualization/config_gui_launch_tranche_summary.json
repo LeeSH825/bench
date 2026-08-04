@@ -1,0 +1,184 @@
+{
+  "tranche": "config_gui_launch",
+  "verdict": "READY_FOR_GPU_QUEUE_AND_EXECUTION_POLICY_TRANCHE",
+  "generated_at_utc": "2026-08-01T17:34:19Z",
+  "instruction": {
+    "path": "docs/benchmark_visualization/benchmark_visualization_tool_docs/22_config_gui_launch_implementation_prompt.md",
+    "sha256": "844c5cfeda546c4bbe23e3c2cc6258f71c9a084b4b934006121fa13317aba865",
+    "wrapper": "docs/benchmark_visualization/benchmark_visualization_tool_docs/22a_config_gui_launch_safe_execution_wrapper.md",
+    "tracked_at_start": false,
+    "tracked_by_final_commit": true
+  },
+  "git": {
+    "common_repository": "/home/dss-pc-05/bench/.git",
+    "feature_worktree": "/home/dss-pc-05/bench-worktrees/config-gui-launch",
+    "branch": "benchmark-viz/config-gui-launch",
+    "base_branch": "benchmark-viz/write-control",
+    "user_working_tree_modified": false,
+    "certified_baseline_worktree_modified": false
+  },
+  "preset_catalog": {
+    "source": "git ls-files -- bench/configs",
+    "presets": 62,
+    "launchable": 50,
+    "preset_id_form": "<stem>.<12 hex content digest>",
+    "path_traversal_expressible": false,
+    "untracked_files_addressable": false,
+    "yaml_bounds": {
+      "max_bytes": 524288,
+      "max_depth": 30,
+      "max_nodes": 20000
+    }
+  },
+  "config_schema": {
+    "single_source_of_truth": true,
+    "derived_from": "bench/control/config/schema.py dataclasses",
+    "unknown_override_paths_refused": true,
+    "form_yaml_round_trip": "PASS",
+    "certified_envelope": {
+      "device": "cpu",
+      "precision": "fp32",
+      "num_workers": 0,
+      "gradient_accumulation_steps": 1
+    }
+  },
+  "validation": {
+    "endpoint": "POST /api/v1/config/validate",
+    "registered_in_read_only_build": true,
+    "side_effects": "none",
+    "diff_source": "resolved run specs",
+    "result": "PASS"
+  },
+  "launch_api": {
+    "endpoint": "POST /api/v1/runs/launch",
+    "registered_in_read_only_build": false,
+    "read_only_response": 405,
+    "idempotent_retry_codes": [
+      202,
+      200,
+      200,
+      200,
+      200
+    ],
+    "actions_created": 1,
+    "runs_created": 1,
+    "workers_started": 1,
+    "stale_preset_digest": 409,
+    "preview_hash_mismatch": 409,
+    "same_key_different_draft": 409,
+    "invalid_config": 422,
+    "unknown_preset": 404,
+    "coordinator_failure": 503,
+    "same_config_different_keys_unique_runs": true,
+    "restart_boundaries": "PASS",
+    "spawn_failure_run_state": "CANCELLED",
+    "spawn_failure_exit_code": 52,
+    "idempotency_key_persisted": false,
+    "provenance_files": [
+      "original_preset.yaml",
+      "submitted_draft.yaml",
+      "config_validation.json",
+      "launch_request.json",
+      "resolved_run_spec.json"
+    ]
+  },
+  "registry": {
+    "schema_version": 4,
+    "migration_added": "0004 nullable run_actions.run_id",
+    "forward_only_additive": true
+  },
+  "cli_gui_parity": {
+    "result": "PASS",
+    "cases": [
+      "suite_train_smoke/kalmannet_tsp",
+      "suite_split_train_smoke/split_knet",
+      "suite_all_simple_tiny/mb_kf_oracle"
+    ],
+    "fields_compared": [
+      135,
+      139,
+      139
+    ],
+    "expected_differences_only": [
+      "experiment.experiment_id",
+      "identity.run_id",
+      "hashes.resolved_spec_hash",
+      "provenance.environment_fingerprint"
+    ],
+    "numerical_parity": {
+      "gate": "BENCH_PARITY_E2E=1",
+      "knet": "PASS",
+      "split": "PASS"
+    }
+  },
+  "e2e": {
+    "knet_gui_launch": "PASS",
+    "split_gui_launch": "PASS",
+    "model_based_baseline_launch": "PASS",
+    "playwright_new_run_launch_stop_resume_child": "PASS",
+    "playwright_checks": 31,
+    "playwright_failures": 0,
+    "parent_state": "INTERRUPTED",
+    "parent_exit_code": 10,
+    "parent_updates": 94,
+    "child_state": "COMPLETED",
+    "child_exit_code": 0,
+    "child_updates": 600,
+    "console_errors": 0
+  },
+  "http_surface": {
+    "audit_method": "openapi_schema",
+    "read_only_non_get_routes": [
+      "POST /api/v1/config/validate"
+    ],
+    "write_mode_non_get_routes": [
+      "POST /api/v1/config/validate",
+      "POST /api/v1/runs/{run_id}/actions/stop",
+      "POST /api/v1/checkpoints/{checkpoint_id}/actions/resume",
+      "POST /api/v1/runs/launch"
+    ],
+    "mutating_routes_in_read_only_build": 0
+  },
+  "regression": {
+    "collected": 639,
+    "passed": 635,
+    "skipped": 4,
+    "failed": 0,
+    "subtests_passed": 12,
+    "tests_deleted_or_skipped": 0,
+    "assertions_updated": [
+      "test_control_registry_events.py::MigrationTests::test_schema_version_is_recorded (3 -> 4)"
+    ],
+    "init_provenance_tests": 28,
+    "observed_flake": "test_control_process_telemetry.py::FailurePathTests::test_live_worker_is_never_marked_orphaned (one group run; passed in isolation, on re-run and in both full-suite runs)"
+  },
+  "third_party": {
+    "tracked_diff_empty": true,
+    "dirty_submodules": [
+      "KalmanNet_TSP",
+      "MAML_KalmanNet"
+    ],
+    "dirt": "untracked __pycache__ only"
+  },
+  "defects_found_and_fixed": [
+    "compute_diff compared raw YAML documents and reported 0 changed fields while the structural hash moved",
+    "GUI-resolved specs left bench_context.executor unset, unlike the CLI",
+    "GUI-launched runs recorded no git/submodule/environment provenance",
+    "GET /api/v1/actions/{id} returned NULL run_id for LAUNCH_RUN, so the UI lost the link to the run it had just started"
+  ],
+  "not_implemented": [
+    "sweeps",
+    "batch launch",
+    "GPU queue/scheduler",
+    "warm start",
+    "evaluate checkpoint",
+    "draft library",
+    "arbitrary path upload",
+    "auth",
+    "multi-user",
+    "remote workers",
+    "GUI launch for adaptive_knet/maml_knet/me_split_knet_v0",
+    "WebSocket/SSE"
+  ],
+  "evidence_directory": "/home/dss-pc-05/bench-worktrees/config-gui-launch/artifacts/benchmark_config_gui_launch/20260801T173224Z"
+}

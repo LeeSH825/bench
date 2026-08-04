@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-08-01T00:00:00Z",
+  "git_common_repository": "/home/dss-pc-05/bench/.git",
+  "user_working_tree": "/home/dss-pc-05/bench",
+  "user_working_tree_untouched": true,
+  "feature_worktree": "/tmp/bench-wc-tranche",
+  "branch": "benchmark-viz/write-control",
+  "baseline_commit": "5ea4546",
+  "head_commit": "729629437e361d5a177cb81177607b03e27de6f8",
+  "new_commits": [
+    "ba65524",
+    "7296294"
+  ],
+  "verification_layer": "production_worker",
+  "verdict": "READY_AFTER_SPECIFIC_FIXES",
+  "verdict_reason": "KNet and Split real-worker bitwise parity both PASS through actual WorkerManager processes. Real-process checkpoint-failure (exit 50), the two child-failure fault cases, and coordinator restart during child RUNNING were not executed.",
+  "production_stop_wiring": {
+    "stop_coordinator_constructed_in_worker": true,
+    "stop_requested_callback_injected": true,
+    "on_interrupt_settlement_callback_injected": true,
+    "gated_on_control_resumable_v1_only": true,
+    "legacy_and_not_applicable_get_no_callback": true,
+    "terminal_overwrite_prevented": true,
+    "signal_handler_still_flag_only": true
+  },
+  "interrupt_checkpoint": {
+    "schema_version": 2,
+    "validation_status": "VALID",
+    "training_path_id": "control_resumable_v1",
+    "launch_eligible": true,
+    "transitions": [
+      "RUNNING",
+      "STOP_REQUESTED",
+      "CHECKPOINTING",
+      "INTERRUPTED"
+    ],
+    "exit_code": 10,
+    "stop_cursor": "actual, not hard-coded"
+  },
+  "kalmannet_tsp_worker_parity": "BITWISE_PASS",
+  "split_knet_worker_parity": "BITWISE_PASS",
+  "parity_detail": {
+    "kalmannet_tsp": {
+      "N": 40,
+      "K_actual": 21,
+      "reference_sha256": "7c10a4145ffdb1a6",
+      "child_sha256": "7c10a4145ffdb1a6",
+      "identical": true
+    },
+    "split_knet": {
+      "N": 40,
+      "K_actual": 1,
+      "reference_sha256": "a704f59ce873cae6",
+      "child_sha256": "a704f59ce873cae6",
+      "identical": true
+    }
+  },
+  "child_process_verified": true,
+  "lineage_complete": true,
+  "parent_immutable": true,
+  "distinct_pids": true,
+  "idempotency": {
+    "stop_5_requests": {
+      "actions": 1,
+      "checkpoints": 1,
+      "terminals": 1
+    },
+    "resume_5_requests": {
+      "actions": 1,
+      "children": 1
+    }
+  },
+  "second_bug_found": {
+    "summary": "Split certification row was keyed on bench_split_knet_adapter_v1 while the system derives bench_split_adapter_v1, making the certification unreachable; Split ran the legacy path on every real launch",
+    "fix": "corrected certification data only; identity derivation untouched because it feeds variant_id",
+    "guard": "new test pins every certified implementation_id to what draft_from_suite derives"
+  },
+  "not_executed": [
+    "real worker checkpoint-write failure -> exit 50 (section 6.3)",
+    "child restore/protocol failure before first update (section 9.1)",
+    "child ordinary failure after restore during training (section 9.2)",
+    "coordinator restart while child RUNNING (section 10)"
+  ],
+  "full_pytest": {
+    "baseline_collected": 534,
+    "baseline_passed": 533,
+    "collected": 541,
+    "passed": 540,
+    "failed": 0,
+    "skipped": 1,
+    "new_tests_added": 7,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0
+  },
+  "api_methods": [
+    "GET"
+  ],
+  "dash_action_buttons": 0,
+  "third_party_tracked_diff": false,
+  "certification_levels": {
+    "adapter_service_fresh_process_parity": "CERTIFIED",
+    "workermanager_real_subprocess_parity": "CERTIFIED",
+    "public_api_ui_exposure": "NOT_IMPLEMENTED"
+  },
+  "documents": [
+    "docs/benchmark_visualization/production_worker_graceful_stop_contract.md",
+    "docs/benchmark_visualization/write_control_worker_wiring_report.md",
+    "docs/benchmark_visualization/write_control_worker_wiring_summary.json",
+    "docs/benchmark_visualization/worker_level_exact_resume_certification.md"
+  ]
+}

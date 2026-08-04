@@ -36,6 +36,21 @@ viz = [
   "streamlit>=1.60,<2",
   "plotly>=6.9,<7",
 ]
+# Control plane: run registry, worker supervision, read-only API and Dash
+# dashboard (bench.control / bench.ui). Kept as an extra so the training
+# environment is not forced to carry a web stack.
+#
+# psutil and nvidia-ml-py are optional at runtime: without them CPU and GPU
+# telemetry report themselves unavailable rather than failing a run.
+control = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "dash>=2.17,<4",
+  "plotly>=6.9,<7",
+  "pydantic>=2",
+  "psutil>=5.9",
+  "nvidia-ml-py>=12",
+]
 basilisk = [
   "bsk>=2.10.2,<3",
 ]
@@ -49,6 +64,25 @@ my_model = []
 
 [tool.setuptools]
 packages = ["bench"]
+
+[tool.pytest.ini_options]
+# Bare `pytest` from the repo root otherwise descends into third_party/ and
+# collects upstream helper scripts named *_test.py, which fail to import
+# because they expect their own repo root on sys.path. Those are not our tests
+# and we do not modify vendored code, so they are excluded from collection.
+testpaths = ["bench/tests", "tests"]
+norecursedirs = [
+  "third_party",
+  ".venv",
+  ".basilisk_deps",
+  "runs",
+  "reports",
+  "bench_data_cache",
+  "control",
+  "plots",
+  "logs",
+  "*.egg-info",
+]
 
 [[tool.uv.index]]
 name = "pytorch-cu121"

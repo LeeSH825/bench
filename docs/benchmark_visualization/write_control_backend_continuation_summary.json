@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-31T05:10:00Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "authoritative_head_untouched": "d92cd0c",
+    "continuation_baseline": "dfb932d",
+    "branch": "benchmark-viz/write-control",
+    "worktree": "/tmp/bench-wc-tranche",
+    "partial_commits_verified": {
+      "48b0edb": "present_and_ancestor",
+      "dfb932d": "present_and_ancestor"
+    },
+    "c0eaaf7_ancestry_confirmed": true,
+    "new_commits": [
+      "11a451d",
+      "de79d2a",
+      "a3ceff1"
+    ],
+    "pushed_to_remote": false
+  },
+  "verdict": "READY_AFTER_SPECIFIC_FIXES",
+  "verdict_reason": "Gates B0, B1 and C implemented and tested. The mandated real-subprocess KNet/Split stop->resume->child bitwise parity E2E (sections 9.3/9.4) was not executed; that is the specific fix required.",
+  "gates": {
+    "B0_training_path_persistence": "DONE",
+    "B0_checkpoint_v2": "DONE",
+    "B1_worker_child_launch": "DONE",
+    "C_durable_resume_action": "DONE",
+    "D_cli_backend_e2e": "PARTIAL"
+  },
+  "training_path_persistence": {
+    "registry_migration": 3,
+    "forward_only": true,
+    "additive_only": true,
+    "existing_rows_preserved": true,
+    "old_rows_promoted": false,
+    "default_for_old_rows": "legacy_train_v1",
+    "automatic_backup": true,
+    "persisted_in": [
+      "resolved_run_spec",
+      "structural_config_hash",
+      "registry_run_row",
+      "checkpoint_manifest",
+      "checkpoint_registry_row",
+      "certification_key",
+      "lifecycle_start_event"
+    ]
+  },
+  "checkpoint_versioning": {
+    "write_version": 2,
+    "supported_read_versions": [
+      1,
+      2
+    ],
+    "v1_meaning_changed": false,
+    "version_derived_from_provenance": true,
+    "unknown_version_refused": true,
+    "v1_valid_but_launch_ineligible": true,
+    "reason_codes": [
+      "CHECKPOINT_TRAINING_PATH_UNPROVEN",
+      "CHECKPOINT_SCHEMA_NOT_WRITE_CONTROL_CERTIFIED",
+      "TRAINING_PATH_NOT_RESUMABLE",
+      "PARENT_NOT_TERMINAL",
+      "UNCERTIFIED_TUPLE",
+      "CHECKPOINT_NOT_VALID"
+    ],
+    "eligibility_decided_without_unpickling": true
+  },
+  "certification": {
+    "key_includes_training_path": true,
+    "legacy_path_certified": false,
+    "seeded_as_reference_data_on_migration": true,
+    "v1_evidence_retained": true
+  },
+  "resume_child": {
+    "immutable_child": true,
+    "new_run_id_and_directory": true,
+    "inherits_variant_and_training_path": true,
+    "lineage_complete": true,
+    "parent_immutable": true,
+    "parent_moved_to_resuming": false,
+    "child_uses_ordinary_lifecycle": true,
+    "never_started_child_terminal_state": "CANCELLED"
+  },
+  "durable_action": {
+    "action_type": "RESUME_EXACT",
+    "reuses_run_actions_table": true,
+    "separate_action_store_created": false,
+    "completed_means_worker_launched_not_training_finished": true,
+    "five_retries_produce": {
+      "actions": 1,
+      "children": 1,
+      "workers": 1
+    },
+    "same_key_different_payload": "CONFLICT",
+    "stale_parent_version": "CONFLICT_NO_SIDE_EFFECT",
+    "crash_windows_recovered": [
+      "after_action_row",
+      "after_child_allocation",
+      "after_link",
+      "coordinator_restart",
+      "retry"
+    ],
+    "second_reconcile_is_noop": true
+  },
+  "cli": {
+    "resume_plan_only_preserved": true,
+    "launch_explicit_flag": "--launch",
+    "idempotency_key_required_with_launch": true,
+    "reconcile_actions_command": true
+  },
+  "tests": {
+    "baseline_collected": 515,
+    "baseline_passed": 514,
+    "collected": 532,
+    "collection_errors": 0,
+    "passed": 531,
+    "failed": 0,
+    "skipped": 1,
+    "new_tests_added": 17,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0,
+    "pre_existing_tests_updated": 2,
+    "pre_existing_tests_update_reason": "registry schema is now 3; a save without training-path provenance now correctly publishes a v1 package"
+  },
+  "non_regression": {
+    "api_http_methods": [
+      "GET"
+    ],
+    "post_routes_added": 0,
+    "dash_action_buttons": 0,
+    "third_party_tracked_diff_empty": true
+  },
+  "not_executed": [
+    "real-subprocess KNet stop->resume->child bitwise parity E2E",
+    "real-subprocess Split stop->resume->child bitwise parity E2E",
+    "child ordinary training exception in a real resumed child",
+    "child SIGKILL -> ORPHANED in a real resumed child"
+  ],
+  "deferred_to_next_tranche": [
+    "POST write API",
+    "Dash Stop/Resume controls",
+    "write-mode env switch UI behaviour",
+    "Playwright action workflow",
+    "config GUI launch",
+    "force terminate",
+    "warm start",
+    "GPU scheduling",
+    "GPU/AMP/multi-worker exact resume",
+    "Adaptive/MAML/ME-Split resume",
+    "authentication",
+    "remote worker"
+  ],
+  "documents": [
+    "docs/benchmark_visualization/checkpoint_v2_schema.md",
+    "docs/benchmark_visualization/resume_child_worker_contract.md",
+    "docs/benchmark_visualization/durable_resume_action_contract.md",
+    "docs/benchmark_visualization/write_control_backend_continuation_report.md",
+    "docs/benchmark_visualization/write_control_backend_continuation_summary.json"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_write_control_backend/"
+}

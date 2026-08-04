@@ -8,7 +8,7 @@ import logging
 import os
 import random
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MethodType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
@@ -17,8 +17,27 @@ import numpy as np
 import torch
 from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
 from bench.utils.logging import get_logger
+from bench.control.checkpoints.schema import CheckpointCapabilities, CheckpointUnsupportedError
+from bench.models.checkpoint_support import CheckpointableAdapterMixin
 
 logger = get_logger(__name__)
+
+# Control-plane observability. `active_observer()` returns a NullObserver unless a
+# control-plane worker has installed one, so these calls are no-ops under the
+# existing CLI and add no dependency to it. The fallback keeps the adapter
+# importable if bench.control is unavailable.
+try:
+    from bench.control.events.observer import active_observer  # type: ignore
+except Exception:  # pragma: no cover - control plane is optional
+
+    def active_observer():  # type: ignore[misc]
+        class _Null:
+            def status(self, *args: Any, **kwargs: Any) -> None: ...
+            def metric(self, *args: Any, **kwargs: Any) -> None: ...
+            def log(self, *args: Any, **kwargs: Any) -> None: ...
+            def artifact(self, *args: Any, **kwargs: Any) -> None: ...
+
+        return _Null()
 
 
 try:
@@ -394,7 +413,7 @@ def _resolve_x0_batch(
     raise ValueError(f"shape_mismatch: unexpected x0 rank/shape={tuple(x.shape)}")
 
 
-class SplitKNetAdapter(ModelAdapter):
+class SplitKNetAdapter(CheckpointableAdapterMixin, ModelAdapter):
     """
     Route-B adapter for third_party/Split_KalmanNet.
 
@@ -661,6 +680,15 @@ class SplitKNetAdapter(ModelAdapter):
         optimizer = torch.optim.Adam(params, lr=lr, weight_decay=wd)
         loss_fn = torch.nn.MSELoss(reduction="mean")
 
+        _observer = active_observer()
+        # One optimizer slot, not the paper's alternating scheme — the capability
+        # declaration in bench/control/capabilities.py records this deviation.
+        _observer.status(
+            "PHASE_START",
+            phase="train",
+            message=f"Split-KalmanNet training: max_updates={max_updates} lr={lr} optimizer_slots=['main']",
+        )
+
         self._filter_obj.kf_net.train()
         updates_used = 0
         best_step = 0
@@ -820,6 +848,13 @@ class SplitKNetAdapter(ModelAdapter):
                     raise FloatingPointError(f"train_nan: non-finite parameter at update={updates_used}")
                 updates_used += 1
                 last_train_loss = float(loss.detach().item())
+                _observer.metric(
+                    "loss/train_total",
+                    last_train_loss,
+                    step=int(updates_used),
+                    phase="train",
+                    unit="mse",
+                )
                 if (
                     updates_used == 1
                     or updates_used == max_updates
@@ -851,6 +886,13 @@ class SplitKNetAdapter(ModelAdapter):
                         init_from_gt=train_init_from_gt,
                     )
                     val_history.append({"step": float(updates_used), "val_mse": float(val_loss)})
+                    _observer.metric(
+                        "loss/validation_total",
+                        float(val_loss),
+                        step=int(updates_used),
+                        phase="validation",
+                        unit="mse",
+                    )
                     if (best_val - float(val_loss)) > min_delta:
                         best_val = float(val_loss)
                         best_step = int(updates_used)
@@ -880,6 +922,12 @@ class SplitKNetAdapter(ModelAdapter):
             ckpt_path,
         )
         self._saved_ckpt_path = ckpt_path
+        _observer.status(
+            "PHASE_END",
+            phase="train",
+            message=f"training finished: updates_used={updates_used} best_step={best_step}",
+        )
+        _observer.artifact(kind="checkpoint_weights", uri=str(ckpt_path))
 
         train_state = {
             "status": "ok",
@@ -1544,6 +1592,91 @@ class SplitKNetAdapter(ModelAdapter):
         self._write_train_diagnostics_csv()
 
     @torch.no_grad()
+    # -- checkpointable-training hooks (bench.models.checkpoint_support) -----
+
+    def _ckpt_model_module(self) -> torch.nn.Module:
+        if self._filter_obj is None:
+            raise RuntimeError("setup() must be called before checkpointable training.")
+        return self._filter_obj.kf_net
+
+    def _ckpt_batch_loss(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Any) -> torch.Tensor:
+        # Mirrors the train() update body: measurement transform, filter
+        # forward, state-estimation loss plus any measurement extra loss.
+        batch = {"x": x, "y": y}
+        train_init_from_gt = bool(self._cfg.get("train_init_from_gt", True))
+        x0_batch = x[:, 0, :] if train_init_from_gt else None
+        y_model = self.transform_measurements(y, x_btd=x, batch=batch, phase="train")
+        validate_exact_layout(
+            y_model,
+            expected=(int(y.shape[0]), int(y.shape[1]), int(self._y_dim)),
+            axis_names=("B", "T", "D"),
+            label="y_model",
+        )
+        pred = self._forward_batch(y_btd=y_model, x0_batch=x0_batch)
+        loss = self.state_estimation_loss(
+            pred_btd=pred, x_btd=x, batch=batch, phase="train", loss_fn=loss_fn
+        )
+        return loss + self.measurement_extra_loss(
+            x_btd=x, y_raw_btd=y, y_model_btd=y_model, batch=batch, phase="train"
+        )
+
+    def _ckpt_validation_loss(self, val_batches: List[Dict[str, Any]], loss_fn: Any) -> float:
+        return self._compute_validation_loss(
+            val_dl=val_batches,
+            loss_fn=loss_fn,
+            max_batches=0,
+            init_from_gt=bool(self._cfg.get("train_init_from_gt", True)),
+        )
+
+    #: GRU initial hidden states created in ``DNN_SKalmanNet_GSS.__init__`` with
+    #: ``torch.randn``. They are plain attributes, not registered buffers, so
+    #: ``state_dict()`` does not contain them — yet ``initialize_hidden()``
+    #: restores every sequence rollout from ``*_init``, which makes them a
+    #: seed-dependent constant on the numerical path of *every* update.
+    #: Omitting them from a checkpoint produces a resume that loads the right
+    #: weights and still diverges (see the state audit, §4).
+    _CKPT_HIDDEN_INIT_ATTRS: Tuple[str, ...] = ("hn1_init", "hn2_init", "hn1", "hn2")
+
+    def _ckpt_extra_state(self) -> Dict[str, Any]:
+        if self._filter_obj is None:
+            return {}
+        net = self._filter_obj.kf_net
+        hidden: Dict[str, Any] = {}
+        for attr in self._CKPT_HIDDEN_INIT_ATTRS:
+            value = getattr(net, attr, None)
+            if isinstance(value, torch.Tensor):
+                hidden[attr] = value.detach().cpu().clone()
+        return {"kf_net_hidden": hidden}
+
+    def _ckpt_restore_extra(self, extra: Dict[str, Any]) -> None:
+        if self._filter_obj is None:
+            return
+        hidden = dict(extra.get("kf_net_hidden") or {})
+        if not hidden:
+            # A payload that predates hidden-state capture cannot be resumed
+            # exactly; refusing is the only honest option (ADR-CSR §3.2).
+            raise CheckpointUnsupportedError(
+                "checkpoint does not carry kf_net GRU initial hidden state; "
+                "Split-KalmanNet exact resume is not certifiable without it"
+            )
+        net = self._filter_obj.kf_net
+        for attr, value in hidden.items():
+            setattr(net, attr, value.detach().clone().to(self.device))
+
+    def checkpoint_capabilities(self) -> CheckpointCapabilities:
+        base = super().checkpoint_capabilities()
+        return replace(
+            base,
+            required_conditional_state=("kf_net.hn1_init", "kf_net.hn2_init"),
+            certified_training_mode="supervised_single_optimizer_split_deviation",
+            notes=(
+                "Filter hidden state and history are reset per sequence rollout. The GRU "
+                "initial hidden states (hn1_init/hn2_init) are randn-initialised plain "
+                "attributes outside state_dict() and are captured explicitly. This adapter "
+                "uses one optimizer slot, not the paper's alternating optimization."
+            ),
+        )
+
     def _compute_validation_loss(
         self,
         *,

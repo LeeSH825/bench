@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-31T06:00:00Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "branch": "benchmark-viz/write-control",
+    "worktree": "/tmp/bench-wc-tranche",
+    "baseline_tip": "9eb4f08",
+    "new_commits": [
+      "7caeb04"
+    ],
+    "pushed_to_remote": false,
+    "reported_hash_9e4fd8": "NOT_FOUND",
+    "semantically_corresponding_commit": "9eb4f08",
+    "ancestry_verified": [
+      "c0eaaf7",
+      "48b0edb",
+      "dfb932d",
+      "11a451d",
+      "de79d2a",
+      "a3ceff1",
+      "9eb4f08"
+    ]
+  },
+  "verdict": "NOT_READY",
+  "verdict_reason": "StopCoordinator/settle_graceful_stop are not wired into the production worker, so a real parent worker cannot produce an interrupt checkpoint and the real-worker parity gate cannot be executed at all.",
+  "kalmannet_tsp_worker_parity": "NOT_EXECUTED_BLOCKED",
+  "split_knet_worker_parity": "NOT_EXECUTED_BLOCKED",
+  "child_process_verified": false,
+  "checkpoint_schema_version": 2,
+  "training_path_id": "control_resumable_v1",
+  "findings": {
+    "F-1": {
+      "summary": "prepare_run() never persisted the decided training path onto the registry run row; the resolver and worker were correct but eligibility is answered from the registry",
+      "severity": "real_bug",
+      "status": "FIXED",
+      "commit": "7caeb04",
+      "found_by": "first real WorkerManager launch, not by any unit test"
+    },
+    "F-2": {
+      "summary": "StopCoordinator and settle_graceful_stop exist but are not wired into the production worker; no worker can observe a stop action or write an interrupt Checkpoint v2",
+      "severity": "blocker",
+      "status": "OPEN",
+      "evidence": "grep finds no production use outside their own definitions; a completed control_resumable_v1 run produced zero checkpoints"
+    }
+  },
+  "failure_cases": {
+    "restore_or_protocol_failure_before_first_update": "NOT_EXECUTED_BLOCKED",
+    "ordinary_failure_during_child_training": "NOT_EXECUTED_BLOCKED"
+  },
+  "idempotency_restart_under_real_process": "NOT_EXECUTED_BLOCKED",
+  "service_level_evidence_still_passing": {
+    "adapter_fresh_process_exact_resume": "PASS",
+    "checkpoint_atomicity_and_mutation_probes": "PASS",
+    "graceful_stop_service_level": "PASS",
+    "coordinator_idempotency_and_recovery": "PASS"
+  },
+  "certification_levels": {
+    "adapter_service_fresh_process_parity": "CERTIFIED",
+    "workermanager_real_subprocess_parity": "NOT_CERTIFIED",
+    "public_api_ui_exposure": "NOT_IMPLEMENTED"
+  },
+  "full_pytest": {
+    "baseline_collected": 532,
+    "baseline_passed": 531,
+    "collected": 534,
+    "passed": 533,
+    "failed": 0,
+    "skipped": 1,
+    "new_tests_added": 2,
+    "identity_regression_passed": 28,
+    "tests_deleted_or_skipped_to_pass": 0
+  },
+  "api_methods": [
+    "GET"
+  ],
+  "dash_action_buttons": 0,
+  "third_party_tracked_diff": false,
+  "production_code_changed": [
+    "bench/control/process/manager.py"
+  ],
+  "required_to_close_gate": [
+    "wire StopCoordinator into worker_cli for control_resumable_v1 runs",
+    "call settle_graceful_stop from _call_resumable_train on result.interrupted, with training_path_id so the package is Checkpoint v2 and launch-eligible",
+    "exit 10 and let INTERRUPTED stand",
+    "then run KNet and Split real-worker parity, the two child-failure cases, and real-process idempotency/restart"
+  ],
+  "documents": [
+    "docs/benchmark_visualization/write_control_real_worker_parity_report.md",
+    "docs/benchmark_visualization/write_control_real_worker_parity_summary.json"
+  ],
+  "documents_not_written": [
+    "worker_level_exact_resume_certification.md (real-worker parity has not passed; recording it would be false)"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_write_control_real_worker/"
+}

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-30T16:57:58Z",
+  "repository": {
+    "root": "/home/dss-pc-05/bench",
+    "baseline_commit": "d1cc4b035597bb029e0bce95a546b29b4664b5c6",
+    "verified_commit": "d1cc4b035597bb029e0bce95a546b29b4664b5c6",
+    "dirty": true
+  },
+  "overall_verdict": "NOT_READY",
+  "phase_verdicts": {
+    "phase_0": "ACCEPT_WITH_CONDITIONS",
+    "phase_1": "ACCEPT_WITH_CONDITIONS",
+    "phase_3": "ACCEPT_WITH_CONDITIONS"
+  },
+  "tests": {
+    "collect_only_collected": 587,
+    "collect_only_errors": 1,
+    "full_command_status": "collection_error",
+    "excluded_collection_error_passed": 585,
+    "excluded_collection_error_skipped": 2,
+    "control_targeted_passed": 160,
+    "identity_regression_passed": 28,
+    "warnings": 1
+  },
+  "findings": {
+    "critical": 0,
+    "high": 3,
+    "medium": 2,
+    "low": 1
+  },
+  "verified_capabilities": {
+    "stable_identity": "PASS",
+    "typed_config": "PASS_WITH_SCOPE_LIMITS",
+    "immutable_run": "PASS",
+    "sqlite_registry": "PASS",
+    "jsonl_events": "PASS",
+    "separate_worker": "PASS",
+    "ui_independence": "PASS",
+    "restart_recovery": "PASS_WITH_WORKER_STATE_REPRESENTATION_ISSUE",
+    "live_metric_log_resource": "PASS",
+    "cpu_gpu_telemetry": "PASS_HOST_WITH_DEVICE_ONLY_GPU_ATTRIBUTION",
+    "failure_orphan": "PASS",
+    "readonly_dashboard": "PASS",
+    "legacy_inspector": "PASS_WITH_CONDITIONS",
+    "graceful_stop": "NOT_IMPLEMENTED_BY_DESIGN",
+    "exact_resume": "NOT_IMPLEMENTED_BY_DESIGN",
+    "config_gui_launch": "NOT_IMPLEMENTED_BY_DESIGN"
+  },
+  "unverified_items": [
+    "real_adapter numerical non-regression with observer and telemetry toggles",
+    "all supported YAML preset round-trips and CLI parity",
+    "DataLoader child process tree behavior",
+    "telemetry overhead",
+    "1000/10000 run scale smoke",
+    "complete browser detail workflow coverage"
+  ],
+  "release_blockers": [
+    "V-001: implementation is working-tree/untracked while verified HEAD equals baseline",
+    "V-002: mandated bare pytest commands fail during collection",
+    "V-003: real-adapter numerical non-regression is unverified"
+  ],
+  "recommended_next_tranche": [
+    "commit reproducible implementation and tests",
+    "repair pytest collection and rerun bare full suite",
+    "run deterministic CPU parity tests for KNet and Split",
+    "fix or label stale worker-state representation after API restart",
+    "measure scale and document path exposure/trusted proxy boundary"
+  ],
+  "artifact_root": "/home/dss-pc-05/bench/artifacts/benchmark_visualization_verification/20260730T164756Z"
+}

@@ -13,8 +13,26 @@ import numpy as np
 import torch
 from bench.utils.diagnostics import format_array_stats, has_nonfinite, validate_exact_layout
 from bench.utils.logging import get_logger
+from bench.models.checkpoint_support import CheckpointableAdapterMixin
 
 logger = get_logger(__name__)
+
+# Control-plane observability. `active_observer()` returns a NullObserver unless a
+# control-plane worker has installed one, so these calls are no-ops under the
+# existing CLI and add no dependency to it. The fallback keeps the adapter
+# importable if bench.control is unavailable.
+try:
+    from bench.control.events.observer import active_observer  # type: ignore
+except Exception:  # pragma: no cover - control plane is optional
+
+    def active_observer():  # type: ignore[misc]
+        class _Null:
+            def status(self, *args: Any, **kwargs: Any) -> None: ...
+            def metric(self, *args: Any, **kwargs: Any) -> None: ...
+            def log(self, *args: Any, **kwargs: Any) -> None: ...
+            def artifact(self, *args: Any, **kwargs: Any) -> None: ...
+
+        return _Null()
 
 
 try:
@@ -265,7 +283,7 @@ def _load_kalmannet_tsp(repo_root: Path) -> _KNetImports:
     )
 
 
-class KalmanNetTSPAdapter(ModelAdapter):
+class KalmanNetTSPAdapter(CheckpointableAdapterMixin, ModelAdapter):
     """
     Route-B import-mode adapter for third_party/KalmanNet_TSP.
 
@@ -461,6 +479,13 @@ class KalmanNetTSPAdapter(ModelAdapter):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=wd)
         loss_fn = torch.nn.MSELoss(reduction="mean")
 
+        _observer = active_observer()
+        _observer.status(
+            "PHASE_START",
+            phase="train",
+            message=f"KalmanNet_TSP training: max_updates={max_updates} lr={lr} eval_interval={eval_interval}",
+        )
+
         self.model.train()
         updates_used = 0
         best_step = 0
@@ -506,6 +531,13 @@ class KalmanNetTSPAdapter(ModelAdapter):
                 optimizer.step()
                 updates_used += 1
                 last_train_loss = float(loss.detach().item())
+                _observer.metric(
+                    "loss/train_total",
+                    last_train_loss,
+                    step=int(updates_used),
+                    phase="train",
+                    unit="mse",
+                )
 
                 should_eval = (updates_used % eval_interval == 0) or (updates_used == max_updates)
                 if should_eval:
@@ -515,6 +547,13 @@ class KalmanNetTSPAdapter(ModelAdapter):
                         max_batches=val_max_batches,
                     )
                     val_history.append({"step": float(updates_used), "val_mse": float(val_loss)})
+                    _observer.metric(
+                        "loss/validation_total",
+                        float(val_loss),
+                        step=int(updates_used),
+                        phase="validation",
+                        unit="mse",
+                    )
                     if (best_val - float(val_loss)) > min_delta:
                         best_val = float(val_loss)
                         best_step = int(updates_used)
@@ -545,6 +584,12 @@ class KalmanNetTSPAdapter(ModelAdapter):
             ckpt_path,
         )
         self._saved_ckpt_path = ckpt_path
+        _observer.status(
+            "PHASE_END",
+            phase="train",
+            message=f"training finished: updates_used={updates_used} best_step={best_step}",
+        )
+        _observer.artifact(kind="checkpoint_weights", uri=str(ckpt_path))
 
         train_state = {
             "status": "ok",
@@ -843,6 +888,22 @@ class KalmanNetTSPAdapter(ModelAdapter):
         return dict(self._runtime_diag)
 
     @torch.no_grad()
+    # -- checkpointable-training hooks (bench.models.checkpoint_support) -----
+
+    def _ckpt_model_module(self) -> torch.nn.Module:
+        if self.model is None:
+            raise RuntimeError("setup() must be called before checkpointable training.")
+        return self.model
+
+    def _ckpt_batch_loss(self, x: torch.Tensor, y: torch.Tensor, loss_fn: Any) -> torch.Tensor:
+        # Same forward and loss as train(): hidden state is re-initialised
+        # inside _forward_sequence for every batch.
+        pred = self._forward_sequence(y, context=None)
+        return loss_fn(pred, x)
+
+    def _ckpt_validation_loss(self, val_batches: List[Dict[str, Any]], loss_fn: Any) -> float:
+        return self._compute_validation_loss(val_dl=val_batches, loss_fn=loss_fn, max_batches=0)
+
     def _compute_validation_loss(
         self,
         *,
