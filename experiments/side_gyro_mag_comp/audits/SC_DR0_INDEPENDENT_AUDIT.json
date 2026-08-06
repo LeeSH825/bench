@@ -1,0 +1,161 @@
+{
+  "schema_version": "side-study-claude-audit-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage_audited": "DR0_DESIGN_REVIEW",
+  "audit_stage": "DR0_INDEPENDENT_AUDIT",
+  "auditor": "claude-independent",
+  "decision": "FAIL_REVISE_MATH",
+  "repairable": true,
+  "implementation_authorized": false,
+  "audited_predicate": "The sealed DR0 bundle is mathematically coherent, information-boundary clean, and sufficiently frozen that G0-G4 verdicts are determined before test access.",
+  "predicate_result": false,
+  "audit_target_path": "experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+  "target_count": 1,
+  "checkpoint_digest_algorithm": "sha256",
+  "checkpoint_digest_before_audit": "298feba22320a5e1abd617455d4d7cc342f539229d443c2cda3577326788f730",
+  "checkpoint_digest_after_audit": "298feba22320a5e1abd617455d4d7cc342f539229d443c2cda3577326788f730",
+  "checkpoint_stable": true,
+  "manifest_member_files_verified": 7,
+  "manifest_member_hash_mismatches": 0,
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "dr0_repair_rounds_consumed_before_this_audit": 0,
+  "pass_qualification": {
+    "red_path_present": true,
+    "non_empty_population": true,
+    "unambiguous_target": true,
+    "single_predicate": true,
+    "stable_checkpoint": true
+  },
+  "independent_derivations": [
+    {
+      "id": "DERIV-1",
+      "statement": "nu_m = z_tilde_m - h_m = [h_m]_x delta_theta to first order, hence H_m = [+[h_m]_x, 0_3x3].",
+      "result": "CONFIRMED",
+      "method": "first-order expansion of C_BN(q_true) = (I - [delta_theta]_x) C_BN(q_hat) under active Hamilton q_NB with right-local error; cross-checked against bench/estimators/mekf.py body_vector_jacobian"
+    },
+    {
+      "id": "DERIV-2",
+      "statement": "Gyro gauge degeneracy: (c_g, b_r) -> (c_g + A_g C_SgB v, b_r - v) leaves y_g^Sg(t) invariant for all t and all constant v in R^3.",
+      "result": "CONFIRMED_DEGENERATE",
+      "method": "direct algebraic substitution into the SC-00 gyro sensor model"
+    },
+    {
+      "id": "DERIV-3",
+      "statement": "(RMSE_N3S - RMSE_N2) == L - D exactly, and (L >= 0.5*D) is logically equivalent to (RMSE_N3S - 0.5*RMSE_N2 - 0.5*RMSE_N3 >= 0).",
+      "result": "CONFIRMED",
+      "method": "symbolic reduction plus 100000 randomized numeric trials, zero counterexamples"
+    },
+    {
+      "id": "DERIV-4",
+      "statement": "Intersection of SC-00's 13 frozen red-path identifiers with the 7 identifiers cited in the sealed handoff is empty.",
+      "result": "CONFIRMED_EMPTY",
+      "method": "identifier extraction and set intersection over canonical source"
+    },
+    {
+      "id": "DERIV-5",
+      "statement": "SC-01 defines no numeric parameter support for R1, R2, R3, or R4.",
+      "result": "CONFIRMED_ABSENT",
+      "method": "exhaustive grep of the side-study canonical document set"
+    },
+    {
+      "id": "DERIV-6",
+      "statement": "No divergence criterion or threshold is defined anywhere in the side-study canon, yet G4 conditions on it.",
+      "result": "CONFIRMED_ABSENT",
+      "method": "exhaustive grep of docs, experiments, agent_system, and prompts for the side study"
+    },
+    {
+      "id": "DERIV-7",
+      "statement": "sealed_checkpoint equals sha256 over raw bytes of CHECKPOINT_MANIFEST.json; three alternative composition rules were computed and falsified.",
+      "result": "CONFIRMED_RULE_UNDOCUMENTED",
+      "method": "recomputation of canonical-JSON, concatenated-hash, and path-plus-hash alternatives"
+    }
+  ],
+  "blocking_failure_classes": [
+    {
+      "id": "FC-1",
+      "class": "MATH_IDENTIFIABILITY",
+      "severity": "BLOCKER",
+      "summary": "Deterministic calibration (A_g, c_g) and residual bias b_r are not separately identifiable; an exact 3-dimensional gauge orbit leaves the gyro packet stream invariant. SC-01 states neither cross-trajectory sharing of (A_g, c_g), nor E[b_r]=0, nor any excitation requirement. On R4 the deterministic split is unrecoverable by construction.",
+      "artifacts": ["docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md", "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md"]
+    },
+    {
+      "id": "FC-2",
+      "class": "UNFROZEN_SUPPORT",
+      "severity": "BLOCKER",
+      "summary": "No numeric parameter supports exist for R1-R4. The declared primary method-lock endpoint (R4) is not implementable, R4 disjointness is unfalsifiable, and SC-01's ban on post-test-access support changes has no referent.",
+      "artifacts": ["docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md"]
+    },
+    {
+      "id": "FC-3",
+      "class": "GATE_ARITHMETIC_FALSIFICATION",
+      "severity": "BLOCKER",
+      "summary": "G3's 'includes zero' disjunct fires whenever 1.96*SE(N3S-N2) >= D-L, so a decorative feature path passes at rates up to ~0.73 under a true null; pass probability increases with imprecision. The primary condition L >= 0.5*D is point-estimate-only while G0/G1/G2 require CIs.",
+      "artifacts": ["docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md"]
+    },
+    {
+      "id": "FC-4",
+      "class": "GATE_ARITHMETIC_UNDERSPECIFIED",
+      "severity": "BLOCKER",
+      "summary": "Divergence is undefined though G4 conditions on it; seed aggregation is defined only for G1/G2, leaving G0/G3/G4 free; the bootstrap resampling/clustering unit is ambiguous and the pooled reading understates CI half-width by up to sqrt(3); the two-of-three-seeds rule names no statistic and no record schema.",
+      "artifacts": ["docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md"]
+    },
+    {
+      "id": "FC-5",
+      "class": "RED_PATH_TRACEABILITY",
+      "severity": "BLOCKER",
+      "summary": "Zero overlap between SC-00's 13 frozen red-path identifiers and the 7 cited in the sealed handoff. No claim covers causal ordering or deterministic-vs-residual separation. No red path falsifies learned-compensator residual-bias retention, intra-timestamp stage order, or the right-error reset. Several existing red paths are vacuous unless fixture conditions are stated.",
+      "artifacts": ["docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md", "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json"]
+    }
+  ],
+  "material_findings": [
+    {"id": "FC-6", "class": "CAUSALITY_AMBIGUITY", "severity": "MATERIAL", "summary": "SC-00:11 'nor the correction produced at t' admits two incompatible readings; Reading B would make the N3/G2/G3 architecture illegal. Two incompatible implementations of test_sc_causal_prefix_invariance_red follow."},
+    {"id": "FC-7", "class": "CLAIM_POPULATION_AND_SEAL_COVERAGE", "severity": "MATERIAL", "summary": "C3 undercounts (1350 vs 1800: N3 branch routing uncounted); C6 undercounts (270 vs 450: G1's R1 and R2 populations uncounted). The handoff is excluded from the manifest, so claims and populations can change without altering the sealed digest."},
+    {"id": "FC-8", "class": "N3S_INTERVENTION_PURITY", "severity": "MATERIAL", "summary": "Derangement permutation sharing across time indices is unspecified; an independent per-index permutation bundles a second intervention that inflates L favorably. Strata of size 1 make derangement impossible and silently degrade to identity."},
+    {"id": "FC-9", "class": "SPLIT_FIREWALL_PARTIAL", "severity": "MATERIAL", "summary": "R4 is held out only over calibration-parameter support; initial states, orbit phases, and noise streams are not required disjoint, weakening the OOD framing of the primary endpoint."},
+    {"id": "FC-10", "class": "SIGN_CONVENTION", "severity": "MATERIAL", "summary": "G2 uses (N3-N2), G3 uses D = N2-N3, and G1's CI contrast is never named."},
+    {"id": "FC-11", "class": "COMPUTE_PROPORTIONALITY", "severity": "MATERIAL", "summary": "Charter section 12 requires a run budget for runs over 30 minutes; no wall-time, CPU/GPU/RAM, parallelism, disk, or stop-condition record exists, and prompt 05's required-output list has no carrier for it."},
+    {"id": "FC-12", "class": "REUSE_PINNING", "severity": "MATERIAL", "summary": "Imported frozen modules are not hashed by the manifest and the working tree is dirty, so the commit pin does not establish the content of the reused math across sequential stages."},
+    {"id": "FC-13", "class": "DECISION_LEDGER", "severity": "MATERIAL", "summary": "DECISION_LEDGER.md is byte-identical to its template and records no DR0 seal entry."}
+  ],
+  "cosmetic_findings": [
+    {"id": "FC-14", "summary": "Undocumented digest-composition rule; no hashing command recorded in COMMANDS.json."},
+    {"id": "FC-15", "summary": "STAGE_STATE.json was written in-stage but appears in neither CHANGED_PATHS.json nor excluded_from_manifest."},
+    {"id": "FC-16", "summary": "SC_DR0_DECISION.json target_population_count 30 is an unlabeled scalar matching no other count in the bundle."},
+    {"id": "FC-17", "summary": "C1 uses a per-model population convention while C2/C3 pool over models."},
+    {"id": "FC-18", "summary": "SC-00:11 calls the gyro packet body-frame while SC-00:17 defines it in the sensor frame; A_g and A_m invertibility is assumed but never declared."},
+    {"id": "FC-19", "summary": "COMMANDS.json hardcodes a machine-specific interpreter path."},
+    {"id": "FC-20", "summary": "No shared early-stopping / checkpoint-selection criterion is declared across N0-N3, required for paired fairness."}
+  ],
+  "verified_correct": [
+    "nu = z_tilde - h and H_m = [+[h_m]_x, 0] including sign, consistent with bench/estimators/mekf.py",
+    "gyro inverse algebra and the no-double-count argument for propagation with omega_tilde - b_hat_r",
+    "magnetometer hard-iron then inverse-soft-iron then mounting order",
+    "K = G1 H_m^T G2 in R^(6x3), delta_x = K nu_m, right injection consistent with right-error convention and reset",
+    "rank([h_m]_x) = 2 with body-frame null direction span{h_m}; weak-axis statement honest and correctly limited to instantaneous observability",
+    "scope is minimally sized; all five regimes and N0-N3S load-bearing; C0/C1 justified diagnostic grounding; all 8 secondary metrics zero-marginal-cost",
+    "no excluded topic smuggled in; deferrals correctly gated",
+    "checkpoint integrity, target uniqueness, path ownership, handoff freshness, repair accounting",
+    "boundary isolation: main Phase 2, SpikeRA-KalmanNet, frozen Phase 0-1, and .codex/config.toml untouched"
+  ],
+  "unsupported_claims_identified": [
+    {"artifact": "experiments/side_gyro_mag_comp/design_review/SC_DR0_REVIEW.md", "line": 5, "quote": "SC-01 defines all R0-R4 supports", "status": "FALSE", "basis": "DERIV-5"},
+    {"artifact": "experiments/side_gyro_mag_comp/design_review/SC_DR0_REVIEW.md", "line": 5, "quote": "SC-00 closes the deterministic-calibration versus residual-bias ambiguity", "status": "OVERCLAIM", "basis": "DERIV-2; SC-00 states a requirement, not an identifiability result"},
+    {"artifact": "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json", "claim_id": "DR0-C6-GATES", "quote": "G0-G4 predicates are fully specified before test inspection", "status": "FALSE", "basis": "DERIV-6 and FC-4"}
+  ],
+  "boundary_preservation": {
+    "main_phase2_unaffected": true,
+    "spikera_kalmannet_unaffected": true,
+    "frozen_phase0_1_unaffected": true,
+    "codex_config_preserved": true,
+    "side_study_authorizes_nothing_external": true
+  },
+  "next_state": {
+    "current_stage": "DR0_REPAIR",
+    "stage_status": "READY",
+    "next_actor": "CODEX",
+    "next_allowed_stage": "DR0_INDEPENDENT_AUDIT",
+    "repair_round_recorded_for": "DR0",
+    "second_failure_policy": "A second failed DR0 audit closes the study as COMPLETE_BLOCKED; no third round exists."
+  },
+  "audited_at_utc": "2026-08-06T11:12:00+00:00"
+}

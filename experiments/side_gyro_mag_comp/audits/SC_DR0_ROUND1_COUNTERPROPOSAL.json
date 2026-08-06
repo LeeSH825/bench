@@ -1,0 +1,222 @@
+{
+  "schema_version": "side-study-claude-to-codex-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "DR0_INDEPENDENT_AUDIT",
+  "status": "AUDIT_COMPLETE_REPAIR_REQUIRED",
+  "decision": "FAIL_REVISE_MATH",
+  "repairable": true,
+  "repair_round": 1,
+  "repair_rounds_remaining_after_this": 0,
+  "implementation_authorized": false,
+  "audited_checkpoint_digest": "298feba22320a5e1abd617455d4d7cc342f539229d443c2cda3577326788f730",
+  "checkpoint_stable_during_audit": true,
+  "claude_audit_md": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.md",
+  "claude_audit_json": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.json",
+  "next_actor": "CODEX",
+  "next_stage": "DR0_REPAIR",
+  "re_audit_stage": "DR0_INDEPENDENT_AUDIT",
+  "minimum_counterproposal": {
+    "principle": "Text-only repair of the frozen contract before any test access. No architecture, model family, feature dimension (8), conditioning mechanism (branch_specific_film), split structure, seed set, bootstrap replicate count, bootstrap seed, or numeric gate threshold may change. Every item below either adds a missing definition or removes a permissive escape clause; none relaxes a threshold.",
+    "edits": [
+      {
+        "id": "CP-1",
+        "covers": [
+          "FC-1"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Add a 'Gauge fixing and identifiability' paragraph to the Regimes section.",
+        "requirement": "State that within each regime (A_g, c_g) are drawn once per regime and are identical for every trajectory and every split containing that regime; b_r is drawn i.i.d. per trajectory with E[b_r] = 0 and declared covariance Sigma_br; the declared numeric supports satisfy a stated scale separation between ||c_g|| and sigma_br; and every regime population contains three-axis omega_true excitation sufficient to identify diag(A_g). State explicitly that without this anchoring (c_g, b_r) -> (c_g + A_g C_SgB v, b_r - v) is an exact observational symmetry and omega_target is defined only up to a constant. Because c_g on R4 lies outside training support, state that R4 gyro corrected-rate RMSE and residual-bias RMSE are reported jointly with no per-component claim on R4."
+      },
+      {
+        "id": "CP-2",
+        "covers": [
+          "FC-2"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Add a numeric support table for R0-R4.",
+        "requirement": "Give explicit numeric ranges for every deterministic parameter of R1 (gyro offset, diagonal scale) and R2 (hard iron, soft iron), the R3 in-support ranges, and the R4 held-out ranges, with a stated disjointness margin that a test can check. R4's support must be numerically disjoint from the union of R1-R3 supports. Without numbers the primary R4 endpoint is not implementable and SC-01's post-test-access freeze has no referent."
+      },
+      {
+        "id": "CP-3",
+        "covers": [
+          "FC-3"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Replace the G3 predicate.",
+        "requirement": "G3 passes when the paired 95% percentile bootstrap CI for the per-trajectory contrast T = RMSE_N3S - 0.5*RMSE_N2 - 0.5*RMSE_N3 has lower endpoint > 0. Delete the 'includes zero' disjunct entirely.",
+        "threshold_preservation_proof": "T > 0 is logically equivalent to L >= 0.5*D, verified symbolically and over 100000 randomized numeric trials with zero counterexamples. The frozen 0.5 margin is preserved exactly; this is a reformulation, not a threshold change. The existing bootstrap (trajectory pairs, 10000 resamples, percentile, seed 45173) computes it unchanged.",
+        "additional": "Add an INCONCLUSIVE_UNDERPOWERED terminal distinct from a substantive G3 failure, so that low power is not reported as a scientific refutation either. Charter section 11 maps a substantive G3 failure to REVISE_FEATURE_INTERFACE; the new terminal must not be mapped there."
+      },
+      {
+        "id": "CP-4",
+        "covers": [
+          "FC-4",
+          "FC-10"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Add one 'Gate arithmetic' subsection freezing five things.",
+        "requirement": [
+          "Divergence predicate: a numeric criterion (non-finite estimate OR max geodesic attitude error above a stated divergence_threshold_rad). If the Phase 1b definition is reused, add it to SC-02 as a read-only reuse row.",
+          "Bootstrap unit: the resampling unit is the unique test trajectory ID; a resampled ID carries its per-seed values as a block; the statistic is the seed-averaged paired difference. Equivalently, state explicitly that R4 test trajectories are regenerated per training seed; if shared, cluster on trajectory_id.",
+          "Seed aggregation applied uniformly to G0-G4 (seed mean for point estimates), retaining the existing two-of-three direction rule for G1 and G2 and stating explicitly whether G4's 0.03 ratio holds per seed or on the seed mean.",
+          "The two-of-three-seeds statistic: the sign of the per-seed mean paired difference over that seed's 30 R4 trajectory pairs, with the magnitude threshold and CI computed on the pooled frame defined above. Pre-register the per-record key tuple {experiment, regime, model, window, metric, seed, trajectory_id}.",
+          "One canonical contrast order treatment - reference for every gate, including G1's, and restate G3's D in that order."
+        ]
+      },
+      {
+        "id": "CP-5",
+        "covers": [
+          "FC-5"
+        ],
+        "files": [
+          "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+          "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json"
+        ],
+        "action": "Restore red-path traceability and close red-path gaps.",
+        "requirement": [
+          "Every manifest claim must cite SC-00's frozen test_sc_*_red identifiers verbatim; the current 7 invented names have zero overlap with the frozen 13 and must be replaced or mapped.",
+          "Add manifest claims covering the causal-ordering contract and the deterministic-vs-residual separation, which currently have no claim at all.",
+          "Add test_sc_learned_compensator_residual_bias_retention_red: on a diagnostic split, assert the OLS slope of (omega_tilde_learned - omega_true) on b_r is approximately 1 (not 0) and E[omega_tilde_learned - omega_target] is approximately 0.",
+          "Add test_sc_intra_timestamp_stage_order_red: an implementation that updates before propagating at equal timestamps must fail.",
+          "Add a red path for the right-error reset (identity reset instead of right_jacobian_so3 must fail).",
+          "State mandatory fixture conditions so existing red paths are not vacuous: injection and Jacobian fixtures require q_hat != identity and delta_theta not parallel to the q_hat axis; the magnetometer inverse fixture requires b_m != 0, anisotropic A_m, and C_SmB != identity.",
+          "State that the declared nu = z_tilde - h is the normative sign anchor, since (nu, H) jointly flipped is a gauge, and note that a global sign on H_m^T inside K is absorbable by the learned G1/G2 so the neural gain does not test it."
+        ]
+      },
+      {
+        "id": "CP-6",
+        "covers": [
+          "FC-6"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+        "action": "Replace the second sentence of the event-order paragraph.",
+        "requirement": "No value carrying a timestamp later than t may influence any quantity computed at t. Within t the stage order is gyro compensation, propagation, magnetometer compensation, magnetometer update; a stage may consume only outputs of strictly earlier stages at t, or any stage at times < t. In particular the posterior correction delta_x_t = K_t nu_t and the posterior state at t may not influence K_t, G1_t, G2_t, f_g_t, or f_m_t, whereas f_g_t and f_m_t, being outputs of earlier stages at t, may condition G1_t and G2_t."
+      },
+      {
+        "id": "CP-7",
+        "covers": [
+          "FC-7"
+        ],
+        "files": [
+          "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json",
+          "experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+          "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json"
+        ],
+        "action": "Correct claim populations and bring the claims inside the seal.",
+        "requirement": "Set DR0-C3 target_population_count to 1800 with the decomposition 1350 identity plus 450 N3 routing. Set DR0-C6 to 450 enumerating five regime populations of 90 (R3, R4, R0, plus G1's R1 and R2). Correct DR0-C6's predicate text, which currently asserts full gate specification and is false. Add a claims_digest field to the handoff (sha256 over the canonical serialization of the claims array) and mirror it into STAGE_STATE.json next to sealed_checkpoint, so populations cannot change without altering a sealed value."
+      },
+      {
+        "id": "CP-8",
+        "covers": [
+          "FC-8",
+          "FC-9"
+        ],
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Tighten the N3S intervention and the R4 firewall.",
+        "requirement": [
+          "Require one derangement permutation sigma per (regime, training_seed), applied identically at every time index, so whole feature sequences are reassigned and temporal coherence is not a second bundled intervention.",
+          "Make a derangement stratum of size < 2 a hard error, and require a recorded per-stratum fixed-point count of exactly 0 across the whole N3S evaluation, asserted by the N3S red path.",
+          "Require R4 initial states, orbit phases, and raw-noise RNG namespaces to be disjoint from R0-R3 train/validation streams, and record the stream namespace per trajectory ID under the pairing/split red path."
+        ]
+      },
+      {
+        "id": "CP-9",
+        "covers": [
+          "FC-11",
+          "FC-12",
+          "FC-13"
+        ],
+        "files": [
+          "experiments/side_gyro_mag_comp/design_review/",
+          "docs/research/side_gyro_mag_comp/SC_02_REPOSITORY_REUSE_MAP.md",
+          "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md"
+        ],
+        "action": "Close governance and reproducibility gaps.",
+        "requirement": [
+          "Add experiments/side_gyro_mag_comp/design_review/RUN_BUDGET.json (wall-time estimate, CPU/GPU/RAM, parallelism, disk estimate, hard stop condition) and include it in the manifest, satisfying charter section 12. It must live under experiments/side_gyro_mag_comp/**, not prompts/**.",
+          "Pin the reused frozen modules by sha256 (bench/estimators/mekf.py, bench/metrics/mekf.py, bench/tasks/generator/mekf_fusion_events.py) in the manifest or a sibling REUSE_PIN.json, and record a baseline dirty-path inventory as BASELINE_DIRTY_PATHS.json so later stages diff against it rather than against a dirty HEAD.",
+          "Add the DR0 seal row to DECISION_LEDGER.md citing the manifest digest, and add the DR0 audit row citing this audit JSON."
+        ]
+      },
+      {
+        "id": "CP-10",
+        "covers": [
+          "FC-14",
+          "FC-15",
+          "FC-16",
+          "FC-17",
+          "FC-18",
+          "FC-19",
+          "FC-20"
+        ],
+        "action": "Cosmetic cleanups, batched into the same round.",
+        "requirement": [
+          "Document the digest rule (sha256 over raw bytes of CHECKPOINT_MANIFEST.json) in the manifest schema and record the hashing command in COMMANDS.json.",
+          "List STAGE_STATE.json in CHANGED_PATHS.json and in excluded_from_manifest with a one-line reason.",
+          "Label or remove SC_DR0_DECISION.json target_population_count.",
+          "Make claim population conventions consistent (per-model vs pooled) and fix DR0-C1's population string.",
+          "Fix the gyro packet frame wording in SC-00 and declare A_g, A_m invertibility and conditioning bounds.",
+          "Replace the hardcoded interpreter path in COMMANDS.json.",
+          "Declare one shared early-stopping and checkpoint-selection criterion applied identically across N0-N3.",
+          "Correct SC_DR0_REVIEW.md: strike 'SC-01 defines all R0-R4 supports' (false) and soften 'SC-00 closes the deterministic-calibration versus residual-bias ambiguity' (overclaim) to match CP-1."
+        ]
+      },
+      {
+        "id": "CP-11",
+        "covers": [
+          "I1"
+        ],
+        "source": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT_ADDENDUM.md",
+        "class": "INFORMATION_BOUNDARY",
+        "file": "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+        "action": "Define a symmetric deployable encoder interface and mark all calibration symbols non-deployable.",
+        "requirement": "Rename SC-00 line 29 to z_m^{B,oracle} = C_BSm A_m^-1 (y_m^Sm - b_m^Sm) and mark it, together with omega_target^B, as a label/diagnostic definition only. Define the deployable pair explicitly and symmetrically: (omega_tilde_g^B, f_g) = GyroEncoder(y_g^Sg, t; theta) and (z_tilde_m^B, f_m) = MagEncoder(y_m^Sm, t; theta). State that (A_g, c_g^Sg, C_SgB, A_m, b_m^Sm, C_SmB) are non-deployable in all of N0-N3S. Extend test_sc_deployable_namespace_leakage_rejected_red to reject each of those six symbols in the deployable signature.",
+        "rationale": "As frozen, SC-00 line 29 defines z_tilde_m^B solely from the TRUE calibration parameters and line 33 feeds that same symbol into the deployable innovation, while line 45 forbids calibration parameters in the deployable namespace. Separately, f_m is consumed at line 39 but produced by no defined encoder, so the magnetometer branch of N3 has no specified interface. The gyro side is already correct because line 21 qualifies omega_target^B as a target.",
+        "scope_preservation": "Text-only. No threshold, model family, feature dimension, conditioning mechanism, regime, population, split, seed, or endpoint changes. No experiment, architecture, or sensor added."
+      },
+      {
+        "id": "CP-12",
+        "covers": [
+          "I4"
+        ],
+        "source": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT_ADDENDUM.md",
+        "class": "INFORMATION_BOUNDARY",
+        "file": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "action": "Rescope the train/test firewall from regime to split.",
+        "requirement": "Replace 'Training/validation/normalization use R0-R3 only.' with: training, early stopping, checkpoint selection, threshold setting and all normalization constants are computed only from R0-R3 TRAINING-SPLIT trajectory IDs; no test-split trajectory of any regime R0-R4 may influence any of them; normalization constants are hashed and frozen before the first test evaluation and the hash is recorded in the per-seed training manifest. Extend test_pairing_split_firewall_red to fail when any test-split trajectory ID of any regime contributes to a normalization constant, an early-stopping decision, or a checkpoint selection.",
+        "rationale": "The current sentence restricts by REGIME, and SC-01 line 15 ('test 30 per R0-R4') confirms R0-R3 test splits exist. Only R4 is protected. G0 is scored on R3, G1 sensor metrics on R1 and R2, and G4 on R0, so three of five gates are decided on regimes whose test split may lawfully feed normalization, early stopping and checkpoint selection. SC-00's 'train-frozen normalization constants' is a runtime-input adjective, not a computation-scope definition, so the two documents do not close the hole together.",
+        "scope_preservation": "Text-only. No threshold, model family, feature dimension, conditioning mechanism, regime, population, split size, seed, or endpoint changes. No experiment, architecture, or sensor added."
+      }
+    ],
+    "explicitly_not_requested": [
+      "any change to the 10% G0, 5% G1, 5% G2, 0.5 G3, or 0.03 G4 numeric thresholds",
+      "any change to model family, feature dimension 8, branch-specific FiLM conditioning, or the 6x3 gain",
+      "any change to the split structure, training seeds [31001,31002,31003], bootstrap seed 45173, or 10000 replicates",
+      "any additional model, regime, sensor, or comparison arm",
+      "attention, Transformer, SNN, SoW, uncertainty heads, learned Q/R, reliability gating, or broad KalmanNet-family comparison",
+      "any new experiment; no proposed edit can change which of G0-G4 is decidable, only whether the decision is determinate"
+    ],
+    "addendum_note": "CP-11 and CP-12 were appended by an additive independent audit pass recorded in experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT_ADDENDUM.md/.json. They cover two INFORMATION_BOUNDARY blockers (I1, I4) not covered by CP-1..CP-10. Because DR0 has consumed its only repair round, the repair must cover CP-1..CP-12 together; a blocker omitted here cannot be repaired later."
+  },
+  "re_audit_contract": {
+    "on_reseal_claude_will_verify": [
+      "the gauge-fixing paragraph makes (A_g, c_g) vs b_r identifiable and the R4 per-component claim is withdrawn",
+      "numeric R1-R4 supports exist and R4 disjointness is machine-checkable",
+      "G3 contains no disjunct and its CI form is algebraically equivalent to L >= 0.5*D",
+      "divergence, seed aggregation, bootstrap unit, the two-of-three statistic, and contrast order are all frozen",
+      "every manifest claim cites a frozen SC-00 red-path identifier and the four missing red paths exist",
+      "the causal-ordering sentence admits exactly one implementation",
+      "claim populations are corrected and a claims_digest brings them inside the seal",
+      "a new stable checkpoint digest, recomputed before and after re-audit",
+      "SC-00 defines MagEncoder producing (z_tilde_m^B, f_m) from causal sensor-frame input only, and z_m^{B,oracle} plus all six calibration symbols are marked non-deployable (CP-11)",
+      "the deployable-namespace red path actually rejects A_m, b_m, C_BSm, A_g, c_g, C_SgB (CP-11)",
+      "SC-01's firewall is scoped by SPLIT not regime and names training, early stopping, checkpoint selection, threshold setting and normalization (CP-12)",
+      "the pairing/split red path fails on a test-split contribution to normalization or selection (CP-12)"
+    ],
+    "second_failure_policy": "This is repair round 1 of 1. A second failed DR0 audit closes the study as COMPLETE_BLOCKED with next_actor NONE and a final bundle recording every unresolved blocker and this counterproposal. No third round exists and no human escalation occurs mid-workflow."
+  },
+  "boundary_statement": "This handoff authorizes nothing outside the side study. Main AI-ADCS Phase 2, SpikeRA-KalmanNet, and frozen Phase 0-1 evidence remain untouched and unauthorized. Claude edited no implementation, checkpoint, threshold, machine result, or Codex report.",
+  "written_at_utc": "2026-08-06T11:12:00+00:00",
+  "claude_audit_addendum_md": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT_ADDENDUM.md",
+  "claude_audit_addendum_json": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT_ADDENDUM.json"
+}

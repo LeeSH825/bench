@@ -1,0 +1,8 @@
+{
+  "status": "MERGED_EXISTING_CONFIG",
+  "config": "/home/dss-pc-05/bench/.codex/config.toml",
+  "backup": "/home/dss-pc-05/bench/.agent_package_backups/side_gyro_mag_v2_20260806T102415Z/.codex/config.toml",
+  "changes": [],
+  "preservation_policy": "no existing key or unrelated section modified",
+  "timestamp_utc": "2026-08-06T10:24:15.347003+00:00"
+}

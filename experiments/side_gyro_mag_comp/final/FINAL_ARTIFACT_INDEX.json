@@ -1,0 +1,45 @@
+{
+  "schema_version": "side-study-final-artifact-index-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "target_population_count": 3,
+  "codex_final_bundle": [
+    "experiments/side_gyro_mag_comp/final/FINAL_RESULT.md",
+    "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json",
+    "experiments/side_gyro_mag_comp/final/FINAL_ARTIFACT_INDEX.json"
+  ],
+  "required_claude_final_outputs": [
+    "experiments/side_gyro_mag_comp/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp/final/FINAL_AUDIT.json"
+  ],
+  "canonical_contracts": [
+    "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+    "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md"
+  ],
+  "design_evidence": [
+    "experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp/audits/SC_DR0_REAUDIT.json"
+  ],
+  "implementation_evidence": [
+    "experiments/side_gyro_mag_comp/implementation/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp/implementation/SC_IMPLEMENTATION_DECISION.json",
+    "experiments/side_gyro_mag_comp/implementation/TEST_RESULTS.json",
+    "experiments/side_gyro_mag_comp/implementation/smoke/SMOKE_RESULT.json"
+  ],
+  "independent_audit_evidence": [
+    "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+    "experiments/side_gyro_mag_comp/audits/SC_IMPL_RED_PATH_EVIDENCE.json",
+    "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+    "experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json"
+  ],
+  "state_and_governance": [
+    "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json",
+    "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md"
+  ],
+  "absent_by_design": {
+    "method_lock_results": "not executed",
+    "g0_g4_gate_records": "not executed",
+    "paired_bootstrap_records": "not executed",
+    "implementation_repair_checkpoint": "not created because the mandatory repair contract is incomplete"
+  }
+}

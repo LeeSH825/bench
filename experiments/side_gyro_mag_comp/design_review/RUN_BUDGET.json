@@ -1,0 +1,10 @@
+{
+  "schema_version": "side-study-run-budget-v1",
+  "stage": "METHOD_LOCK_PILOT",
+  "wall_time_estimate_hours": 8,
+  "hardware": {"gpu": "one CUDA GPU if available", "cpu_cores_max": 8, "ram_gb_max": 32},
+  "parallel_training_jobs": 1,
+  "disk_estimate_gb": 8,
+  "hard_stop": "Stop the current gate on non-finite loss, resource exhaustion, elapsed wall time above 12 hours, or a result that makes the frozen gate impossible; do not add trials or tune.",
+  "scope": "Only G0-G4 gate-order work; no sweep."
+}

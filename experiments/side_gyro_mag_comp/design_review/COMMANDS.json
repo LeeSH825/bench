@@ -1,0 +1,10 @@
+{
+  "schema_version": "side-study-command-manifest-v1",
+  "stage": "DR0_DESIGN_REVIEW",
+  "commands": [
+    "python3 agent_system/side_gyro_mag_comp/scripts/validate_stage_state.py agent_system/side_gyro_mag_comp/state/STAGE_STATE.json",
+    "python3 agent_system/side_gyro_mag_comp/scripts/validate_handoff.py experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json",
+    "sha256sum experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+    "git status --porcelain=v1 --untracked-files=all"
+  ]
+}

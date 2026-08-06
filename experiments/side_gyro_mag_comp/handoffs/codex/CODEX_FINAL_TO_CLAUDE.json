@@ -1,0 +1,72 @@
+{
+  "schema_version": "side-study-codex-handoff-v2",
+  "status": "SEALED_FOR_AUDIT",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "FINAL_SYNTHESIS",
+  "decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "checkpoint_digest": "cb7b82943b6a0fa0d6d7e2740088f38228ecb1912f80c79954af9d586cff6ae7",
+  "audit_target_paths": [
+    "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json"
+  ],
+  "target_count": 1,
+  "claims": [
+    {
+      "claim_id": "FINAL-C1-BLOCKER",
+      "predicate": "The terminal BLOCKED_CONTRACT_GAP decision follows because mandatory repair R8 requires a frozen-threshold weak/observable population definition and no canonical or independently authorized artifact supplies its exact threshold and membership rule.",
+      "red_path_test": "Claude final audit must reject this predicate if any cited canonical artifact contains an exact R8 threshold and membership formula, or if the final report implies the separately clarified R9 remains unresolved.",
+      "target_population_count": 5,
+      "target_population_decomposition": {"SC-00": 1, "SC-01": 1, "implementation_audit": 1, "counterproposal": 1, "R9_clarification": 1},
+      "machine_evidence": [
+        "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+        "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+        "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+        "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+        "experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json"
+      ]
+    },
+    {
+      "claim_id": "FINAL-C2-NO-SCIENCE",
+      "predicate": "G0-G4 are all NOT_RUN and the blocked result makes no compensation, feature, shuffle, nominal-harmlessness, covariance, or flight-performance claim.",
+      "red_path_test": "Claude final audit must fail any G0-G4 PASS/FAIL statement or method conclusion that does not resolve to a method-lock result artifact; none exists in the final artifact index.",
+      "target_population_count": 5,
+      "target_population_decomposition": {"G0": 1, "G1": 1, "G2": 1, "G3": 1, "G4": 1},
+      "machine_evidence": [
+        "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json",
+        "experiments/side_gyro_mag_comp/final/FINAL_ARTIFACT_INDEX.json"
+      ]
+    },
+    {
+      "claim_id": "FINAL-C3-COMPLETED-SCOPE",
+      "predicate": "The only numeric execution scope reported is the non-performance tiny smoke: 42 tests, 140 records, 7 variants, 20 test trajectories, 4 per R0-R4, seed 31001, whole-trajectory attitude geodesic RMSE, and 20 N3S bridge records.",
+      "red_path_test": "Claude final audit independently recomputes counts and scope fields from TEST_RESULTS.json and SMOKE_RESULT.json and fails on any mismatch or performance interpretation.",
+      "target_population_count": 140,
+      "target_population_decomposition": {"variants": 7, "records_per_variant": 20, "regimes": 5, "trajectories_per_regime": 4},
+      "machine_evidence": [
+        "experiments/side_gyro_mag_comp/implementation/TEST_RESULTS.json",
+        "experiments/side_gyro_mag_comp/implementation/smoke/SMOKE_RESULT.json"
+      ]
+    },
+    {
+      "claim_id": "FINAL-C4-BOUNDARIES",
+      "predicate": "Finalization preserves main Phase 2, SpikeRA-KalmanNet, frozen Phase 0-1 evidence, and .codex/config.toml; the config digest remains the installed preflight value.",
+      "red_path_test": "Claude final audit verifies the final manifest member hashes and fails if .codex/config.toml is not sha256 315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d or if the final bundle claims edits outside the side-study paths.",
+      "target_population_count": 4,
+      "target_population_decomposition": {"main_phase2": 1, "SpikeRA_KalmanNet": 1, "frozen_phase0_1": 1, "codex_config": 1},
+      "machine_evidence": [
+        "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json",
+        "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json"
+      ]
+    }
+  ],
+  "commands": [
+    "python3 agent_system/side_gyro_mag_comp/scripts/validate_handoff.py experiments/side_gyro_mag_comp/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json",
+    "python3 agent_system/side_gyro_mag_comp/scripts/validate_stage_state.py agent_system/side_gyro_mag_comp/state/STAGE_STATE.json"
+  ],
+  "machine_artifacts": [
+    "experiments/side_gyro_mag_comp/final/FINAL_RESULT.md",
+    "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json",
+    "experiments/side_gyro_mag_comp/final/FINAL_ARTIFACT_INDEX.json",
+    "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json"
+  ],
+  "next_actor": "CLAUDE"
+}
