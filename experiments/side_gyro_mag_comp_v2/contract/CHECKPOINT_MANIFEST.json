@@ -1,0 +1,31 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-checkpoint-manifest-v2",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT_REPAIR",
+  "contract_repair_round": 1,
+  "archive_base_evidence_commit": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+  "archive_self_contained_commit": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+  "hash_algorithm": "sha256",
+  "checkpoint_digest_rule": "sha256 over the raw bytes of this CHECKPOINT_MANIFEST.json file",
+  "contract_target_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+  "contract_target_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+  "files": [
+    {"path":"agent_system/side_gyro_mag_comp_v2/control/validate_contract.py","sha256":"483889464c7ba3f619e6667207a353a929f17dd167e46759a48222f6ba12f002"},
+    {"path":"docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json","sha256":"50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe"},
+    {"path":"docs/research/side_gyro_mag_comp_v2/SC_V2_REPOSITORY_REUSE_MAP.md","sha256":"13fb66f07267fe0247ea1461bf4b677cc8c6e0e07528178e2e60919a73eecbd8"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/ARCHIVE_PROVENANCE.json","sha256":"3fb7b231deacaabb1250a97a175617c9b55b8595fbff74000b72f004182f3fc0"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/CHANGED_PATHS.json","sha256":"7375756de32cc16f815e27c5c8fe0abd404d843b70f291f65e02dbb50c07ab78"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/COMMANDS.json","sha256":"5176b080e87c04bf80fc3a0450e435ba7b66106023e4aad59d35659d0531a52b"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/CONTRACT_DECISION.json","sha256":"2e41545aae7473a8cb424082da1a0ca8cb5ccfe7a178188ea72d32b135ab70da"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/CONTRACT_MUTATION_RESULT.json","sha256":"1ccc31eba3c7e8dbf6c4ee59eec75fa950799f84f18e30563267a192397191fa"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/SC_V2_CONTRACT_REPORT.md","sha256":"3877aa38e9d6c353b7f8b282055129e16a9cd7ed82524e6609ecb6e59685324e"},
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json","sha256":"e38e481c251e019def6f5a74191cf68b6388f2c42a9583f55d1f933df18a50e2"}
+  ],
+  "file_count": 10,
+  "supersedes_checkpoint_sha256": "93afc0c0f72adb3169f956273bcaeccd30b4152d964885ed8dd74364c622bd45",
+  "excluded_from_manifest": [
+    {"path":"experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json","reason":"self-digest target"},
+    {"path":"experiments/side_gyro_mag_comp_v2/handoffs/codex/CODEX_CONTRACT_TO_CLAUDE.json","reason":"transport points to the single sealed manifest target"},
+    {"path":"agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json","reason":"mutable coordination state records the sealed digest"}
+  ]
+}

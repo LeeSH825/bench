@@ -1,0 +1,39 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-final-artifact-index-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "codex_final_bundle": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_RESULT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_DECISION.json",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_ARTIFACT_INDEX.json",
+    "experiments/side_gyro_mag_comp_v2/final/COMMANDS.json",
+    "experiments/side_gyro_mag_comp_v2/final/CHANGED_PATHS.json",
+    "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json"
+  ],
+  "contract_evidence": [
+    "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CONTRACT_MUTATION_RESULT.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CONTRACT_DECISION.json"
+  ],
+  "state_and_handoff": [
+    "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json",
+    "experiments/side_gyro_mag_comp_v2/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json"
+  ],
+  "required_claude_final_outputs": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json"
+  ],
+  "required_claude_final_outputs_present_at_codex_seal": false,
+  "absent_by_design": {
+    "implementation": "not authorized",
+    "G0": "not run",
+    "G1": "not run",
+    "G2": "not run",
+    "G3": "not run",
+    "G4": "not run",
+    "scientific_result": "none",
+    "independent_final_audit": "Claude-owned and not fabricated by Codex"
+  }
+}

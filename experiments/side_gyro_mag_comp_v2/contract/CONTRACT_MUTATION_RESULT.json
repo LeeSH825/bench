@@ -1,0 +1,39 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-contract-mutation-result-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT_REPAIR",
+  "contract_repair_round": 1,
+  "command": ["python3", "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py", "--contract", "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json", "--mutation-matrix"],
+  "exit_code": 0,
+  "decision": "PASS",
+  "all_mutations_rejected": true,
+  "mutation_count": 485,
+  "unrejected_mutations": [],
+  "mutation_labels_sha256": "adcddf341cb11f23bb667885736d1288a4d6e84e0ce5f4669e639671118b9321",
+  "category_counts": {
+    "changed_paths": 3,
+    "descriptor_required_fields": 144,
+    "descriptor_value_bindings": 54,
+    "exclusive_semantics": 36,
+    "execution_access_firewall": 5,
+    "g1_six_conjuncts_plus_primary": 7,
+    "gate_arithmetic_leaves": 38,
+    "observability_fields": 16,
+    "producer_fields": 72,
+    "producer_value_bindings": 72,
+    "r1_r13_source_projection": 13,
+    "r9_source_projection": 5,
+    "threshold_leaves": 20
+  },
+  "coverage": {
+    "descriptor_instances": 18,
+    "required_descriptor_fields_each": 8,
+    "producer_fields_each": 4,
+    "g1_addressable_metrics": 7,
+    "r1_r13_source_projection_rows": 13,
+    "r9_projection_sections": 5,
+    "observability_fields": 16
+  },
+  "execution_mode": "in-memory contract mutations only; no estimator, model, data, test, smoke, performance, or payload execution",
+  "test_payload_accessed": false
+}

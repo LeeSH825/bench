@@ -1,0 +1,25 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-archive-provenance-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "archive_branch": "codex/side-gyro-mag-comp-v1-terminal-archive",
+  "base_evidence_commit": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+  "base_evidence_staged_path_count": 84,
+  "base_evidence_staged_path_set": {
+    "canonical_contract_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+    "json_pointer": "/archive_provenance/base_parent_staged_paths",
+    "representation": "exact ordered git diff-tree path list"
+  },
+  "self_contained_archive_commit": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+  "self_contained_archive_parent": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+  "companion_staged_path_count": 1,
+  "companion_staged_path_set": [
+    ".codex/config.toml"
+  ],
+  "companion_config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d",
+  "final_manifest_path": "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json",
+  "final_manifest_members_verified": 9,
+  "final_manifest_member_count": 9,
+  "self_containment_result": "PASS_9_OF_9",
+  "verification_scope": "All final-manifest member paths were read from the self-contained archive commit and their raw-byte sha256 values matched the archived manifest.",
+  "held_out_or_test_payload_accessed": false
+}
