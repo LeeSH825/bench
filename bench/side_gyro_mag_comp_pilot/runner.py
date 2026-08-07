@@ -354,9 +354,18 @@ class PilotRun:
         for seed in self.config["training"]["seeds"]:
             _, n3_state, checkpoint_sha = n3_trained[int(seed)]
             for trajectory_id in r4_ids:
+                # Run the paired N3 reference first so its post-replay state digest is
+                # independent evidence for the N3S checkpoint identity check.
+                reference_estimator = SideEstimator("learned", feature_enabled=True)
+                reference_estimator.load_state_dict(n3_state, strict=True)
+                n3_reference_replay = deployable_replay(
+                    runtime_by_id[trajectory_id], reference_estimator, runtime_normalization,
+                    dataset.m_model_N_onboard, variant="N3",
+                )
                 replay, evidence = n3s_replay_namespace(
                     runtime_by_id, r4_ids, REGIMES.index("R4"), dataset.m_model_N_onboard,
-                    trajectory_id, int(seed), n3_state, checkpoint_sha, runtime_normalization,
+                    trajectory_id, int(seed), n3_state, checkpoint_sha,
+                    state_dict_digest(reference_estimator.state_dict()), runtime_normalization,
                 )
                 own = [
                     record for record in self.records
@@ -365,14 +374,9 @@ class PilotRun:
                 ]
                 if len(own) != 1:
                     raise ValueError("N3S could not locate the paired N3 record")
-                # Re-run N3 solely to obtain protected machine hashes for the bridge check.
-                estimator = SideEstimator("learned", feature_enabled=True)
-                estimator.load_state_dict(n3_state, strict=True)
-                n3_replay = deployable_replay(
-                    runtime_by_id[trajectory_id], estimator, runtime_normalization,
-                    dataset.m_model_N_onboard, variant="N3",
+                n3_hashes = protected_replay_hashes(
+                    runtime_by_id[trajectory_id], n3_reference_replay,
                 )
-                n3_hashes = protected_replay_hashes(runtime_by_id[trajectory_id], n3_replay)
                 n3s_hashes = protected_replay_hashes(runtime_by_id[trajectory_id], replay)
                 verify_n3s_bridge(
                     n3_hashes, n3s_hashes, evidence,

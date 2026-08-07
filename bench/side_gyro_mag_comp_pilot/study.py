@@ -270,6 +270,7 @@ def n3s_replay_namespace(
     training_seed: int,
     n3_checkpoint: Mapping[str, torch.Tensor],
     checkpoint_file_sha256: str,
+    n3_reference_state_dict_sha256: str,
     normalization: RuntimeNormalization,
     initial_state: MEKFState | None = None,
 ) -> tuple[ReplayResult, dict[str, Any]]:
@@ -312,24 +313,30 @@ def n3s_replay_namespace(
         reset_state, 0.0, trajectory_owner_token=target.realization_sha256,
     )
     steps, timestamps = [], []
+    target_own_features: list[tuple[torch.Tensor, torch.Tensor]] = []
     for index, (gyro, mag) in enumerate(_event_pairs(target)):
         own_g = estimator.compensate_gyro(gyro.measurement_S, gyro.timestamp_s, gyro.valid)
         estimator.propagate(own_g)
         own_m = estimator.compensate_magnetometer(mag.measurement_S, mag.timestamp_s, mag.valid)
+        target_own_features.append((own_g.feature.detach().clone(), own_m.feature.detach().clone()))
         shuffled_g, shuffled_m = source_features[index]
         g = EncoderOutput(own_g.corrected_B, shuffled_g)
         m = EncoderOutput(own_m.corrected_B, shuffled_m)
         steps.append(estimator.update(g, m, m_model_N_onboard))
         timestamps.append(gyro.timestamp_s)
     result = _assemble_replay(target, "N3S", timestamps, steps, estimator)
+    source_gyro = np.stack([item[0].cpu().numpy() for item in source_features])
+    source_mag = np.stack([item[1].cpu().numpy() for item in source_features])
+    target_gyro = np.stack([item[0].cpu().numpy() for item in target_own_features])
+    target_mag = np.stack([item[1].cpu().numpy() for item in target_own_features])
     evidence = {
         "stratum_nonce": int(stratum_nonce), "training_seed": training_seed,
         "mapping": {str(key): value for key, value in mapping.items()},
         "fixed_point_count": sum(key == value for key, value in mapping.items()),
         "n3_checkpoint_file_sha256": checkpoint_file_sha256,
         "n3s_checkpoint_file_sha256": checkpoint_file_sha256,
-        "n3_state_dict_sha256": state_dict_digest(n3_checkpoint),
-        "n3s_state_dict_sha256": state_dict_digest(n3_checkpoint),
+        "n3_state_dict_sha256": n3_reference_state_dict_sha256,
+        "n3s_state_dict_sha256": state_dict_digest(estimator.state_dict()),
         "source_trajectory_id": source_id, "target_trajectory_id": trajectory_id,
         "expected_target_recurrent_owner_token": target.realization_sha256,
         "n3s_recurrent_owner_token": estimator.recurrent_history_owner_token,
@@ -337,6 +344,12 @@ def n3s_replay_namespace(
         "n3s_recurrent_transition_count": estimator.backbone.transition_count,
         "source_recurrent_owner_token": source_encoder.recurrent_history_owner_token,
         "source_recurrent_history_sha256": source_encoder.recurrent_history_provenance_sha256(),
+        "source_gyro_feature": source_gyro.tolist(),
+        "source_mag_feature": source_mag.tolist(),
+        "target_own_gyro_feature": target_gyro.tolist(),
+        "target_own_mag_feature": target_mag.tolist(),
+        "n3s_applied_gyro_feature": result.gyro_feature.tolist(),
+        "n3s_applied_mag_feature": result.mag_feature.tolist(),
         "intervention": "whole_feature_sequence_association_only",
     }
     return result, evidence
@@ -378,6 +391,16 @@ def verify_n3s_bridge(
         raise ValueError("N3S checkpoint file digest changed")
     if evidence["n3_state_dict_sha256"] != evidence["n3s_state_dict_sha256"]:
         raise ValueError("N3S state_dict digest changed")
+    source_gyro = np.asarray(evidence["source_gyro_feature"], dtype=np.float64)
+    source_mag = np.asarray(evidence["source_mag_feature"], dtype=np.float64)
+    target_gyro = np.asarray(evidence["target_own_gyro_feature"], dtype=np.float64)
+    target_mag = np.asarray(evidence["target_own_mag_feature"], dtype=np.float64)
+    applied_gyro = np.asarray(evidence["n3s_applied_gyro_feature"], dtype=np.float64)
+    applied_mag = np.asarray(evidence["n3s_applied_mag_feature"], dtype=np.float64)
+    if not np.array_equal(applied_gyro, source_gyro) or not np.array_equal(applied_mag, source_mag):
+        raise ValueError("N3S applied features do not equal the source trajectory features")
+    if np.array_equal(source_gyro, target_gyro) or np.array_equal(source_mag, target_mag):
+        raise ValueError("N3S feature association did not change from the target trajectory")
     if n3s_recurrent_owner_token != evidence["expected_target_recurrent_owner_token"]:
         raise ValueError("N3S target recurrent history was replaced by source history")
     if evidence["n3s_recurrent_owner_token"] != n3s_recurrent_owner_token:
@@ -890,6 +913,7 @@ def run_tiny_smoke(config_path: Path, output_dir: Path) -> dict[str, Any]:
                 "C0": _classical_replay(dataset, trajectory_id, oracle_enabled=False),
                 "C1": diagnostic_oracle_replay(dataset, trajectory_id, "C1"),
             }
+            replay_estimators: dict[str, SideEstimator] = {}
             for variant in ("N0", "N2", "N3"):
                 estimator = SideEstimator(
                     "learned" if variant in ("N2", "N3") else "raw",
@@ -899,13 +923,15 @@ def run_tiny_smoke(config_path: Path, output_dir: Path) -> dict[str, Any]:
                 replays[variant] = deployable_replay(
                     runtime, estimator, runtime_normalization, dataset.m_model_N_onboard, variant=variant,
                 )
+                replay_estimators[variant] = estimator
             n1_estimator = SideEstimator("raw", feature_enabled=False)
             n1_estimator.load_state_dict(estimators["N1"].state_dict(), strict=True)
             replays["N1"] = diagnostic_oracle_replay(dataset, trajectory_id, "N1", n1_estimator)
             n3s, evidence = n3s_replay_namespace(
                 runtime_by_id, tuple(test_ids), REGIMES.index(regime), dataset.m_model_N_onboard,
                 trajectory_id, int(config["training"]["seeds"][0]), n3_state,
-                n3_checkpoint_file_digest, runtime_normalization,
+                n3_checkpoint_file_digest,
+                state_dict_digest(replay_estimators["N3"].state_dict()), runtime_normalization,
             )
             n3_protected = protected_replay_hashes(runtime, replays["N3"])
             n3s_protected = protected_replay_hashes(runtime, n3s)
