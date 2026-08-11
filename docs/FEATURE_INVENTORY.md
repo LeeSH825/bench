@@ -23,6 +23,7 @@ features from another working tree's untracked files.
 | Offline Run Inspector | `viz/` | Included |
 | ADCS replay and Vizard tooling | `bench/visualization/`, `bench/tasks/replay_generated_data.py` | Included structurally; real-package and native-tool gates remain external |
 | Legacy Spike-Split/SpikeRA benchmark | `bench/models/*spike*.py`, `suite_basilisk_spike_*.yaml` | Included structurally; Euclidean 6D-observation scope only |
+| Side gyro-mag compensation pilots | `bench/side_gyro_mag_comp_v1/`, `bench/side_gyro_mag_comp_pilot/` | Modules and two YAML contracts included; frozen evidence remains outside the wheel |
 | Suite definitions | `bench/configs/*.yaml` | Included as package data |
 
 ## Control-plane behavior

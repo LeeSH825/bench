@@ -99,6 +99,14 @@ def main() -> int:
             "bench.tasks.replay_generated_data, "
             "bench.models.g1_snn_split_knet, bench.models.spike_ra_knet, "
             "bench.models.spike_split_knet, "
+            "bench.side_gyro_mag_comp_v1.data, "
+            "bench.side_gyro_mag_comp_v1.model, "
+            "bench.side_gyro_mag_comp_v1.study, "
+            "bench.side_gyro_mag_comp_pilot.data, "
+            "bench.side_gyro_mag_comp_pilot.model, "
+            "bench.side_gyro_mag_comp_pilot.oracle_decomposition, "
+            "bench.side_gyro_mag_comp_pilot.runner, "
+            "bench.side_gyro_mag_comp_pilot.study, "
             "bench.visualization.phase6b_checkpoint_replay, "
             "bench.visualization.phase6g_kalmannet_export, "
             "bench.visualization.phase7_vizard_convention, "
@@ -113,7 +121,11 @@ def main() -> int:
             "spike_configs = sorted(config_root.glob('suite_basilisk_spike_*.yaml')); "
             "assert len(spike_configs) == 12; "
             "assert all(isinstance(yaml.safe_load(path.read_text(encoding='utf-8')), dict) "
-            "for path in spike_configs)"
+            "for path in spike_configs); "
+            "side_configs = [config_root / 'side_gyro_mag_comp_v1.yaml', "
+            "config_root / 'side_gyro_mag_comp_pilot.yaml']; "
+            "assert all(isinstance(yaml.safe_load(path.read_text(encoding='utf-8')), dict) "
+            "for path in side_configs)"
         )
         run([str(python), "-c", import_check], cwd=tmp, env=clean_env)
         for command in CONSOLE_SCRIPTS:
