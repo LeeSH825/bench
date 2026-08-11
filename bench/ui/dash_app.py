@@ -13,7 +13,10 @@ the cursor/gap-fill semantics a push transport would need, so adding WebSockets
 later is additive. Introducing them now — without reconnect and gap tests —
 would be the premature optimization design doc 05 §6 warns about.
 
-No callback here starts, stops, or modifies a run. The dashboard is a viewer.
+The default dashboard is a viewer.  When the API and dashboard are started
+with ``BENCH_CONTROL_ENABLE_WRITES=1`` on loopback, the guarded callbacks expose
+configuration launch, graceful stop, and exact resume through the same action
+services used by the CLI and API.
 """
 
 from __future__ import annotations

@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bench"
 version = "0.1.0"
-description = "Research benchmarking scaffold for KalmanNet-family models (Step 0–)."
+description = "Reproducible benchmarking and ADCS research toolkit for KalmanNet-family estimators."
 readme = "README.md"
-requires-python = ">=3.9"
-license = { text = "MIT" }
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
 
 dependencies = [
   # Bench-common deps (MVP)
@@ -54,6 +55,9 @@ control = [
 basilisk = [
   "bsk>=2.10.2,<3",
 ]
+research = [
+  "jsonschema>=4.18",
+]
 
 # placeholders for later separation (Step 4+)
 kalmannet_tsp = []
@@ -62,8 +66,25 @@ maml_knet = []
 split_knet = []
 my_model = []
 
+[project.scripts]
+bench-smoke-data = "bench.tasks.smoke_data:main"
+bench-run-suite = "bench.runners.run_suite:main"
+bench-make-report = "bench.reports.make_report:main"
+bench-control = "bench.control.cli:main"
+bench-control-api = "bench.control.api.app:main"
+bench-dashboard = "bench.ui.dash_app:main"
+
 [tool.setuptools]
-packages = ["bench"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bench", "bench.*", "viz", "viz.*"]
+exclude = ["bench.__pycache__*", "bench.*.__pycache__*", "viz.__pycache__*", "viz.*.__pycache__*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+bench = ["configs/*.yaml"]
 
 [tool.pytest.ini_options]
 # Bare `pytest` from the repo root otherwise descends into third_party/ and
@@ -83,13 +104,3 @@ norecursedirs = [
   "logs",
   "*.egg-info",
 ]
-
-[[tool.uv.index]]
-name = "pytorch-cu121"
-url = "https://download.pytorch.org/whl/cu121"
-explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cu121" }
-torchvision = { index = "pytorch-cu121" }
-torchaudio = { index = "pytorch-cu121" }

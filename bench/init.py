@@ -1,14 +1,7 @@
-"""
-bench package (scaffold)
-
-Step 2 scope:
-- Interfaces, schemas, docs, and minimal utilities only.
-- No training/evaluation loop implementation.
-- third_party repos are never modified by this package.
-"""
+"""Backward-compatible version shim for older ``bench.init`` imports."""
 
 from __future__ import annotations
 
-__all__ = ["__version__"]
-__version__ = "0.1.0"
+from . import __version__
 
+__all__ = ["__version__"]
