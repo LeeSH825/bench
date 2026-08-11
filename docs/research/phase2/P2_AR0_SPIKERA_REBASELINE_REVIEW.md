@@ -5,9 +5,9 @@
 - scope: documentation-only claim, architecture, sensor, baseline, and phase-plan review
 - reviewed date: 2026-08-03 (Asia/Seoul)
 
-> **Formal review status:** `BLOCKED_SPIKERA_EVIDENCE_OR_ARCHITECTURE_INSUFFICIENT`  
-> **Reason:** the live repository `/home/dss-pc-05/bench` was not mounted in this execution environment, so the required entry/exit repository fingerprints and direct writes to the exact repository paths could not be performed. The scientific/architectural review is complete and is packaged with the exact relative paths for later integration.  
-> **Architecture decision:** `NOT FROZEN`  
+> **Formal review status:** `BLOCKED_SPIKERA_EVIDENCE_OR_ARCHITECTURE_INSUFFICIENT`
+> **Reason:** the live repository `/home/dss-pc-05/bench` was not mounted in this execution environment, so the required entry/exit repository fingerprints and direct writes to the exact repository paths could not be performed. The scientific/architectural review is complete and is packaged with the exact relative paths for later integration.
+> **Architecture decision:** `NOT FROZEN`
 > **P2-A0 / model implementation:** `NOT AUTHORIZED`
 
 ## 1. Authority and scope

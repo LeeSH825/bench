@@ -6,8 +6,8 @@
 > or validate the current right-local Phase 2 estimator, where gyro is a
 > propagation/process input. Its proposed claims are not current evidence.
 
-**Method name:** Spike-Split KalmanNet  
-**Target submission:** IAA Conference on AI for Space  
+**Method name:** Spike-Split KalmanNet
+**Target submission:** IAA Conference on AI for Space
 **Goal:** produce the minimum experimental evidence needed to write a defensible abstract.
 
 This document replaces the earlier "build everything from scratch" plan. The current repository audit indicates that the general ADCS/Basilisk benchmark infrastructure, NTD dataset format, Basilisk-based attitude/IMU data generation, EKF baseline, Split-KalmanNet baseline, runner/report/test infrastructure, and generic metrics are already implemented. Therefore, this plan focuses only on the missing Spike-Split-specific components.
