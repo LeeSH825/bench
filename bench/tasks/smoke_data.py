@@ -59,7 +59,12 @@ def _variance_ratio_report(x: np.ndarray, y: np.ndarray, H: np.ndarray, t0: int)
 
 def main() -> int:
     p = argparse.ArgumentParser(description="bench_generated v0 smoke check (generate -> cache -> load -> shape)")
-    p.add_argument("--suite-yaml", type=str, required=True, help="Path to suite YAML (e.g., /mnt/data/suite_shift.yaml)")
+    p.add_argument(
+        "--suite-yaml",
+        type=str,
+        required=True,
+        help="Path to suite YAML (e.g., bench/configs/suite_kf_baseline_smoke.yaml)",
+    )
     p.add_argument("--task", type=str, required=True, help="task_id (e.g., C_shift_Rscale_v0)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--cache-root", type=str, default="", help="Override BENCH_DATA_CACHE (optional)")

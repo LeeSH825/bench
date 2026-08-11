@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import site
 import subprocess
 import sys
 import tarfile
@@ -66,6 +67,27 @@ def main() -> int:
             cwd=tmp,
         )
 
+        # A child venv does not inherit packages installed in the invoking
+        # venv, even with system_site_packages=True. Make only the caller's
+        # dependency directories visible; the assertions below still require
+        # bench and viz themselves to resolve from this clean child venv.
+        caller_sites = [
+            str(Path(path).resolve())
+            for path in site.getsitepackages()
+            if Path(path).is_dir()
+        ]
+        child_site = Path(
+            subprocess.check_output(
+                [str(python), "-c", "import site; print(site.getsitepackages()[0])"],
+                cwd=tmp,
+                text=True,
+            ).strip()
+        )
+        (child_site / "bench-caller-dependencies.pth").write_text(
+            "".join(f"{path}\n" for path in caller_sites),
+            encoding="utf-8",
+        )
+
         clean_env = os.environ.copy()
         clean_env.pop("PYTHONPATH", None)
         clean_env["PYTHONNOUSERSITE"] = "1"
@@ -79,7 +101,8 @@ def main() -> int:
             "bench.visualization.phase6g_kalmannet_export, "
             "bench.visualization.phase7_vizard_convention, "
             "bench.visualization.vizard_native_bridge, viz; "
-            f"assert not Path(bench.__file__).resolve().is_relative_to(Path({str(repo_root)!r}))"
+            f"assert Path(bench.__file__).resolve().is_relative_to(Path({str(environment)!r})); "
+            f"assert Path(viz.__file__).resolve().is_relative_to(Path({str(environment)!r}))"
         )
         run([str(python), "-c", import_check], cwd=tmp, env=clean_env)
         for command in CONSOLE_SCRIPTS:

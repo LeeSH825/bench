@@ -127,6 +127,15 @@ check builds only `HEAD` from a Git archive, installs the wheel outside the
 repository, verifies the full benchmark/control/config/viz surface, and runs
 every public CLI help path:
 
+The release verifier requires the standard-library `venv` module (the
+`python3-venv` OS package on Debian/Ubuntu) and the development plus control
+extras in the invoking environment. It reuses those installed dependencies,
+but requires `bench` and `viz` themselves to import from the clean wheel:
+
+```bash
+python -m pip install -e '.[dev,control]'
+```
+
 ```bash
 python scripts/verify_clean_wheel.py
 ```
