@@ -365,6 +365,10 @@
 
   .venv/bin/python -m bench.tests.adcs_replay_ci
 
+  The legacy Euclidean Spike boundary remains outside that ADCS manifest and has its own bounded regression command:
+
+  .venv/bin/python -m unittest bench.tests.test_legacy_spike_contract
+
   BENCH_DATA_CACHE=/tmp/bench_data_cache_userguide .venv/bin/python -m bench.tasks.smoke_data --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --task C_shift_plan_matrix_smoke_v0 --seed 0
 
   BENCH_DATA_CACHE=/tmp/bench_data_cache_userguide .venv/bin/python -m bench.runners.smoke_run --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --task-id C_shift_plan_matrix_smoke_v0 --model-id

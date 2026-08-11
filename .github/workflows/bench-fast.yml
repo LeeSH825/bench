@@ -29,3 +29,5 @@ jobs:
           python -m bench.tests.run_all --device cpu
       - name: Run bounded ADCS replay and Vizard regressions
         run: python -m bench.tests.adcs_replay_ci
+      - name: Run bounded legacy Spike contract regressions
+        run: python -m unittest bench.tests.test_legacy_spike_contract
