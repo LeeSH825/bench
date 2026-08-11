@@ -1,0 +1,28 @@
+{
+  "schema_version": "side-gyro-mag-comp-pilot-step0-repair-v1",
+  "verdict": "PASS",
+  "reviewed_commit": "ba312f10559935f7f60782771f8de64ab77787af",
+  "branch": "codex/side-gyro-mag-comp-pilot",
+  "repairs_applied": ["R-1", "R-2", "R-3", "R-4", "R-5", "R-6"],
+  "integrity_check_count": 6,
+  "integrity_tests_passed": 6,
+  "canonical_mekf_tests_passed": 98,
+  "real_implementation_defect": false,
+  "g0_rerun": false,
+  "g1_rerun": false,
+  "pilot_spec_sha256": "a10d1de963b27606e924657565716afbd7d85aea516f919a26875dd472c15410",
+  "retained_artifact_sha256": {
+    "PER_TRAJECTORY_RECORDS.jsonl": "da1ff1654fc9a12e024d00fe3ad9ebd6cb53f0c5b00f1fe439f7831c407222ae",
+    "PAIRED_COMPARISONS.json": "ffe421232cee164bb87d9d626fd7b3c5c3dde84487fafa425a8c9710909520ad",
+    "GATE_RESULTS.json": "16c15db75f45ee0a67cbbd3b6fe8d52485b0383c9b4103a4fa3ed4f93140a401"
+  },
+  "changed_paths": [
+    "bench/side_gyro_mag_comp_pilot/study.py",
+    "bench/side_gyro_mag_comp_pilot/runner.py",
+    "tests/test_side_gyro_mag_comp_pilot_integrity.py",
+    "experiments/side_gyro_mag_comp_pilot/FINAL_RESULT.md",
+    "experiments/side_gyro_mag_comp_pilot/TEST_EVIDENCE.json",
+    "experiments/side_gyro_mag_comp_pilot/STEP0_REPAIR_RESULT.md",
+    "experiments/side_gyro_mag_comp_pilot/STEP0_REPAIR_RESULT.json"
+  ]
+}

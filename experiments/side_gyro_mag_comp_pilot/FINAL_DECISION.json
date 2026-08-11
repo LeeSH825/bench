@@ -1,0 +1,68 @@
+{
+  "base_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "covariance_claim_valid": false,
+  "decision": "REJECT_LEARNED_COMPENSATION",
+  "experiments_executed": [
+    "repository_and_canonical_MEKF_sanity",
+    "six_mandatory_integrity_checks",
+    "tiny_smoke_non_scientific",
+    "G0_oracle_headroom",
+    "G1_learned_compensation"
+  ],
+  "experiments_not_run": [
+    "G2_feature_increment",
+    "G3_trajectory_shuffled_features",
+    "G4_nominal_condition"
+  ],
+  "gates": {
+    "G0": {
+      "authorized_next": true,
+      "ci": [
+        -0.024083909083112195,
+        -0.010813566633354758
+      ],
+      "fractional_reduction": 0.216668251192605,
+      "passed": true,
+      "seed_directions": [
+        true,
+        true,
+        true
+      ],
+      "status": "PASS"
+    },
+    "G1": {
+      "authorized_next": false,
+      "ci": [
+        -0.01407579696359747,
+        -0.00493016080538042
+      ],
+      "fractional_reduction": 0.11970907562707635,
+      "gyro_increment_strict": false,
+      "gyro_rate_strict": false,
+      "mag_angle_strict": true,
+      "passed": false,
+      "seed_directions": [
+        true,
+        true,
+        true
+      ],
+      "status": "FAIL"
+    },
+    "G2": {
+      "authorized_next": false,
+      "status": "NOT_RUN"
+    },
+    "G3": {
+      "authorized_next": false,
+      "status": "NOT_RUN"
+    },
+    "G4": {
+      "authorized_next": false,
+      "status": "NOT_RUN"
+    }
+  },
+  "performance_claim_scope": "this preregistered synthetic pilot only",
+  "reason": "G1 failed; the feature claim was not tested.",
+  "schema_version": "side-gyro-mag-comp-pilot-final-decision-v1",
+  "spec_commit": "a7ebd8247bf00cbca888c08feb6dafa6ce6ebe40"
+}

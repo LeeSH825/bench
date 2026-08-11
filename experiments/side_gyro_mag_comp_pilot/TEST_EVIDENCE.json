@@ -1,0 +1,59 @@
+{
+  "schema_version": "side-gyro-mag-comp-pilot-test-evidence-v1",
+  "reviewed_commit": "ba312f10559935f7f60782771f8de64ab77787af",
+  "repair_request": "experiments/side_gyro_mag_comp_pilot/review/REPAIR_REQUEST.md",
+  "pilot_spec_sha256": "a10d1de963b27606e924657565716afbd7d85aea516f919a26875dd472c15410",
+  "integrity_command": "TMPDIR=/tmp /home/dss-pc-05/.pyenv/versions/3.10.13/bin/python -m pytest -q -s tests/test_side_gyro_mag_comp_pilot_integrity.py",
+  "integrity_result": {
+    "status": "PASS",
+    "passed": 6,
+    "failed": 0,
+    "duration_seconds": 1.83,
+    "checks": [
+      {
+        "id": "a",
+        "name": "whole_trajectory_split_disjointness",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "WholeTrajectorySplit rejected an overlapping train/validation trajectory ID with the disjointness guard."
+      },
+      {
+        "id": "b",
+        "name": "identical_raw_realization",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "assert_same_realization rejected a perturbed raw packet digest while trajectory_id remained identical."
+      },
+      {
+        "id": "c",
+        "name": "runtime_leakage_and_future_sample_exclusion",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "A one-step-lookahead wiring changed the protected prefix under tail-only perturbation, and the production encoder rejected a decreasing timestamp."
+      },
+      {
+        "id": "d",
+        "name": "right_error_gain_and_multiplicative_injection",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "The independent G1@H.T@G2 check rejected a real G2-transpose gain perturbation on randomized non-symmetric factors, and the independent Hamilton product rejected left injection."
+      },
+      {
+        "id": "e",
+        "name": "n3s_exact_checkpoint_and_feature_association_only",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "Verification rejected a replayed estimator with a perturbed trainable checkpoint tensor and rejected an identity feature mapping that did not change association."
+      },
+      {
+        "id": "f",
+        "name": "feature_off_corrected_only_equivalence",
+        "status": "PASS",
+        "negative_fixture_rejection_reason": "Exact array equality rejected the feature-enabled output when nonzero FiLM parameters made it differ from the feature-off corrected-only backbone."
+      }
+    ]
+  },
+  "canonical_mekf_command": "TMPDIR=/tmp /home/dss-pc-05/.pyenv/versions/3.10.13/bin/python -m pytest -q -s tests/test_mekf_conventions.py tests/test_mekf_core.py tests/test_mekf_metrics.py",
+  "canonical_mekf_result": {
+    "status": "PASS",
+    "passed": 98,
+    "failed": 0,
+    "duration_seconds": 2.75
+  },
+  "g0_g1_rerun": false
+}

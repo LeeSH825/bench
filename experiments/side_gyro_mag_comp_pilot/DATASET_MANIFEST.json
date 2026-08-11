@@ -1,0 +1,2821 @@
+{
+  "base_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "dt_s": 0.1,
+  "generation_seed": 271828,
+  "r4_train_or_validation_count": 0,
+  "same_realization_key": "trajectory_id+realization_sha256",
+  "schema_version": "side-gyro-mag-comp-pilot-dataset-v1",
+  "sequence_length": 16,
+  "spec_commit": "a7ebd8247bf00cbca888c08feb6dafa6ce6ebe40",
+  "split_seed": 314159,
+  "trajectories": [
+    {
+      "realization_sha256": "742f75dfe4d68db29fd43860c877bfb4b9a419a6c216d4b3da1d9c0b8a416cc7",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 0,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "65105c8a99ea20e036d2e3e7196c2a1365c914f5cbd42bf7d84943c30950d0e9",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 1,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "216d52b9f26420615243b25d9492f31f19c44e782e6cf8223c96a8d7c713392a",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 2,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3c46afa5fdbb1cd8969ad3affc89b71bf76514c4b8eb56376576831b86ffaffb",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 3,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e17d3254e35fec424f2fd54591f8e497606e8c76d1f6945355d6cb48c90e6dfa",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 4,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ee9e4531a19bb1f913d77ee917440b529b8cf889383a396156edb2636864a3a9",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 5,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "47633d8b3028f3dcbf649be0d9e1d9537fee1056c071638e957b009dd880e10f",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 6,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ca6c0e84b54b08cc2153d3b40e9300ae08c585b5ea77f68af02a121df094487e",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 7,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f9091a66159578ff098d7dc9001f96a785a929d01b4935dbcfd9d0352176ffa9",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 8,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8f903f3b5d0a0d5127a70000b98db8e75893caf9cad7482be78cf19dd2a9c051",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 9,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7f2fa64f14e2639b5f11a8d2d0f5761499dc78ffe2b420c0a8c5cc6054fcb5eb",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 10,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5ce4948a1999617454ae32db6c7724929bc5986652c7a8670ef27268551f13ff",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 11,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "52d986ae77343f00e62937bcec53bebe1ebe8a82c49d0e6ad85d3160083b419f",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 12,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bda082127e77ba9bdd123e2f311ad43bc427b419b059fe07728bca2c43a22524",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 13,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "87d338aee02963fe22d062ef45f370e83f94580cc3c858c4e24c6d8d27335c65",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 14,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "485c8f5571ec0c70775cfac825278511955a09908ccb3dc7d8493a2f4dd946d7",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 15,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a94b91a74076f72d235ad5d8bf4e5be6df4e3457ac9320ed566fc0b9e82ece6d",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 16,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2c8325f9ff75794f4f377be17ea5b30c3ba4b88db115309d190f306a54ab1021",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 17,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "46775c644d3d795ecb80e4d8354496dad1b09c57c2939a8e7eea3e79166f9356",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 18,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7ad361b2ec9570d7385b80df9ff81ab21fce5e0af4dae867b3bcf1abbd2db6df",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 19,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "176407c75deaa304971ac3708b5cf16770564d4b5fe7aa004eb035b7214fa0a0",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 20,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bdadbed840b0a9c40265f17beff936039cfe3e0c872ea3432b08b8e28a0b48e1",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 21,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2281a089f9401c3fea695167aaa8ec789d792bbb45f369701f347a9eda9fd279",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 22,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "96f052a9eab86d819291365b273f750c9f9b0fab5100686abd5c0d0f06abd26f",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 23,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7e0addbd9cbf5c0f9db459d8834589d4bcf454aec52d8d3d1b7e8f759800d72d",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 24,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4eedfcc0e8a4a4d1188b9e0f7d14aaa6eddac6229c38b49aa91c730dfaebfe49",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 25,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c2e13bde303f07511c6408d7b96a40493ce5796f2aa1801d32ac787ec5e8dc53",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 26,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "303a030db90720d6449c8463a70fad462efc54fe9f790b5da26a887cbdbc0728",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 27,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2f6775c7f06bedd1609dc5f835d5d29c7fbed203e447bfae9b53a7a0a5f6d4dd",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 28,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0aca7d5f847bf588ec0031debfa096e867cb404622f0dab3729dcc5d495390c4",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 29,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e923fb8516fc7b017008e946bf1d167920479e6554eb3f78615450adbd9e6325",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 30,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ad63cffdaec33222473ebc13ab4517d249520bbf81ef26fc2511ffec58d0e138",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 31,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "38ad620329553cb81f3514064187242d5744bd87c6e61e9cd760999f8c1b5268",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 32,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "20618e7603b28e39f473b68e3cdfca7ceeb785dc06f7521997ef9cc1b6c766fe",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 33,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3cae2abe9be9a859cc2973cf7049ccf37f3e234147da8f1f03a4a4dc1ce14ab9",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 34,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "382df97f568071cc82116bbb9fa85442c8a944ba550167fe4f15559907320640",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 35,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "70aaf46060fb89e2d07761ff7efa95641d773ce793c0f6d8ed9af3e88f4a840e",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 36,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "cbd2b7009f7332c9ee45ddabe20ee865d2180109afba084c13d0a4cc24379054",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 37,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d0ceb12b6315055a19a0796c37c4c0d8d6d3cafbe20c61347caa0732e9cf6479",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 38,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7a786b07b77d85ac67d15c2ba0dab03dbb2c2908419789d76bd91bcff014cf07",
+      "regime": "R0_NOMINAL",
+      "split": "train",
+      "trajectory_id": 39,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "37710606d87bc87ebd38740a785260eaea051a6189ffa7b9b644dabfff8198d7",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 40,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "398b07ac74172013678665de74ebd784a0f54e027b57d9e966a61b20d66660b6",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 41,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "00a8fd8ca7afb9e69e518b8696cdba953ad0462d84542491405f69b14441f68a",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 42,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "cc07a181837ec14bc6c8408bfe1ba54ee4ad1eb50848f05d576b01036feded78",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 43,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3b58aed2c74ae11d0f33394a433325c59e881287d060839c374ea8eeb9040413",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 44,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f2bafdb1080f406d08a9a39789d8927f2b88b197277475060a1a9180d715569d",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 45,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4fa9b67a7d55e22dc5d987040a8af43700d276b95a0b6dbc1379e9a2aad59f86",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 46,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d6f1b840e5874dcb1b9388b825e2e6f928f5a2f007e9543b6e1b4483f4fa3925",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 47,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f95516710208a48e564f15057f8409120eb8e0d1112c2e32a93bfbacdbe58e2c",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 48,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e4a569798dacade0b7559c6ad10f18397aca7ad92b359ab14533a8ffd20290d3",
+      "regime": "R0_NOMINAL",
+      "split": "validation",
+      "trajectory_id": 49,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ba3cc91c572f70e5885a68b0530bf946d19afe38221943caccf8824adfd32294",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 50,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "40cb862982fb4f2acb6d5b24e800972e441515fe5120870040758757aef54c1d",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 51,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5a7c3cf6fb04da65be69972dcc05a735527a86c979f7918d9b49c9c0edc67e34",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 52,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e43dc02c890cd583ad671fa0729dee4a96eadf43759d108a607b2a703b3fbd25",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 53,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a0b9cd9925307380b16454fd7fad97bd93a6a96bdabd5849a4d5047a2fcdf98b",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 54,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9afbabe53daf29e46d44820f8f49b3174ebd6836b23a17005d212d8b7df9f5cc",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 55,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "eb37307924e9f30f3284c57c4ec9f377d9d698aa412d97238d20622870ad98c3",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 56,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e9f958527828962adf24e8ceb2246ff129dca60ca6a19d8d1f065d74dd552623",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 57,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "96ba60fca23dfd89781357911ffe76fe1cb4d3ebf4c509ae61f600567f393063",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 58,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d07cb27d7795f19834b3f083e34aa4f44b39263e932c05cecc8f3abe20e63e94",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 59,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "16ee0a58b793d28018fcfaaa412de2344522cc5a829f15b7940d990553d1adca",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 60,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d2f7810364618deeec2f0d68b3201f216b701523548ab98fc8aa9c4c16a455ae",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 61,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b1ca51ce4dfa30b21eae73010f609e4fca632f61f3601903716712ba8b7aaeea",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 62,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8ee857eb0f07bb153b3fd82274c03956a6619f9ed1accec5d34ca0f576c5b9ec",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 63,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2d4340a0786ea9bb42d0dbdfc4b2eece48a234be50241965f8cdb58e375617b0",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 64,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d4034b999cf0072138e12312d6409a30cd6a275dedfa891ce030c74b9b4be681",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 65,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5b4a61080c787277571e2d13b3545f8167770a65dd4fc1bd8851046633fe9836",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 66,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2dbe2e66b4213cdb9ae183e907e934a45fe022f16ef6eda72a6ee4d0b2ff7a7d",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 67,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b71aae1f461d79ff17cb238145f2330b57827c6096b99692702cf24926c048bd",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 68,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9909878b8840fd934c5e6a2d261ee75a9168d3237ac99057d08979940c200fbf",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 69,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0f465125343efbdeea693ebbbf960f7792435c0e754e5f368319997e34260c4c",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 70,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c69a1c28faad24d85253d3677d719162e25dcc53d7c52af6e4ab29f49308bd01",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 71,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1c10c86dbf26ac4c21c6e97f5a6ef7beebcfa5835f73eacb3329bacd12850fc9",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 72,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "014cda8f4c24fb5615322af2a01eafe68d630d0a0ddc37f80e7fd8747c084d34",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 73,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "860493ee18edd0dceb0f45ef3bd157ef077a8063306dc4cd73524b98ad5577af",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 74,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f210ed1c3e8a32d75408f0607a3d1c05c2d12c4adc07fb1e0c3ed0f5618ff623",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 75,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4d793432b289763895fa6284f159ac08767bb1061da0c442054d88d8ebff1ccc",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 76,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c614c37c3638cc7c2910f83cbac64e15ce631bd2aa368a686cb84b408989fde9",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 77,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5a0b4418de987ab46d27ba1a9f233c6e80ccc400a4688420f7a8d400c8189721",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 78,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "94c8e733997ff64744c0234694eb893e1ed023b524c410b49bea71cc54c1ba23",
+      "regime": "R0_NOMINAL",
+      "split": "test",
+      "trajectory_id": 79,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fa7dd1afe95fa55a4804f172dbdfb09187aaa61f47f4f7985f5bdcb850a611d5",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 80,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2b551a593454cad726f35e199e3abbc6cac3e72a525e6815c42b9f7a8ba44e6a",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 81,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "357996bfe794c2f1f88118a93b9c5b66a773c7f69d6077206d337d64c414b273",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 82,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fcb7f266478de877c707491e3e6d54726ce25bb32f23d2b34c6887a1fbdf3594",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 83,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1e9c438374d12dc3956f347df45c36d55653bf10625c61c18d2f12bc2586d111",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 84,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f9ac874fc14b3e94f6a0ef02e35e67162343e974024a60ab5bfae27cb18b70a6",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 85,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1472a865a0fab17e05f7a09c365c3f4135c1d226eede268c372487afe4307ec2",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 86,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "88c0a8383ee49ffd1f1abedd3509c4c0cd5c771bf70b606a2f836a662182f555",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 87,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fc4cec39b58322482d95c81fb66fde4dad7ddb5ee1d6420ed1578a9e32a8fee3",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 88,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "561ad51534b51bd0f4944a59d3f05f2e3be78fb4568c20408bd5513506fc6ef9",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 89,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "871991804c714e7e571abe365a0176068cf0ec46c31037e5c1e84cda7fa19e97",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 90,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a6f7bd29418142c2abd31e87469f69cc644652b36c3d2f37798c4cab64b6bff1",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 91,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9a2bdf832f7c4fcccecaef45e7aa9cf4ffe7689872ef7c0f4f458cc04c4efbbf",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 92,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "851713dda79982e4f3fe12fa28aa321730fdaf1268fe963aac8817c104d8a030",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 93,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f8f4d96bd0a7d6c92de128ae5fba6a91b5d5aa3e36a3510d1576c3bf658b4267",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 94,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7f73c48f828d8f6c40b746f55bf53a9659091dfc5dcb3c2443467d1da0828f1d",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 95,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c902d906771043a5234ecc725422ba3beb1d2d207dec6bd09dbe4aa784b863a8",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 96,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "116497b35decbbec59e6e732111cc80141ac52f7b9257f837ced04487e579d65",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 97,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "cb1af6e020a598a36ee4729a5d70ac07273639651cbed08ee65848afd9c21eae",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 98,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8a37614ba961d74ed82dc6c3c3a3f5510743acd62c308d599176f2e45274ca8b",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 99,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "996b9ad852f8178e31efcb503ffd26e1508a20cdeb8071b03521dc9677b1ca70",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 100,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "613b5bd589b9caf10778b55dd9a918b2f444917b4dc0bb06221b1984ec57f1b8",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 101,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9986593aa6dfa057cbeed04fb61f6323c7ceec81b19f55e0432949497d05de7f",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 102,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a3c21f456c080dfb8b1437c473bf8e113c5b3332cd81b1230108b3319be61b73",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 103,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "96fd0eb6b5d6840e68c7d9e5dc8457aeb23bf82acf55710d5cdbde69d27f8cab",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 104,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "86c399c08595afff1cf8bacb7a31cb6fb16ee979cd07181914c795c3c7d211da",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 105,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "587d06cabb80090faa649e7a5782f6c54e79e9709303d435e6a11ac96c4e8136",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 106,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "26d0fbd70ad397c2479bfdeee570d20a1096f86cbbb6e5b1957a36bccdc41af9",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 107,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "20c3605520974a84c0176954b8f597ca6728d9d689fe4397d4fe82d83f57ecce",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 108,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "036a0162e53d68b30c893e9b54e8f03f1425f59c0628bb8c63af3b2462aea33c",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 109,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ab53659d6b10d9f5c6a92b4cb19b516fe3dd796a268aecf7d6f79820f034ddc9",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 110,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a86b5781a5a2f6b19f1dce39560964f0444f353a945df80122bf61f433c1f24f",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 111,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a01b30d69f3e6a662b97c0eb82870b65b5ac92830e28863bf932049e43540fff",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 112,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0f822c211d3ad4f5413e34bf60ac2996a6d3624ef345c09804f369de8cf95619",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 113,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a782c629f2a8f8492f95c64e88d86378432dce4d6467d4f24482d21b8e1d97ca",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 114,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "938f5eacc2595bf30398147ca67df96abf40e7d5f92722e2a52d075650d7fa9a",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 115,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e97304d585fa8c9d82bd8f1ae01386479e4adb6e144b5b48713f642a46e2510f",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 116,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ac1bfdef4859ff8c8edc6c93510f45b64a5c2b59b64df09cf61aab5f278eeee4",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 117,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4baac500fa669708ed64f6b13af655806c01948e2fc777eda88036ea09d879da",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 118,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7abb2d9a34bfec90d350cd0e0d2d6ece0b7ae91a9d14f755c52d63ca3392fd78",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "train",
+      "trajectory_id": 119,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d0dcc726d6dcc8cf51ce2077dc9753f0625b821c4a9db877ba3f1012ca04f86b",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 120,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7d4bfb43468e8cc287c8ac9a59ca4fa28853a3dc31de16493698b1b81745b0a6",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 121,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "30350967fb9d81c131c9121c00c209a7bf7880d131ea06ca15df544465edfd0f",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 122,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8eccf3e1c42cb2b4ace990de892ed4c696259e3dcb14fa84511321f399f09f8c",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 123,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "85faf9847526dc6f7b886b35eeced1eb9565e82b9607e7c08ca972ac5b5be77d",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 124,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "03b6ff800887fabf3dc4bf2df0658e0128b304feaaef8e3761a97354609069d9",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 125,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "45630e77ca9b59692e95e31eec4a6367e505be8378959f161dadee9b3e3b25a4",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 126,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f645e596b76e4e988f348d0eb34a65a9dca4f3bad95e1cf8be8474db5a33d927",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 127,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d8242814a2e1d3de303df7e1286f3cd74ace5e8f8e21d7be334b1cfc83d89715",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 128,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a13145eea6e8f83f23b92479a3438e7c9bb5278321085dc9fb810fd1dc92e714",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "validation",
+      "trajectory_id": 129,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "22b207df0db5e686f635a25c90c29e9de71ddb509e108e019a7813103c668d22",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 130,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8c8c48441aad097322edd3113c47a2f5f1aeca1df984722bc17ff439191bbaa9",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 131,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0dd2ecd18768b2e8b0a595e88e0f86bb757078556f59e09a9642e7b9e688e1c8",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 132,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f14ac40b5f15c477db1aff34bc77635c2bccf21c2999851e11468cef380b2ce6",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 133,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4ed22218fda2ae3f274886d4037867b2ba42d73bff16a6686fba1aee741451d8",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 134,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f6ed47347bc7e00b76831ae420e7a607a83a1c4bd5314a34c4a81065b4e8b1cf",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 135,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ba132ab85aa993b37fa050434b0e341509cb4fd466743659bb2ac825bcf31c5d",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 136,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "559324a18f08cf615960e20690ff91313fb1b2b896226938744b278927e9bc9f",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 137,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a835b41b630701fbdf17629608ee4bf05df0e0258ef6fcec1a5bb85d30e7104a",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 138,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3543cd4746dffef952250a51d076231422461cd6588594f5b8c8795e597ba7a5",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 139,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4d86c7393e9b31b157c1085574a3f7a247edbf41451ddd58c1f3d9b36148cd0e",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 140,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e46d84f7f4afe081d27c4d9125c949d86c311dbed13c81fff09630b908042c60",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 141,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5552045817f515efcee947cf2fe9c8eaebd9b78e039fc9b28d94591374d31234",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 142,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "773120a89341b407f82892bafd9464410b4318e30824b4e779278ab436f20cd0",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 143,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4faccfba3c263248eb46f724794b0f14c99af2dabefc570ad731e7fb8acbff71",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 144,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3703b3daa7a82b4866f9e26cca10660eeb0713fb2d4e1edc0b0c744b5140bbfe",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 145,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7e78b227f6bb1102f1e35fed0deb6c29d73801e943c1248828ea1b63e0afd45c",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 146,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f16467aef6964b44e424d02ba1db0aa2a6bc2c1ac001a0f6de796a20b782a349",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 147,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5702a7f5ae193f646968059703358b56ce21c14a7ca3eb1e14798278ff72e112",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 148,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7f29631dfd726d7fe0064fefc7b1c55ad8983d60e48904e093450a3e972f6572",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 149,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "22d55edd5dab21d6a63efd8dcbc89ec9a46ecb6e60a90baa651d47a52d0e3594",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 150,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3e22d55f40c50510b1c7189e93ec79a8870d2e030b08b36cc2df1975c961dbd5",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 151,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d8f09cd82c619cd59191720a5fb004b17eaa19fdae656939f4267cbe67e17e27",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 152,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "01242651486975d88231f9f1405f9a51fc368ddb406a610b8b10d0778a14f134",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 153,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "27f29acfa9a2d5cdc83a3213e03cb6453d39887d8c7c7828444e0e8d4448144b",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 154,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ba683fcfe4c6b5f00c91c3df8771db1530e8fc9683b149e46f82afee2c654957",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 155,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bb8a1e27125e9c80f034fba701762eb2b42ea4407a3727d2ebee2db3030e5a43",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 156,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "41b3da978fd147d883aea010e485f945ede93f66ce3a64aac1fa8008bfd04009",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 157,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "01c151cfdbcb8cca4df9ca025b1cf03c47eeaac8b32c4e0bcc3fde77a3cb3b9b",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 158,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9ad8120432dfbd89d7900452c2fa01bbc7c531d061ed1dcc540fb59b860cf8c7",
+      "regime": "R1_GYRO_BIAS_SCALE",
+      "split": "test",
+      "trajectory_id": 159,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "cd6775f0b4402d6130d1d64f1a93337e5031f2c49f7c1a590f89010011552b9a",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 160,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d6045d22e120213ac15eb6a4c63d4fb29413bf4d51e10b3356c174d00e52e6b1",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 161,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "414ec13a7053f58f6aedca24f069922c8706c2a319cba52ec2ff996b5f29498f",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 162,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "eb85a9449d080bbde7b7ae1b0776689fb0e7d067d36e20ff2d46cc0f31048b2b",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 163,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "6495843039ef2b3e56d5beb75a38a874fc0afe8b65e225e9b4a86982130bbc95",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 164,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a818516fb3dda7d2badb30437abe4ae6e71d04a6260e05e0d7d642cd5c28b07c",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 165,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "13227dc233329c53e525786a83e3ccf2aca899646765f6043d8bf42a48d335c0",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 166,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1bc81f33f001cfee1c0862edf00f8db37255be6f302359d537568682c1e9bddf",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 167,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "804f5d2c4b2d0330c63a074bf2e267bc08b1b1a3803a1f6a77b9cc5284a3185b",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 168,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0cf773d32d0646b53fc36fe686c43aa71fe8cb3e46cf292a79b5be65e9ba0472",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 169,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8f4ea5b7632fb1dadf7e994003d434e571bb6694f366ddc745cc7ed1f512c669",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 170,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ca707a7ebdb02547320b8bbe2460c5401f1e3f64c39469fb52ee6bccda7e9294",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 171,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c8b997464e3b46f59e999d3ac137bb3d0cc5ac34b74457e9cd7fdc15423634bb",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 172,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4ee512303850b4cc912f2a8b811dcc7cbf33355358496d13e3a235ce2970aa85",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 173,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "71a1ef9e18a85fe9289c80c39d0424ade0030a49bf5ec8bbbebe3d6cb3048040",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 174,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7fe9d58f0253768a0a7cb1e546108a5207d421f86ba7117044e5a539c1063896",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 175,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "261c69a4f3d3aa6521fe1394cc89f26044ceb63199c9972c782b8cd44ca34132",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 176,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b7892d5c10b234a19dcfea52bd5aceffda10f185ee4007bf720325092d81329d",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 177,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e54696a8f1d0a390045b62be7a32e6f5bc768b20c64d4eefdf621bbe69aa36be",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 178,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2c2a97db018f6d91e72c8a42883d431c72326b05f6fd7ae04d9b45b01caf37cf",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 179,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f528c8e364b9e98bc8c44698aa7ec4bad3fb6e6206b94e23abc14800f40d3065",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 180,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a58f2b61ed1b66dde13653232ecfc51cdcbeef9478c7c4d6edb9d51f16077699",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 181,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fc96794904276d3a6b922ca7b30c9c38683055a4ffb4c88f0fedaf2a01baadbf",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 182,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "80b4e0681357f6646022037525445fb9ddabd5582ff2b5c291b4f27d785ccbb2",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 183,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "968c06ef90636f8602766bc3ac9ab385c4f90731251e7971b401d0e2eb624a24",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 184,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "33886ad11f7837509015b883b9945f3026238621dbc1f0a68c7744a7c624fd45",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 185,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d198fc68881aaaa3f90c1a25badf2d2b58411b2e86dc54a0dfef15edc07064da",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 186,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "03a5cbbba28b7f814c163961f0046a53762b87625594d9b3b342c5c01135ac66",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 187,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4f774ed224bd648f7e3ae0de58ac1f2fa096b31fb62c6bfdf2d883ce8f0e657b",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 188,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d5be2a8bcfc3d126cd45941186f695443a682ae88eddd3555906db34c0b940d8",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 189,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f83a590e19020aba387a98b4f0c06a6b0206331ae9815ac0ca896880ac981a4b",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 190,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "87dbe4385bfa4445bf3a8f2fb293b785e73d8878325ea91ae9ca4989e1a3e1c9",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 191,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7d0364a418ddc665f654040e4eb5df9cf9a672b7c7a06745054e708ba9191e54",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 192,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0c4886ebfcc82c950db6ff03d6a2c5851eb59a6929b10c4e4e2c7509d7955091",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 193,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "16268b09c44ad4051f24b044488f41d33583ab34d6aa518db229ff0cc636ddc3",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 194,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ada32809287e8eaeee58f34baf2dba1b107dfc862f882c9f0031c381af4faa97",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 195,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d4125ee8a8f323ec356cb43c0db1d8c6238c4afc1022c414988d0e0af9c4c77c",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 196,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5828ca7579e2c39bdb91c31d01b3371e777b82c4cac7972577d8351b592bf041",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 197,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8ec30967b469b5c7e9724e67a905e120e48219c8469cc96a785c433850efadc0",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 198,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "6dbb3b70600aa5daf53bc1deb05a526a6f6143583f89e1dece491516625168f2",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "train",
+      "trajectory_id": 199,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9838fab8d4f5469185f93e530ccd91c960438a5da1996deeab720588c12435b2",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 200,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ab9cd443f64f07be30739d3bac1fcd9afb51073e0bfffc61267074e069ae13d4",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 201,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bc6dc706d875dab4b67f1f45bca012593de86a5e1c4c57352b09805b3efd2401",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 202,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5fe6edad2801c7b8a05862e569ab043939cf85bcb24bfe70a123fdf3e4ead183",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 203,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "edc9d480aa6547e395fd9d6a4b3fb05b65b40a8d83789cbf1824ebd2e22b66a0",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 204,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0af9fd811052248627b79f54424842e63dc155325c70c66c4199233f3010e3b2",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 205,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a7795c7583066f09defb3a4ef33c633cb28440010fd48bc9abcdfc26a8dc1ab7",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 206,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7368df6e627d46268ab5225571277cc429d25192a91fbcc8dfdb873cdf4565aa",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 207,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "dd082ead357a852fa401d341ff239ef0a766d4005ad5cd09f1d7752c584e955c",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 208,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "de08b5c52f536c24ae7b2e8c822727954610382dc35e470004e594e6a029c5b9",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "validation",
+      "trajectory_id": 209,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9cce94e43fc957f108fcc7f250498851e669381dfe95d61fc57d5e4dfcdcb364",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 210,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b45ee88c987eea9db2f0b8f5264c972fd525e6d8fa7650a7af41e1d853e661da",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 211,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "57ae0b64e2876a36671d917ba004ed4bc6fe2a53cba73e6f8ee44aac02e2dcb9",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 212,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f7a69584d09ec25b60189c2420501e194a76d666a19d094c3514db7195a5d24f",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 213,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d3abdd837b90c786f3377da843418f6e43597d1cb31700a255bcf454a3f82f58",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 214,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e27e463cf137fb0d4a41a7bda1773793ca8ce39b81f33242696636b278ec1de9",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 215,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f2cb59a5d6e59c100e0360097293ae105f3ab7dd7258411192f3389b78d61d62",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 216,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "081e72eede408e2f60bb683fe29c6dbe65eeb40185164724d3eb41dbd73ee635",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 217,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "373cf4e2a62268c3ffc8d852704de1909bed357306c4293de3b8e447ec8aa330",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 218,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0e0a1dc68ce7b887f150c3e908075e66fdb7298cd9c04ceea971b2efcae4a147",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 219,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "95b673ccbfaf29af53f81f0c620cab44c02bc9cb58d66669dd9f2875180dbae7",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 220,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9fabf6493a093ed459581bf8c88862ba3f28d2e3233b866973b1f4bac15af1e7",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 221,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b5c3b9c030ae3adfb3275621da2566567aaf806367011e921a3850c8fd9ca290",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 222,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "daa125dd66aa099d1e3ef06a388176852a0a49f7d844ca70ae0e89dca50d924c",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 223,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b671281ba092d331474c9143cb2b59ca586efecca8d3a6c530a3b183d06614d3",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 224,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "6ce81bfc0636b857ff1c9dde354343528fc2651a64c231d08eacd1bc513f82e0",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 225,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "aae49b3a38a91d41b0b6d1815dbf49ec208fe836296adc929a03ccf1e77eddd9",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 226,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4d3e95a91c8080bc0bcce80c8e56211f3b3eb11e2f995740df133481cdcb3cab",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 227,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "00f59d75e3498a971288f529173ae40cab6299396ab2d37453f61239cc948920",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 228,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c7b6c6804eb643676642b800766dc32c63de85be936eb0427d6edc1474dc1ba5",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 229,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "295a138823c4f40bd6bb9113b6f481dd9517428a9691494d13bff5313cdbe696",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 230,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c70f55433583d72e26ee4c0006344dc64ab5d6fcab59dccee46f0aa30e2d7185",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 231,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4cd6a93734e437ae1f942cd4b45cbef5edc782d6de5f84baef0f6b45dfdeeea1",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 232,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "134488ed7c98a8055c311dc797b8e6bd08cee185035c581bd6452be29ffb8bf2",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 233,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "34de8e5d07bf6bfc3dc565aa6fae8e4117bcbf071d35c39165b3f9ef2c9645e4",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 234,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4c5ef8b716891adba7e84796047d6a4af1fba494f264dea7dd8760db01a5128b",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 235,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d47a552c61c8d3a5ebf05a4af182d2f04dc7fec10cd233d66f97d0655e5f5c26",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 236,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "71d06f92f435d4d44fc880a98a84c0779e10ded750daa8132897f8626b2dcb41",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 237,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bde4f8bfa2fac117ad32de13984c70183f0963602d61e27d3896b1b5f0567656",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 238,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1358313ce09c738d9f6886505d096f1f0e0b74566323ac786755f72252c58532",
+      "regime": "R2_MAG_HARD_SOFT_IRON",
+      "split": "test",
+      "trajectory_id": 239,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4dad38af19719e914f4f1d2472c5701e92229598f072f27dcc7017cd79cfc0e6",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 240,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c85d1b1a900b8c2ae4aa4d62c80e17dd6ad34b7cd48015685bfa2265fc74e3a4",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 241,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3348335e158ab4279567c46238512504819a44967a2d3c9d6334e594ff198009",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 242,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e9cb79f8213bd77eb7dc64bf8a22dd7fd498e3bad5df09a3d7cc35802ce099cd",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 243,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "aaac33f62fb1e7ac51b2cf3a9606d858ccce7e223c5804dbb1a92064d1d991a3",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 244,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5d3af907377481c12e9e2aa0af12aa95ca9c065b4a5e68b7a718061ea66deb0d",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 245,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f1a39c4a46f4ec8df9f8a950b5ff5d9ed50312c0bde03e065e4ea33dc0592def",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 246,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fd9ba9f26274c9f6004c15cb7d7301eb5eb861b1a0f1054a7aa6e2648e2a6707",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 247,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2a5e0a8d4635a98c6e1ab99e2b099cafae4aa7c2849770b64ecb1b9fd4413e0a",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 248,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "051094a4fb21e1b69d2fe26ad99e1b20adb842fa4a8fb3a52e05e939ea2b8daa",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 249,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2d8050cef3143077af8dbc464880ea1b6bd8862de3e60ce8d04f4b561f19dbb0",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 250,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "92295d12facfa6a23b4bbf9e83a1b767b7243e83d462dfb3563e5c1cbffd8845",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 251,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "99f49acd6778460bd89f2475700e8f85098013a46ffee7873b06e9b81a6d5084",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 252,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "89ac9e25aa55a48bd01f42c66ab0bf4d1bb7bd775d31851b9e85ecf60d7140da",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 253,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7550e02bd180acff9fb5ea9a5785bd123adcf606fd4d2409a054f68a6ea69872",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 254,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0e4816c57a163df737f387989c0183461815db93aed7e16a073dbc58b2268a9a",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 255,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e77afbb75a46af19759a617b8304ad994d2fb4b9647a492019ed0c9385e5a7e4",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 256,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8bad74d1e32378ea447714fc536ede8e57ba2e13d2d4308660ac6c25683f503c",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 257,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bcf9283c46d88d0237aedfd552d99e98eb154b94c6a33db3df8067fbe0b0c485",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 258,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0aa31fd9fb6294650e1c81bbe628c569aa215d6731f75430be56914f99ea5920",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 259,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c2a537eda244d26cb86e63850eaea6596ce83be1a7e9e0d3c9ad6aa9f644ff3d",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 260,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3e3de54a88b3299d3c8cf4b195e75d8ea74d90e9c23fd6d465525136381634c1",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 261,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e3fbdee9c104d555fca6769019cdb9c8ee3ac72e42908e2a7c9220d1aadea613",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 262,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ec19be3c5cecb5e37ddd3b47606bff77baace597dabe918070ff7cbc00aae7b8",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 263,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "68673347ef643096a5c0d8d8bfecb1aa6da3698b1451f927f42de92d4c8f47c5",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 264,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "25424a0ed0f138eae7d88169302c1badea7ec189f304f7d04b391440445c118d",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 265,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "14927cb5c7f2ff6ceeba794fc1374b15660ca2ddf636f2424d16f2716f207b57",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 266,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "dac3ef0a887ae33965a120da064e7b5bcf5e4050692b73b1d3b7b82594f2e190",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 267,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5f0c555a12f26ce55c17052f2cf2a6a9192b8c9c7d861f68b4b8b32d3bce31c4",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 268,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e1988b42c2129ecdb377b08a0b1d0c765487c66f0f6ddbdfffabe48cdc766d4a",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 269,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a91f89bf52ced3f8192a74fc58ad89b93c95fb05d2ddf3b13f150c369a398df1",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 270,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "debb1f81b0e238730ecbd0a99c6f21097b538f36039dd55920daca3822db0352",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 271,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "9173c7ce0f266b068c51efc13a80d79cc22542df9bc9c878a08557c4ad7c89ba",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 272,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5c038c14dee3f60a53727523fc19cafb6d38f27256c79ea379247e51e70c6538",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 273,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "af064cda17040440823d0732fbc50229e2cf5f76c1fef91b6bd8dbe38cbf29ad",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 274,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2932449d7a6a0b4bfe1e56d2261757e2607dfb250a0a58ff5f85a4955cf234f4",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 275,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "03096d8e279cb9e006e866af52d0e4f22f2ee135eb6115caf1f884cda00a032b",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 276,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "6233ba51cc1f73b3ba5bd53153fbf6ba25b5c649e7e9de422c9c51b2602c6ffa",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 277,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0e769236441c46d6816ad24be220eb888931ba8cf8ad6df35fcf0c4e0cb7bc72",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 278,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5e352b247891c9c9c20af731914f1efd53eadb78b44a323776d303c13fd842cb",
+      "regime": "R3_COMBINED",
+      "split": "train",
+      "trajectory_id": 279,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bc8fef7024315dc1770b3da5058ec626fa3554b8b3c9faf694f519ae4ee6af01",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 280,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fa7498f09775432c74f0656bb2a42fbb347d2945e0cc1a8c7543697bc2c681f3",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 281,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "78f25063c6085e3cceab1dd3a85ef17ec8c3250a03b110bf092c5eeb2b606e97",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 282,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3754968c91acddce0072756660ba2adc2acf9c684ecfaa7b3c39ec3d9dcae7f1",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 283,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b72baa289ef73367d40871adfb67eb82243cb8561a0b297dbde2c587f42f5521",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 284,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "00be704f9563fd19e5418a13d672ee3d64e5ccc8570d1e62c9b7dcae4152ad55",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 285,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e71f1f6119ed31c8137b551ef5b4590438c929ac782b6c2addf3ded3aaeb023a",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 286,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7b646aec0db26520a2f4cd077a5cd3f64991b006bdc5bd8c911539ce312536f1",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 287,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f7f9c92240ac76ce70bbbda63b7d32fccc92ad10eb046f1098f3929805ae5263",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 288,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "dfde448fb9d461b1b971ec278211feae7854638784cdeb9a60629e65bac47121",
+      "regime": "R3_COMBINED",
+      "split": "validation",
+      "trajectory_id": 289,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1c454331cc6f615a634d85ee9310cd67294a7743c7a122b6ed0a04c52a546793",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 290,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d6e149bfdd9e2568ee35d991c7ac39024380cced9657f5118e2ed1203db64f4b",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 291,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b4d627f2dc8d53c9836ccf004554c1241d92c192f078887563be6fb09230e816",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 292,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "c5b05ec8e101cb2ced0d39af692c4580e58805c7eac5cba6ba5a55bdb541eda2",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 293,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "58c4e145030008b056449f0b8feebb0455f27cca563fd5b62c50261a9c55cec0",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 294,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5127405aa7960b58e16d5a249c3088f25b7788cde814dde9984c8ab34654bbdc",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 295,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3ab8702c81775b0775785bd7862bb6cf0c081fadd5d20ac5b051b6607b300599",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 296,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "b9fbdae867af396b8a416477224dcf7c02df9e44ccc700df27f9d812f2c60860",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 297,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e219ad74e796d06b3f60f32b3e1eccd6dc48eb64eca1c3138ce489074c24e492",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 298,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4c2247b5eaa67c878c806e1f0c62c7dd0a79d61a5e3845427fe54c21fd9894b9",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 299,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3ce092c9a703618793dba5aedfcc2f38410047c11f8b6a8dd23d40d8431a7228",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 300,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "09f28e1978630215dc1abf053e8ebc956a59222d0025bc317d01f50aec534643",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 301,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f46e0811b5cffa09ee757af8788852e5da717e0dd38a5fedd792727d4397ddeb",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 302,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4092b0be95dbe0c7bb83c49ec30dfb9f9b23de7536d477a6ae6f668b0758f277",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 303,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "81482ef22cc30856ad0b97fa59eef8f7017067177a5f1ad1c5f468a246b4ef1b",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 304,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2ba6379cb0944ca34b1e35698638e1395f569b703d167862ae7ba47bc5215e19",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 305,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "542602a675ce5cfb092e7279c4b36b6eb4d8ebb20f816b78cc30115a1af9b1bf",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 306,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2d6a10a88ba058b9c23c0ab26cb9d1ff8b581c9c144ea2eca7056f2030ba99c3",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 307,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5c15fa3739dd448505fddc0bb0b9607959e795ed284b56d6558085f9ac01fed3",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 308,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "436b74e85dd4697ecf2dd676e04998a0584b099bf0dade4194636ecd0ef07b8b",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 309,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "5d0069b4f07c8312dd95fe1afce1752d88d51a733f7c4ba5d4fb9002420c80c2",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 310,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "90faabb8adebd91fe343436ab2978fa335c2d4009cefe6b5a87191f0230c5f00",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 311,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "8ecb02e983e5fcc4840af7ff71608c2fa4426e0c6c55695228178476ad93e6b1",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 312,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d525a55e5286088f2fcfa889bc98f451f5477dec1ec1c9e9a2dfc0acd00ab53a",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 313,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "59d4ebbfb4e21dd07df869a9090b39337377f87936099a71abb6aaa0ba366b65",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 314,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "f4445e686c17c52344f2b71f8dff41a5511418a9e42b83ec646c11d8a162186b",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 315,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "948870d2b4242c8003fbd6e3a63abe7e2fe7f7ccff26d7c8255252173c4dc988",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 316,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "57db519cafb705b673647a05fe75439a54042c7dec792c97bf756452b32021bc",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 317,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7f53b81e0542e52b6e1768a8cb5e3dec11c726340d47fcbef86d339a733cf6e2",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 318,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "232ea92e585c5a5642574030c5a06fc7f5496b2078ce7a49ef05fbf1ff084aef",
+      "regime": "R3_COMBINED",
+      "split": "test",
+      "trajectory_id": 319,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "28d69ff5ab2ca29dc1d35e7cef2d2f97aec21879be6e9a97c6c9b3bd82ffa08d",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 320,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "fe10a2094a1b8d702cde318c651a7278c368161fb321f69f022c6f65a95e0638",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 321,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "91d1baf7880efa6091eb07b7413dd9f665f17140b8d32d28ce99214aed7c72b9",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 322,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3860f688d8eb65ea05ad58d43d47dddcadafcf1b9a01d7b0b73a004dc750394e",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 323,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "03775184f76423b5be8e7458365f777dedb2ebbf3b2731d14e7929338dd12a51",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 324,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "54c60c9b86affb7c557bf0be673b3c7928de1771e21bb676e254791a6edc3d9a",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 325,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "e5ec30f13b3839e2cf40873de764e812b70e7e9e43941e80cf55bbed4d126c53",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 326,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "501536b6b7ec4af1fca4c51ca32fdbc79d7ca238e2438dd8e8acaa6c5d7b60bc",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 327,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4ff7c84c6861b6341595cff64639dd5e57bc4171acaeadf1ded2538735739490",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 328,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "bf5c0fe0dfe1c1dd4810a622a6a90bf0c77db6cedc09cd7862251aaf23881ebc",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 329,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "d44aa60a1d8e570d8dc7eb82dc513b9a99c10ee668cb0166912cccf3d5b707bf",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 330,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "59d4dcb89f1c97b0cf0bb011193df3b274bcdf9cf5ab07245585fb6625a429d6",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 331,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a09806e72528f87ad601673c845f8a21989c99d5d46fa4ab9aa021ff53ce167e",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 332,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "dc70e8438ade59c131c24c3c0f62c79d2049ef84e58a11e034a187304f939abc",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 333,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "40942b9cd53781bd32624f217efa2217711e6e877cb5fba8386d2483b0e4ac90",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 334,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "2929b2492d9c5854879bff47e974f28337726608ab4ddb4930a5b91f116004ab",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 335,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "4ce617ab3b72863c8e90f4523e4e60a58a171fff91f89ef7f671ce4d1e5719df",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 336,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "1eb8aed076f48d4b40aa158e47f54d25b9154e844806467a7aa75bbdb4b4b8e7",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 337,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "a79117424f94c1f0bdca4a7f62492f2449b6479d023d4154ca0ef5edd1bd05f9",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 338,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "0d751761eb7bbec0cb6ab359f4ec3938b9c4bafc9538af7ca884199413517847",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 339,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "aafb6bfe9d0a19c11a1096b72ddd22082e0a0be2dea6848a52826ee68563067c",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 340,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "3e7d799d16333a9d86fd8ef0ee65c21776ce8df2bbd86565058c39605e9290da",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 341,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "86123951f03197016d56d47b2b14e10b2b44317e34f040c0084ecdc83b762126",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 342,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "584cf2cd90607e42ad9acd529b7d4a699e0ec4da5b799165da88cfe0ccf89f2f",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 343,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "699f68836e013aee6263589c34975d0cb15cdd6b6a34595df778964246075ce0",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 344,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "ab97f46165b5928b16a8a39e0bc538dc82cbaaa8ce51e27e685389a6db9b780d",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 345,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "927a102d91505d98673593100b72b2235cadace85d7fcfa46b64f1f59f537b1e",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 346,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "49b07b35a98503023d51b7523b0affacc1e3eb5d250c84b0425ced46b1290f44",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 347,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "7f8f275e1d667ec883f66f88084a85163261876942e9a459adbcc863fc3822d1",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 348,
+      "valid_magnetometer_samples": 16
+    },
+    {
+      "realization_sha256": "de0e458b326fd4ee8d05a2c4d848cfe311ae38f918cc14681e6ab9abc46a43c4",
+      "regime": "R4_COMBINED_OOD",
+      "split": "test",
+      "trajectory_id": 349,
+      "valid_magnetometer_samples": 16
+    }
+  ],
+  "whole_trajectory_split": {
+    "test_ids": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153,
+      154,
+      155,
+      156,
+      157,
+      158,
+      159,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      290,
+      291,
+      292,
+      293,
+      294,
+      295,
+      296,
+      297,
+      298,
+      299,
+      300,
+      301,
+      302,
+      303,
+      304,
+      305,
+      306,
+      307,
+      308,
+      309,
+      310,
+      311,
+      312,
+      313,
+      314,
+      315,
+      316,
+      317,
+      318,
+      319,
+      320,
+      321,
+      322,
+      323,
+      324,
+      325,
+      326,
+      327,
+      328,
+      329,
+      330,
+      331,
+      332,
+      333,
+      334,
+      335,
+      336,
+      337,
+      338,
+      339,
+      340,
+      341,
+      342,
+      343,
+      344,
+      345,
+      346,
+      347,
+      348,
+      349
+    ],
+    "train_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275,
+      276,
+      277,
+      278,
+      279
+    ],
+    "validation_ids": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      287,
+      288,
+      289
+    ]
+  }
+}
