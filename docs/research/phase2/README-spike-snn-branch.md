@@ -1,5 +1,11 @@
 # research/spike-snn
 
+> **Legacy scope warning:** this directory documents the Euclidean
+> `x=[sigma, omega]`, six-dimensional `y=[gyro, delta-angle]` observation
+> benchmark. It is not the current right-local Phase 2 gyro-process-input
+> architecture, authorization, or evidence. Historical phase/stage names below
+> are labels from the source branch only.
+
 Spike-Split KalmanNet: a spiking module in the innovation-covariance branch of
 the existing Split-KalmanNet ADCS benchmark, per
 `spike_split_kalmannet_minimal_abstract_experiment_plan.md` (target: IAA

@@ -1,8 +1,10 @@
-"""
-Spike-Split KalmanNet adapter with a recurrent LIF replacement for G2.
+"""Legacy Euclidean 6D-observation Spike-Split benchmark adapter.
 
 The third-party Split-KalmanNet filter and its G1 branch are reused unchanged.
 Only the innovation-covariance branch is replaced by bench-owned code.
+This module is structurally portable but is not current right-local Phase 2
+evidence. Its gyro channels are observations, and its deployable forward path
+accepts innovation-derived tensors rather than truth or event labels.
 """
 
 from __future__ import annotations

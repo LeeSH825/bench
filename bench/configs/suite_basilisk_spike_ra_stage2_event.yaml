@@ -4,9 +4,11 @@ suite:
   name: basilisk_spike_ra_phase_a_event
   version: "0.1.0"
   description: >
-    Event-only Stage 2 diagnostic for SpikeRA-KalmanNet. The original
-    Split-KalmanNet G1/G2 modules are initialized from the Phase A best
-    checkpoint and frozen; only the SNN reliability adapter is trained.
+    Legacy Euclidean 6D-observation event-only Stage 2 diagnostic for
+    SpikeRA-KalmanNet; this is not current right-local Phase 2 evidence. The
+    original Split-KalmanNet G1/G2 modules require the Phase A producer suite's
+    best checkpoint and are then frozen; a clean clone must run that producer
+    first because checkpoints are not packaged.
 
 seeds: [0]
 
@@ -76,6 +78,8 @@ models:
     adapter_lr: 1.0e-4
     event_loss_lambda: 4.0
     detach_recurrent_state: true
+    # Clean-clone prerequisite: first run
+    # suite_basilisk_spike_ra_phase_a_event.yaml with trained:frozen.
     init_from_split_knet_checkpoint: "runs/basilisk_spike_ra_phase_a_event/Basilisk_IMU_ADCS_event_spike_ra_phase_a_event_v0/split_knet/frozen/seed_0/scenario_b93d070d887d/checkpoints/model.pt"
     capabilities:
       supports_adaptation: false

@@ -1,4 +1,8 @@
-"""G1-SNN insertion-location ablation for Split-KalmanNet."""
+"""Legacy Euclidean G1-SNN ablation for the 6D-observation benchmark.
+
+It does not implement the current right-local gyro-process-input Phase 2
+interface and must not be cited as evidence for that architecture.
+"""
 
 from __future__ import annotations
 

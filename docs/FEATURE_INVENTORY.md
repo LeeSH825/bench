@@ -22,6 +22,7 @@ features from another working tree's untracked files.
 | Dash control UI | `bench/ui/` | Included; New Run and action controls follow API capability gates |
 | Offline Run Inspector | `viz/` | Included |
 | ADCS replay and Vizard tooling | `bench/visualization/`, `bench/tasks/replay_generated_data.py` | Included structurally; real-package and native-tool gates remain external |
+| Legacy Spike-Split/SpikeRA benchmark | `bench/models/*spike*.py`, `suite_basilisk_spike_*.yaml` | Included structurally; Euclidean 6D-observation scope only |
 | Suite definitions | `bench/configs/*.yaml` | Included as package data |
 
 ## Control-plane behavior
@@ -100,8 +101,11 @@ therefore cannot create a false PASS.
   historical Phase labels do not establish research-stage completion, and
   real KalmanNet package inference, Basilisk/native conversion, and manual
   Vizard frame/sign checks remain external gates.
-- SpikeRA research integration and Phase 2 control-plane changes are not part
-  of this tranche.
+- Legacy Euclidean 6D-observation Spike-Split/SpikeRA adapters and suites are
+  included structurally. They are not current right-local gyro-process-input
+  Phase 2 evidence; pretrained checkpoint producers and Basilisk/upstream
+  runtime remain external gates.
+- Phase 2 control-plane changes are not part of this tranche.
 - No history rewrite is performed. Removing generated products from the branch
   stops future tracking but does not shrink existing Git history.
 

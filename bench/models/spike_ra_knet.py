@@ -1,4 +1,10 @@
-"""SpikeRA-KalmanNet: Split-KalmanNet with a spiking reliability adapter."""
+"""Legacy Euclidean 6D-observation SpikeRA benchmark adapter.
+
+This is not the current right-local Phase 2 estimator: gyro is part of the
+six-dimensional observation here, not a propagation/process input. Event
+labels are training-loss and post-hoc diagnostic metadata only; deployable
+forward inference receives causal innovation-derived tensors.
+"""
 
 from __future__ import annotations
 
@@ -343,7 +349,7 @@ class SpikeRAKNet(nn.Module):
 
 
 class SpikeRAKNetAdapter(SplitKNetAdapter):
-    """Split-KalmanNet adapter with a recurrent LIF reliability gate."""
+    """Legacy Split-KalmanNet adapter with a recurrent LIF reliability gate."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -522,6 +528,8 @@ class SpikeRAKNetAdapter(SplitKNetAdapter):
         phase: str,
         loss_fn: torch.nn.Module,
     ) -> torch.Tensor:
+        # Event flags weight an offline supervised training objective only.
+        # They are never accepted by SpikeRAKNet.forward or predict().
         if self._event_loss_lambda <= 0.0:
             return super().state_estimation_loss(
                 pred_btd=pred_btd,

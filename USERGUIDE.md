@@ -349,6 +349,14 @@
   - Basilisk availability/API probing, native Vizard `.bin` conversion, and manual frame/sign review in Vizard remain environment/manual gates. Passing portable-wheel tests does not claim a live Vizard launch or stream.
   - Verified structural support in: bench/tasks/replay_generated_data.py, bench/visualization/phase6b_checkpoint_replay.py, bench/visualization/phase6g_kalmannet_export.py, bench/visualization/vizard_native_bridge.py.
 
+  ### 8.2 Legacy Spike-Split/SpikeRA support boundary
+
+  - The shipped Spike-Split, G1-SNN, and SpikeRA adapters belong to a legacy Euclidean `x=[sigma, omega]`, 6D `y=[gyro, delta-angle]` observation benchmark. They are not evidence for the current right-local Phase 2 architecture, where gyro is a propagation/process input.
+  - Event labels are permitted only for offline training-loss weighting and post-hoc diagnostic segmentation. Deployable `predict`/neural forward paths consume measurements and causal innovation-derived tensors, not truth, oracle context, or event labels.
+  - `suite_basilisk_spike_ra_stage2_event.yaml` and `suite_basilisk_spike_ra_phase_a_event_best_eval.yaml` are not immediately executable in a clean clone: their referenced checkpoints are runtime products intentionally excluded from Git and the wheel.
+  - Produce those checkpoints first by generating and running `suite_basilisk_spike_ra_phase_a_event.yaml` with seed 0 and the `trained:frozen` plan. The exact producer path and scenario identity must match the consuming suite before launch.
+  - Registry/config/unit checks establish structural support only. Basilisk generation and real upstream Split-KalmanNet execution remain environment-dependent functional gates.
+
   ## 9. Testing & Validation
 
   ### 9.1 Smoke tests

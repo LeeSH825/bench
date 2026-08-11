@@ -2,8 +2,11 @@ suite:
   name: basilisk_spike_ra_phase_a_event_best_eval
   version: "0.1.0"
   description: >
-    Checkpoint-only re-evaluation of the best-validation checkpoints from the
-    first SpikeRA CPU event-only Phase A comparison.
+    Legacy Euclidean 6D-observation checkpoint-only re-evaluation of the
+    best-validation checkpoints from the first SpikeRA CPU event-only Phase A
+    comparison; this is not current right-local Phase 2 evidence. A clean clone
+    must run suite_basilisk_spike_ra_phase_a_event.yaml first because the
+    referenced checkpoints are runtime products and are not packaged.
 
 seeds: [0]
 
@@ -49,6 +52,8 @@ tasks:
     sweep: {}
 
 models:
+  # Every ckpt_path below is produced by the trained:frozen Phase A producer
+  # suite and is intentionally absent from a clean clone/wheel.
   - model_id: kalmannet_tsp
     display_name: "KalmanNet_TSP"
     adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"

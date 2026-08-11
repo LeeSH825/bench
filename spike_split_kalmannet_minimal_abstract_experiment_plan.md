@@ -1,6 +1,11 @@
 # Spike-Split KalmanNet Minimal Abstract Experiment Plan
 ## Reuse-Oriented Plan for IAA Conference on AI for Space
 
+> **Historical legacy plan:** this plan targets a Euclidean six-dimensional
+> observation benchmark in which gyro is an observation. It does not describe
+> or validate the current right-local Phase 2 estimator, where gyro is a
+> propagation/process input. Its proposed claims are not current evidence.
+
 **Method name:** Spike-Split KalmanNet  
 **Target submission:** IAA Conference on AI for Space  
 **Goal:** produce the minimum experimental evidence needed to write a defensible abstract.

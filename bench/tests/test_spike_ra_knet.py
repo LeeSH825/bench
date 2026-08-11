@@ -245,7 +245,14 @@ def run_spike_ra_knet_tests() -> SpikeRAResult:
     ]
     data_rc, data_output = _run(data_cmd, cwd=bench_root, env=env)
     if data_rc != 0:
-        if "Basilisk generator unavailable" in data_output or "DatasetMissingError" in data_output:
+        if any(
+            marker in data_output
+            for marker in (
+                "Basilisk generator unavailable",
+                "DatasetMissingError",
+                "AVS Basilisk is required for task_family=",
+            )
+        ):
             return SpikeRAResult(True, True, "Basilisk unavailable; SpikeRA smoke skipped")
         return SpikeRAResult(False, False, f"SpikeRA dataset generation failed:\n{data_output}")
 
