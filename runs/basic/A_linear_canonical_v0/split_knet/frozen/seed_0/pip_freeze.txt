@@ -1,3 +1,0 @@
-# pip freeze produced no stdout
-# stderr:
-/home/xynus/bench/.venv/bin/python3: No module named pip
