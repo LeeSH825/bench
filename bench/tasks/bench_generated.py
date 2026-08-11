@@ -265,6 +265,9 @@ _BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES = {
     "bsk_imu_sparse_ref_adcs",
     "bsk_imu_sparse_ref_adcs_v0",
 }
+_REPLAY_GENERATED_TASK_FAMILIES = {
+    "adcs_replay_v0",
+}
 
 
 def _normalized_task_family(task_cfg: Dict[str, Any]) -> str:
@@ -293,6 +296,8 @@ def _normalized_task_family(task_cfg: Dict[str, Any]) -> str:
         return "basilisk_imu_bias_adcs_v0"
     if family in _BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES:
         return "basilisk_imu_sparse_ref_adcs_v0"
+    if family in _REPLAY_GENERATED_TASK_FAMILIES:
+        return "adcs_replay_v0"
     return family
 
 
@@ -555,6 +560,17 @@ def _dispatch_generate_v1(
     scenario_id: str,
 ) -> Tuple[GeneratorOutput, Optional[np.ndarray], Optional[np.ndarray]]:
     task_family = _normalized_task_family(task_cfg_dict)
+    if task_family == "adcs_replay_v0":
+        from .replay_generated_data import generate_replay_generated_v0
+
+        return generate_replay_generated_v0(
+            suite_name=suite_name,
+            task_cfg_dict=task_cfg_dict,
+            scenario_cfg=scenario_cfg,
+            seed=int(seed),
+            scenario_id=scenario_id,
+            task_family="adcs_replay_v0",
+        )
     if task_family == "linear_mismatch_v0":
         return generate_linear_mismatch_v0(
             suite_name=suite_name,
@@ -669,6 +685,7 @@ def _dispatch_generate_v1(
             | _BASILISK_IMU_ADCS_TASK_FAMILIES
             | _BASILISK_IMU_BIAS_ADCS_TASK_FAMILIES
             | _BASILISK_IMU_SPARSE_REF_ADCS_TASK_FAMILIES
+            | _REPLAY_GENERATED_TASK_FAMILIES
         )
         raise NotImplementedError(
             f"task_family '{task_family}' is not registered. "

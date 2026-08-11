@@ -1,0 +1,109 @@
+suite:
+  name: phase6a_replay_long
+  version: "0.1.0"
+  description: >
+    Long ADCS replay scenario using the existing benchmark suite YAML
+    structure. The approximately 120 second trajectory is intended for later
+    Vizard playback after Phase 6B model inference.
+
+seeds: [0]
+
+tasks:
+  - task_id: phase6a_adcs_bias_long_v0
+    task_name: "Phase 6A ADCS bias replay long"
+    enabled: true
+    system_type: adcs_replay
+    x_dim: 9
+    y_dim: 6
+    sequence_length_T: 241
+    dataset_sizes:
+      N_train: 0
+      N_val: 0
+      N_test: 1
+    time:
+      dt_s: 0.5
+      duration_s: 120.0
+    state_schema:
+      attitude:
+        type: mrp
+        name: sigma_BN
+        indices: [0, 1, 2]
+      angular_rate:
+        type: rad_s
+        name: omega_BN_B
+        indices: [3, 4, 5]
+      gyro_bias:
+        type: rad_s
+        name: gyro_bias
+        indices: [6, 7, 8]
+        optional: true
+    initial_state:
+      sigma_BN: [0.0, 0.0, 0.0]
+      omega_BN_B_rad_s: [0.001, -0.002, 0.003]
+      gyro_bias_rad_s: [0.0001, -0.0001, 0.0002]
+    dynamics:
+      type: simple_attitude_bias
+      attitude_motion: constant_rate
+      gyro_bias_model: constant
+      process_noise_std:
+        attitude_mrp: 0.0
+        angular_rate_rad_s: 0.0
+        gyro_bias_rad_s: 0.0
+    noise:
+      form: diag
+      replay_measurement:
+        attitude_mrp: 0.001
+        angular_rate_rad_s: 0.0001
+        gyro_bias_rad_s: 0.0
+    observation:
+      type: partial
+      h_type: linear
+      observed_state: [0, 1, 2, 3, 4, 5]
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    vizard:
+      position_source: dummy_circular_orbit
+    replay:
+      enabled: true
+      trajectory_id: 0
+      expected_model_input: y_obs
+      notes: "Phase 6A creates replay-ready x_true/y_obs/time_s only."
+    sweep: {}
+
+models:
+  - model_id: replay_placeholder
+    enabled: false
+    display_name: "Replay placeholder"
+    adapter: null
+    repo:
+      path: null
+      entrypoints: {}
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: false
+
+runner:
+  device: cpu
+  precision: fp32
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: replay_generated
+  budget:
+    train_max_updates: 0
+    eval_batch_size: 1
+  tracks:
+    - track_id: replay
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db"]
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/seed_{seed}/scenario_{scenario_id}"
+  tables:
+    summary_csv: "reports/summary_phase6a_replay_long.csv"
