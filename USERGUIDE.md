@@ -4,12 +4,11 @@
 
   ### 1.1 Prerequisites
 
-  - Python >=3.9 is required (pyproject.toml), and this repo was validated with .venv/bin/python (Python 3.10.19).
+  - Python >=3.10 is required (pyproject.toml and README.md), and this repo was validated with .venv/bin/python (Python 3.10.19).
   - Core runtime deps are declared in pyproject.toml: numpy, scipy, pandas, matplotlib, pyyaml, tqdm, torch.
   - GPU is optional in current runner behavior: requesting CUDA falls back to CPU if unavailable.
-  - UNVERIFIED: one-command install flow for this exact environment.
-  - How to verify: run python3 -m pip install -e . at repo root, then run .venv/bin/python -m bench.runners.run_suite --help.
-  - Verified in: pyproject.toml, bench/runners/run_suite.py, README.md.
+  - Editable installation and the clean-source wheel release path are verified. Use `python -m pip install -e '.[dev,control]'`, then run `python scripts/verify_clean_wheel.py` to build from `git archive HEAD`, install outside the repository, import the required surfaces, and exercise every public CLI help path.
+  - Verified in: pyproject.toml, README.md, scripts/verify_clean_wheel.py, bench/runners/run_suite.py.
 
   ### 1.2 5-minute smoke run (verified commands)
 
