@@ -328,7 +328,7 @@
   - timing.csv: per-batch inference timing.
   - checkpoints/model.pt: checkpoint for trained plans or saved model states.
   - checkpoints/train_state.json: train-state summary for trained plans.
-  - artifacts/preds_test.npz: optional prediction dump, adapter-dependent.
+  - artifacts/preds_test.npz: standardized runner-owned prediction artifact when prediction saving is enabled (enabled by default, and always enabled for visualization runs).
   - env.txt: lightweight runtime info.
   - env.json, pip_freeze.txt, requirements.lock (if present), git_versions.txt: reproducibility snapshots.
   - stdout.log, stderr.log: run-level logs.
@@ -339,6 +339,15 @@
   - Early missing-data failures may contain only failure-focused files (for example failure.json, stderr.log).
   - stderr.log may be absent on clean successful runs.
   - Verified in: bench/runners/run_suite.py, bench/utils/io.py, observed run directories under runs/.
+
+  ### 8.1 ADCS replay and Vizard support boundary
+
+  - `replay_generated` is a structurally supported runner data mode; the `adcs_replay_v0` task family dispatches through `bench.tasks.replay_generated_data`.
+  - The Phase 5C/6A-6G/7 names are historical workflow labels. Shipping those modules and suites does not prove completion of a research stage or grant research authority.
+  - Identity baselines, mocks, package probes, and unit tests validate contracts only. They are not evidence of real KalmanNet inference or scientific performance.
+  - Real `kalmannet_tsp` replay requires a compatible external checkpoint package and upstream model source. The environment-gated real-package end-to-end test remains a manual verification gate.
+  - Basilisk availability/API probing, native Vizard `.bin` conversion, and manual frame/sign review in Vizard remain environment/manual gates. Passing portable-wheel tests does not claim a live Vizard launch or stream.
+  - Verified structural support in: bench/tasks/replay_generated_data.py, bench/visualization/phase6b_checkpoint_replay.py, bench/visualization/phase6g_kalmannet_export.py, bench/visualization/vizard_native_bridge.py.
 
   ## 9. Testing & Validation
 

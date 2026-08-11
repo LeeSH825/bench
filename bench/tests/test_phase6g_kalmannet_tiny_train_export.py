@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import json
 import os
 import subprocess
 import sys
@@ -8,6 +9,9 @@ import tempfile
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
+
+import torch
+import yaml
 
 from bench.visualization.checkpoint_contract_probe import (
     probe_checkpoint_contract,
@@ -21,6 +25,88 @@ from bench.visualization.phase6g_kalmannet_export import (
 
 
 ENV_RUN_TINY_TRAIN = "AI_ADCS_PHASE6G_RUN_TINY_TRAIN"
+
+
+class Phase6GExportProvenanceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.run_dir = self.root / "run"
+        checkpoints = self.run_dir / "checkpoints"
+        checkpoints.mkdir(parents=True)
+
+        suite_path = (
+            Path(__file__).resolve().parents[1]
+            / "configs"
+            / "suite_phase6f_kalmannet_adcs_tiny.yaml"
+        )
+        suite = yaml.safe_load(suite_path.read_text(encoding="utf-8"))
+        snapshot = {
+            "suite": suite["suite"],
+            "task": suite["tasks"][0],
+            "model": suite["models"][0],
+            "seed": 0,
+        }
+        (self.run_dir / "config_snapshot.yaml").write_text(
+            yaml.safe_dump(snapshot, sort_keys=False),
+            encoding="utf-8",
+        )
+        torch.save({"state_dict": {}}, checkpoints / "model.pt")
+        self._write_json(checkpoints / "train_state.json", {"best_step": 4})
+        self._write_json(self.run_dir / "metrics.json", {"status": "ok"})
+        self._write_json(self.run_dir / "run_plan.json", {"init_id": "trained"})
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    @staticmethod
+    def _write_json(path: Path, value: object) -> None:
+        path.write_text(json.dumps(value) + "\n", encoding="utf-8")
+
+    def test_nested_destination_and_top_level_best_step(self) -> None:
+        destination = self.root / "missing" / "parents" / "package"
+        exported = export_phase6g_kalmannet_tsp_package(
+            source_run_dir=self.run_dir,
+            package_dir=destination,
+        )
+        contract = validate_replay_checkpoint_package(exported)
+        self.assertEqual(exported, destination.resolve())
+        self.assertEqual(contract["checkpoint_step"], 4)
+
+    def test_missing_required_provenance_is_rejected(self) -> None:
+        (self.run_dir / "metrics.json").unlink()
+        with self.assertRaisesRegex(FileNotFoundError, "required run provenance"):
+            export_phase6g_kalmannet_tsp_package(
+                source_run_dir=self.run_dir,
+                package_dir=self.root / "package",
+            )
+
+    def test_malformed_train_state_is_rejected(self) -> None:
+        (self.run_dir / "checkpoints" / "train_state.json").write_text(
+            "not-json\n",
+            encoding="utf-8",
+        )
+        with self.assertRaises(ValueError):
+            export_phase6g_kalmannet_tsp_package(
+                source_run_dir=self.run_dir,
+                package_dir=self.root / "package",
+            )
+
+    def test_best_step_must_be_top_level_non_negative_integer(self) -> None:
+        train_state = self.run_dir / "checkpoints" / "train_state.json"
+        for invalid in (
+            {},
+            {"checkpoints": {"best_step": 4}},
+            {"best_step": True},
+            {"best_step": -1},
+        ):
+            with self.subTest(invalid=invalid):
+                self._write_json(train_state, invalid)
+                with self.assertRaisesRegex(ValueError, "top-level best_step"):
+                    export_phase6g_kalmannet_tsp_package(
+                        source_run_dir=self.run_dir,
+                        package_dir=self.root / "package",
+                    )
 
 
 class Phase6GKalmanNetTinyTrainExportTests(unittest.TestCase):

@@ -88,21 +88,45 @@ def _build_system_model_from_run(run_cfg: Mapping[str, Any]) -> dict[str, Any]:
     return build_replay_generated_system_model(task_cfg=task_cfg, dt_s=dt_s)
 
 
-def _build_training_summary_from_run(run_dir: Path) -> dict[str, Any]:
-    summary: dict[str, Any] = {
+def _required_run_provenance(run_dir: Path) -> dict[str, dict[str, Any]]:
+    provenance: dict[str, dict[str, Any]] = {}
+    for name, rel in (
+        ("train_state", "checkpoints/train_state.json"),
+        ("metrics", "metrics.json"),
+        ("run_plan", "run_plan.json"),
+    ):
+        path = run_dir / rel
+        if not path.is_file():
+            raise FileNotFoundError(f"required run provenance not found: {path}")
+        provenance[name] = _read_json(path)
+    return provenance
+
+
+def _checkpoint_step_from_train_state(train_state: Mapping[str, Any]) -> int:
+    best_step = train_state.get("best_step")
+    if isinstance(best_step, bool) or not isinstance(best_step, int):
+        raise ValueError(
+            "checkpoints/train_state.json top-level best_step must be a non-negative integer"
+        )
+    if best_step < 0:
+        raise ValueError(
+            "checkpoints/train_state.json top-level best_step must be a non-negative integer"
+        )
+    return int(best_step)
+
+
+def _build_training_summary_from_run(
+    run_dir: Path,
+    provenance: Mapping[str, Mapping[str, Any]],
+) -> dict[str, Any]:
+    return {
         "smoke_training": True,
         "benchmark_reporting_recommended": False,
         "source_run_dir": str(run_dir),
+        "train_state": dict(provenance["train_state"]),
+        "metrics": dict(provenance["metrics"]),
+        "run_plan": dict(provenance["run_plan"]),
     }
-    for rel in ("checkpoints/train_state.json", "metrics.json", "run_plan.json"):
-        path = run_dir / rel
-        if not path.exists():
-            continue
-        try:
-            summary[Path(rel).stem] = _read_json(path)
-        except Exception:
-            continue
-    return summary
 
 
 def export_phase6g_kalmannet_tsp_package(
@@ -124,11 +148,15 @@ def export_phase6g_kalmannet_tsp_package(
         )
     run_cfg = _read_yaml(config_path)
     checkpoint_path = _discover_checkpoint(run_dir)
+    provenance = _required_run_provenance(run_dir)
+    checkpoint_step = _checkpoint_step_from_train_state(provenance["train_state"])
     model_config = _build_model_config_from_run(run_cfg)
     system_model = _build_system_model_from_run(run_cfg)
-    training_summary = _build_training_summary_from_run(run_dir)
+    training_summary = _build_training_summary_from_run(run_dir, provenance)
 
-    with tempfile.TemporaryDirectory(prefix=".phase6g_kalmannet_", dir=str(Path(package_dir).expanduser().resolve().parent)) as tmp:
+    output_dir = Path(package_dir).expanduser().resolve()
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".phase6g_kalmannet_", dir=str(output_dir.parent)) as tmp:
         staging = Path(tmp)
         model_config_path = staging / "model_config.json"
         system_model_path = staging / "system_model.json"
@@ -147,14 +175,14 @@ def export_phase6g_kalmannet_tsp_package(
         )
         return export_kalmannet_tsp_replay_package(
             checkpoint=checkpoint_path,
-            package_dir=package_dir,
+            package_dir=output_dir,
             model_config=model_config_path,
             system_model=system_model_path,
             training_summary=training_summary_path,
             training_suite_name=str((run_cfg.get("suite", {}) or {}).get("name", "")),
             training_task_id=str((run_cfg.get("task", {}) or {}).get("task_id", "")),
             training_seed=int((run_cfg.get("seed", 0)) if isinstance(run_cfg.get("seed", 0), int) else 0),
-            checkpoint_step=int((run_cfg.get("checkpoints", {}) or {}).get("best_step", 0)) if isinstance(run_cfg.get("checkpoints", {}), Mapping) else None,
+            checkpoint_step=checkpoint_step,
             overwrite=bool(overwrite),
         )
 

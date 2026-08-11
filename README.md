@@ -115,8 +115,10 @@ python -m streamlit run viz/app/main.py
 ```
 
 The Run Inspector reads completed artifacts and does not replace the control
-dashboard. ADCS replay/Vizard integration is a separate tranche and is not
-part of this portable-core change.
+dashboard. ADCS replay and Vizard contract/tooling modules are included in the
+portable wheel. Historical Phase labels, mocks, and identity baselines establish
+structural support only; real KalmanNet package replay, Basilisk/native Vizard
+conversion, and manual frame/sign review remain explicit environment gates.
 
 ## Packaging verification
 

@@ -14,6 +14,7 @@ from pathlib import Path
 REQUIRED_MEMBERS = (
     "bench/__init__.py",
     "bench/tasks/smoke_data.py",
+    "bench/tasks/replay_generated_data.py",
     "bench/runners/run_suite.py",
     "bench/models/registry.py",
     "bench/reports/make_report.py",
@@ -26,6 +27,13 @@ REQUIRED_MEMBERS = (
     "bench/ui/dash_app.py",
     "bench/ui/pages/new_run.py",
     "bench/configs/suite_kf_baseline_smoke.yaml",
+    "bench/configs/suite_phase6a_replay_short.yaml",
+    "bench/configs/suite_phase6a_replay_long.yaml",
+    "bench/configs/suite_phase6f_kalmannet_adcs_tiny.yaml",
+    "bench/visualization/phase6b_checkpoint_replay.py",
+    "bench/visualization/phase6g_kalmannet_export.py",
+    "bench/visualization/phase7_vizard_convention.py",
+    "bench/visualization/vizard_native_bridge.py",
     "viz/app/main.py",
 )
 

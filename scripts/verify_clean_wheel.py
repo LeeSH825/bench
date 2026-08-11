@@ -73,7 +73,12 @@ def main() -> int:
             "from pathlib import Path; "
             "import bench, bench.control.cli, bench.control.checkpoints.resume_coordinator, "
             "bench.control.api.routers.actions, bench.control.config.gui_service, "
-            "bench.runners.run_suite, bench.tasks.smoke_data, viz; "
+            "bench.runners.run_suite, bench.tasks.smoke_data, "
+            "bench.tasks.replay_generated_data, "
+            "bench.visualization.phase6b_checkpoint_replay, "
+            "bench.visualization.phase6g_kalmannet_export, "
+            "bench.visualization.phase7_vizard_convention, "
+            "bench.visualization.vizard_native_bridge, viz; "
             f"assert not Path(bench.__file__).resolve().is_relative_to(Path({str(repo_root)!r}))"
         )
         run([str(python), "-c", import_check], cwd=tmp, env=clean_env)
