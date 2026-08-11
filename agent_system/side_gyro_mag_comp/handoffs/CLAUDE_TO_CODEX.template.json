@@ -1,0 +1,12 @@
+{
+  "schema_version": "side-study-claude-handoff-v2",
+  "status": "AUDIT_COMPLETE",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "",
+  "checkpoint_digest": "",
+  "verdict": "",
+  "findings": [],
+  "repairable": false,
+  "counterproposal": null,
+  "next_actor": "CODEX"
+}

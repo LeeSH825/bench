@@ -1,0 +1,107 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-final-decision-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "FINAL_SYNTHESIS",
+  "decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "contract_complete": false,
+  "contract_repair_rounds_consumed": 1,
+  "contract_repair_rounds_remaining": 0,
+  "implementation_authorized": false,
+  "experiment_authorized": false,
+  "scientific_conclusion": "NONE_CONTRACT_INCOMPLETE",
+  "gate_results": {
+    "G0": "NOT_RUN",
+    "G1": "NOT_RUN",
+    "G2": "NOT_RUN",
+    "G3": "NOT_RUN",
+    "G4": "NOT_RUN"
+  },
+  "local_review_rounds": [
+    {
+      "round": 1,
+      "review_kind": "red-capable local pre-handoff review",
+      "decision": "FAIL_REPAIRABLE",
+      "failure_class": "DECLARATIONS_NOT_FULLY_BOUND_TO_MACHINE_EXECUTION",
+      "defects": [
+        "Metric record key omitted split, and descriptors did not freeze producer machine path/schema/value field, split, uniqueness, and completeness.",
+        "G1 combined admissible readings rather than exposing six separately addressable R9 sensor metrics plus the R4 primary, and did not bind exact unweighted averaging over trajectory IDs and seeds.",
+        "The validator did not exact-match all G0-G4 formulas and arithmetic, including denominator positivity, fractional formulas, CI strictness, two-of-three seed rules, G3 weights/lower bound, G4 ratio/divergence, and all six G1 conjuncts.",
+        "R1-R13 and the R9 clarification were not bound by exact deep-equality projections from the four immutable hash-pinned v1 sources.",
+        "The validator did not bind actual git changed paths to CHANGED_PATHS or reject outside-v2/forbidden contract-stage classes, v1/config drift, and forbidden command/access records."
+      ]
+    },
+    {
+      "round": 2,
+      "review_kind": "second red-capable local review after the only repair",
+      "decision": "FAIL_FINAL",
+      "failure_class": "DECLARATIONS_NOT_FULLY_BOUND_TO_MACHINE_EXECUTION",
+      "decisive_defects": [
+        "Metric producers bind a source .py path but not the exact emitted JSON/CSV evidence path, evidence schema, and report-resolution rule.",
+        "The effective repair_obligations array is not derived from or deep-equal to the immutable source projection and can be weakened while the validator still passes.",
+        "Wrong-namespace Claude-authored artifacts escaped the changed-path and v1-freeze validation boundary.",
+        "The declared metric producer path is excluded by the frozen implementation allowlist."
+      ],
+      "consequence": "The one CONTRACT repair is exhausted. Further contract, validator, or allowlist repair is unauthorized; implementation and G0 remain prohibited."
+    }
+  ],
+  "repair_evidence": {
+    "canonical_contract_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+    "canonical_contract_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+    "contract_checkpoint_path": "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+    "contract_checkpoint_sha256": "2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd",
+    "validator_result": "PASS_7_OF_7",
+    "mutation_result": "PASS_485_OF_485_MUTATIONS_REJECTED",
+    "mutation_labels_sha256": "adcddf341cb11f23bb667885736d1288a4d6e84e0ce5f4669e639671118b9321",
+    "qualification": "INSUFFICIENT_NOT_A_PASS",
+    "why_insufficient": "The mutation matrix exercises only predicates encoded by the validator. The second review supplied counterexamples outside that encoded predicate set, so 485 rejected mutations cannot establish contract completeness."
+  },
+  "archive_and_preservation": {
+    "archive_branch": "codex/side-gyro-mag-comp-v1-terminal-archive",
+    "base_evidence_commit": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+    "self_contained_archive_commit": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+    "archive_path_count": 85,
+    "path_for_path_full_working_tree_match": true,
+    "missing_paths": 0,
+    "extra_versionable_paths": 0,
+    "byte_mismatches": 0,
+    "path_byte_set_sha256": "d9668c89768781cd98041533c06000cf97f560054fb4c763753204809f0dcd9a",
+    "v1_final_manifest_self_containment": "PASS_9_OF_9",
+    "config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"
+  },
+  "wrong_namespace_governance_contamination_cleanup": [
+    {"path":"agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json","pre_cleanup_sha256":"6b439b774b2b467ff0f785f2ad90798c9ec70d5572245d5bc35eb37bba74c2e5","provenance":"externally Claude-authored untracked duplicate v2 authority in v1 namespace","authority_status":"INVALID_NOT_V2_AUTHORITY_OR_AUDIT","cleanup":"DELETED_WITH_APPLY_PATCH"},
+    {"path":"agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md","pre_cleanup_sha256":"d9803219e65a7932a8b9c8363b7e10519abf835da51ad3818610bd199dd24751","provenance":"externally Claude-authored untracked duplicate v2 authority in v1 namespace","authority_status":"INVALID_NOT_V2_AUTHORITY_OR_AUDIT","cleanup":"DELETED_WITH_APPLY_PATCH"},
+    {"path":"agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md","pre_cleanup_sha256":"a1230cd7e6e2d20a14e74941bd4b62ec709032397d87ee3dcf7fb738665f8e3f","provenance":"externally Claude-authored untracked duplicate v2 authority in v1 namespace","authority_status":"INVALID_NOT_V2_AUTHORITY_OR_AUDIT","cleanup":"DELETED_WITH_APPLY_PATCH"}
+  ],
+  "generated_cache_preservation_cleanup": {
+    "reason": "Eight recreatable Python/pytest bytecode cache files were the only remaining non-archive paths in the full v1 code/test working-tree namespaces after duplicate-authority cleanup.",
+    "deleted_paths": [
+      "bench/side_gyro_mag_comp_v1/__pycache__/__init__.cpython-312.pyc",
+      "bench/side_gyro_mag_comp_v1/__pycache__/data.cpython-312.pyc",
+      "bench/side_gyro_mag_comp_v1/__pycache__/model.cpython-312.pyc",
+      "bench/side_gyro_mag_comp_v1/__pycache__/study.cpython-312.pyc",
+      "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312-pytest-8.3.4.pyc",
+      "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312.pyc",
+      "tests/side_gyro_mag_comp_v1/__pycache__/test_math_and_model_red.cpython-312-pytest-8.3.4.pyc",
+      "tests/side_gyro_mag_comp_v1/__pycache__/test_training_gates_and_runtime_red.cpython-312-pytest-8.3.4.pyc"
+    ],
+    "pre_cleanup_hashes": "NOT_CAPTURED_BEFORE_INDEPENDENT_REMOVAL",
+    "archive_authority_status": "GENERATED_IGNORED_NON_AUTHORITY_FILES",
+    "post_cleanup_full_path_and_byte_result": "PASS_85_OF_85_ZERO_MISSING_ZERO_EXTRA_ZERO_MISMATCH"
+  },
+  "forbidden_execution_confirmation": {
+    "tests_run": false,
+    "smoke_run": false,
+    "performance_run": false,
+    "G0_run": false,
+    "test_or_held_out_payload_accessed": false
+  },
+  "next_stage": "FINAL_INDEPENDENT_AUDIT",
+  "next_actor": "CLAUDE",
+  "expected_independent_audit_paths": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json"
+  ],
+  "independent_audit_created_by_codex": false
+}

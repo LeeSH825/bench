@@ -1,0 +1,17 @@
+{
+  "schema_version": "side-study-dr0-decision-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "DR0_DESIGN_REVIEW",
+  "decision": "GO_TO_INDEPENDENT_DR0_AUDIT",
+  "method_coherent": true,
+  "implementation_authorized": false,
+  "runtime_sensors": ["gyro", "magnetometer"],
+  "feature_dim_per_sensor": 8,
+  "gain_shape": [6, 3],
+  "regimes": ["R0", "R1", "R2", "R3", "R4"],
+  "models": ["C0", "C1", "N0", "N1", "N2", "N3", "N3S"],
+  "gates": ["G0", "G1", "G2", "G3", "G4"],
+  "primary_test_trajectory_ids_per_regime": 30,
+  "open_blockers": [],
+  "claim_restrictions": ["no_performance_claim", "no_physical_covariance_claim", "single_mag_weak_axis"]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-codex-final-to-claude-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "FINAL_INDEPENDENT_AUDIT",
+  "from_actor": "CODEX",
+  "to_actor": "CLAUDE",
+  "status": "READY_FOR_FINAL_INDEPENDENT_AUDIT",
+  "single_audit_target": {
+    "path": "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json",
+    "sha256": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "digest_rule": "sha256 over raw checkpoint-manifest bytes",
+    "member_count": 9
+  },
+  "codex_decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "audit_predicate": "Does the sealed final bundle accurately preserve the two local review outcomes, explain why the 485/485 mutation result is insufficient, stop after the exhausted CONTRACT repair without implementation or G0-G4 execution, preserve the archive/config boundary, and avoid fabricating independent audit evidence?",
+  "required_checks": [
+    "final checkpoint digest remains stable before and after audit",
+    "all 9 final checkpoint member hashes match",
+    "decision is BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR and method decision is BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+    "the five first-review defects and four decisive second-review defects are represented without weakening",
+    "contract repair evidence is recorded as 50a1c4a contract, 2aa9a457 checkpoint, 7/7 validator, and 485/485 rejected mutations but explicitly not treated as PASS",
+    "G0-G4 are NOT_RUN and no scientific conclusion is claimed",
+    "no implementation, tests, smoke, performance, G0, or payload access occurred",
+    "three wrong-namespace duplicate authority files have recorded pre-cleanup hashes, are absent, and are not treated as valid v2 authority or audit",
+    "versionable v1 archive preservation is exact for 85/85 paths with zero missing, extra, or byte mismatches; archived final manifest is 9/9 and config hash is pinned",
+    "no Codex-created FINAL_AUDIT.md or FINAL_AUDIT.json exists"
+  ],
+  "expected_claude_outputs": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json"
+  ],
+  "implementation_authorized": false,
+  "experiment_authorized": false,
+  "contract_repair_rounds_remaining": 0,
+  "independent_audit_artifact_created_by_codex": false,
+  "next_state_on_matching_audit": "COMPLETE_BLOCKED"
+}

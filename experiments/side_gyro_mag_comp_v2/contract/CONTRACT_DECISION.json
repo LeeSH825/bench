@@ -1,0 +1,18 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-contract-decision-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT",
+  "decision": "GO_TO_CONTRACT_INDEPENDENT_AUDIT",
+  "contract_complete": true,
+  "machine_validation": "PASS",
+  "implementation_authorized": false,
+  "experiment_authorized": false,
+  "test_payload_access_authorized": false,
+  "next_stage": "CONTRACT_INDEPENDENT_AUDIT",
+  "next_actor": "CLAUDE",
+  "repair_round": 1,
+  "canonical_contract_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+  "canonical_contract_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+  "validation_result_path": "experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json",
+  "independent_audit_created": false
+}

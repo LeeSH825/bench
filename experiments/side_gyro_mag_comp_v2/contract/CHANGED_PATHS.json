@@ -1,0 +1,25 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-changed-paths-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT",
+  "paths": [
+    "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py",
+    "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json",
+    "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+    "docs/research/side_gyro_mag_comp_v2/SC_V2_REPOSITORY_REUSE_MAP.md",
+    "experiments/side_gyro_mag_comp_v2/contract/ARCHIVE_PROVENANCE.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CHANGED_PATHS.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp_v2/contract/COMMANDS.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CONTRACT_DECISION.json",
+    "experiments/side_gyro_mag_comp_v2/contract/CONTRACT_MUTATION_RESULT.json",
+    "experiments/side_gyro_mag_comp_v2/contract/SC_V2_CONTRACT_REPORT.md",
+    "experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json",
+    "experiments/side_gyro_mag_comp_v2/handoffs/codex/CODEX_CONTRACT_TO_CLAUDE.json"
+  ],
+  "path_count": 13,
+  "all_paths_within_authorized_v2_namespaces": true,
+  "v1_paths_modified": [],
+  "estimator_model_data_test_config_paths_created": [],
+  "independent_audit_paths_created": []
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-contract-validation-result-v2",
+  "study_id": "side-gyro-mag-comp-v2",
+  "decision": "PASS",
+  "contract_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+  "contract_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+  "validation_command": [
+    "python3",
+    "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py",
+    "--contract",
+    "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json"
+  ],
+  "exit_code": 0,
+  "check_count": 7,
+  "checks_passed": [
+    "archive_identity_84_plus_1_and_9_of_9",
+    "source_and_immutable_pins",
+    "exact_r1_r13_and_r9_source_projections",
+    "method_boundary_identity_and_all_valid_observability",
+    "split_aware_metric_bindings_and_exact_g0_g4_arithmetic",
+    "repair_invariants_stage_stop_and_exclusions",
+    "actual_changed_paths_v1_drift_and_execution_firewalls"
+  ],
+  "contract_repair_round": 1,
+  "mutation_result_path": "experiments/side_gyro_mag_comp_v2/contract/CONTRACT_MUTATION_RESULT.json",
+  "mutation_count": 485,
+  "all_mutations_rejected": true,
+  "errors": [],
+  "test_payload_accessed": false,
+  "performance_or_smoke_run_executed": false,
+  "validated_at_utc": "2026-08-06T13:51:44Z"
+}

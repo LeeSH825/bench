@@ -1,0 +1,10 @@
+# Merge this table into the existing repository .codex/config.toml.
+# Keep concurrency deliberately small to control token and coordination cost.
+model = "gpt-5.6"
+model_reasoning_effort = "high"
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 5
+default_subagent_reasoning_effort = "medium"
+interrupt_message = true

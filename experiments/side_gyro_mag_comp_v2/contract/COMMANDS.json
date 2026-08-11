@@ -1,0 +1,57 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-command-log-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT",
+  "commands": [
+    {
+      "purpose": "resolve active v2 and self-contained archive tips",
+      "argv": ["git", "rev-parse", "codex/side-gyro-mag-comp-v1-terminal-archive"],
+      "exit_code": 0,
+      "result": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0"
+    },
+    {
+      "purpose": "enumerate exact 84 base evidence paths",
+      "argv": ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "235619cbd7b7af7dcc24db89c247673cd72a0363"],
+      "exit_code": 0,
+      "result_record": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json#/archive_provenance/base_parent_staged_paths",
+      "path_count": 84
+    },
+    {
+      "purpose": "enumerate exact companion paths",
+      "argv": ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0"],
+      "exit_code": 0,
+      "result": [".codex/config.toml"]
+    },
+    {
+      "purpose": "verify archived config raw-byte hash",
+      "pipeline": [
+        ["git", "show", "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0:.codex/config.toml"],
+        ["sha256sum"]
+      ],
+      "exit_code": 0,
+      "result": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"
+    },
+    {
+      "purpose": "verify 9 of 9 archived final-manifest members",
+      "argv_summary": "For each member of archived experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json: git show ARCHIVE_COMMIT:path, compute hashlib.sha256(raw_bytes), compare with member sha256.",
+      "exit_code": 0,
+      "result": "PASS_9_OF_9"
+    },
+    {
+      "purpose": "validate repaired canonical contract",
+      "argv": ["python3", "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py", "--contract", "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json"],
+      "exit_code": 0,
+      "result": "PASS_7_OF_7"
+    },
+    {
+      "purpose": "execute exhaustive repaired contract mutation matrix in memory",
+      "argv": ["python3", "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py", "--contract", "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json", "--mutation-matrix"],
+      "exit_code": 0,
+      "result": "PASS_485_OF_485_MUTATIONS_REJECTED",
+      "mutation_labels_sha256": "adcddf341cb11f23bb667885736d1288a4d6e84e0ce5f4669e639671118b9321"
+    }
+  ],
+  "performance_commands": [],
+  "smoke_commands": [],
+  "held_out_or_test_payload_commands": []
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "side-study-implementation-decision-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "IMPLEMENTATION",
+  "decision": "READY_FOR_IMPLEMENTATION_AUDIT",
+  "implementation_complete": true,
+  "full_pilot_executed": false,
+  "performance_claim": false,
+  "physical_covariance_claim": false,
+  "information_firewalls": {"CF-1": "IMPLEMENTED_AND_RED_TESTED", "CF-2": "IMPLEMENTED_AND_RED_TESTED"},
+  "tests": {"passed": 42, "failed": 0},
+  "smoke": {
+    "status": "PASS_SMOKE",
+    "regimes": ["R0", "R1", "R2", "R3", "R4"],
+    "variants": ["C0", "C1", "N0", "N1", "N2", "N3", "N3S"],
+    "test_trajectories_per_regime": 4,
+    "finite_replay_records": 140,
+    "long_form_scope_keys_present": true,
+    "n3s_protected_bridges": 20
+  },
+  "g3_authority": "repaired_audited_SC_01_supersedes_prompt05_for_G3_only",
+  "next_stage": "IMPLEMENTATION_AUDIT",
+  "next_actor": "CLAUDE"
+}

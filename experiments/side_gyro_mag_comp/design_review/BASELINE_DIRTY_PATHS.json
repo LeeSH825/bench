@@ -1,0 +1,12 @@
+{
+  "schema_version": "side-study-baseline-dirty-inventory-v1",
+  "captured_command": "git status --porcelain=v1 --untracked-files=all",
+  "path_record_count": 2441,
+  "ordered_output_sha256": "8c426f31fbb84c41cb59e948c035d0a7c1627d445ec3fed7190203aadf0dbc1a",
+  "comparison_rule": "Later stages recapture the same ordered command and separately enumerate new side-study paths; no existing dirty path may be normalized, restored, or attributed to this study.",
+  "side_study_paths_present_before_dr0": [
+    ".codex/config.toml",
+    "agent_system/side_gyro_mag_comp/",
+    "prompts/side_gyro_mag_comp/"
+  ]
+}

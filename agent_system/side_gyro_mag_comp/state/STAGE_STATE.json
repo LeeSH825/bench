@@ -1,0 +1,51 @@
+{
+  "schema_version": "side-study-autonomous-stage-state-v2",
+  "study_id": "side-gyro-mag-comp-v1",
+  "automation_mode": "AUTONOMOUS_UNTIL_FINAL",
+  "human_review_mode": "FINAL_ONLY",
+  "current_stage": "COMPLETE_BLOCKED",
+  "stage_status": "TERMINAL",
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "sealed_checkpoint": "cb7b82943b6a0fa0d6d7e2740088f38228ecb1912f80c79954af9d586cff6ae7",
+  "sealed_claims_digest": "b014058b5091c35bf23f40430816519f155ba949296e923410f66c0398997135",
+  "active_prompt": "prompts/side_gyro_mag_comp/10_CODEX_AUTONOMOUS_PRIMARY.md",
+  "codex_handoff": "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json",
+  "claude_audit": "experiments/side_gyro_mag_comp/final/FINAL_AUDIT.json",
+  "repair_round_by_stage": {
+    "DR0": 1,
+    "IMPLEMENTATION": 1
+  },
+  "next_actor": "NONE",
+  "next_allowed_stage": "COMPLETE_BLOCKED",
+  "method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "terminal_reason": "BLOCKED_CONTRACT_GAP_R8_WEAK_AXIS_POPULATION_DEFINITION",
+  "final_result_paths": {
+    "result_md": "experiments/side_gyro_mag_comp/final/FINAL_RESULT.md",
+    "decision_json": "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json",
+    "audit_json": "experiments/side_gyro_mag_comp/final/FINAL_AUDIT.json"
+  },
+  "frozen_scope": {
+    "runtime_sensors": [
+      "gyro",
+      "magnetometer"
+    ],
+    "feature_dim_per_sensor": 8,
+    "conditioning": "branch_specific_film",
+    "excluded": [
+      "SNN",
+      "SoW",
+      "reliability_gate",
+      "attention",
+      "Transformer",
+      "learned_QR",
+      "uncertainty_head",
+      "temperature",
+      "outliers",
+      "extra_runtime_sensors",
+      "closed_loop",
+      "FPGA",
+      "broad_sweeps"
+    ]
+  },
+  "updated_at_utc": "2026-08-06T12:59:03.551971+00:00"
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": "side-study-claude-audit-addendum-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage_audited": "IMPLEMENTATION",
+  "audit_stage": "IMPLEMENTATION_AUDIT",
+  "auditor": "claude-independent-addendum",
+  "relationship": "ADDITIVE_TO_PRIMARY_AUDIT",
+  "primary_audit_json": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+  "overwrites_primary": false,
+  "decision": "FAIL_RED_PATH",
+  "decision_direction_matches_primary": true,
+  "repairable": true,
+  "audited_predicate": "Every mandatory red-path test named by a sealed implementation claim fails when that claim is false.",
+  "predicate_result": false,
+  "audit_target_path": "experiments/side_gyro_mag_comp/implementation/CHECKPOINT_MANIFEST.json",
+  "target_count": 1,
+  "checkpoint_digest_before_audit": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "checkpoint_digest_after_audit": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "checkpoint_stable": true,
+  "manifest_member_files_verified": 28,
+  "manifest_member_hash_mismatches": 0,
+  "baseline_suite_reproduced": "42 passed",
+  "mutations_run_by_this_pass": [
+    {
+      "id": "MUT-A",
+      "mutation": "study.py unroll left injection Exp(dtheta) (x) q",
+      "falsifies": "IMPL-C1 right injection",
+      "suite": "42 passed",
+      "went_red": false,
+      "covered_by": "R4"
+    },
+    {
+      "id": "MUT-B",
+      "mutation": "study.py unroll H[:, :3] = -_torch_skew(h)",
+      "falsifies": "IMPL-C1 H_m sign",
+      "suite": "42 passed",
+      "went_red": false,
+      "covered_by": "R4"
+    },
+    {
+      "id": "MUT-C",
+      "mutation": "study.py unroll innovation = h - mag_value",
+      "falsifies": "IMPL-C1 innovation sign",
+      "suite": "42 passed",
+      "went_red": false,
+      "covered_by": "R4"
+    },
+    {
+      "id": "MUT-D",
+      "mutation": "model.py FiLM bypass g1 = 2.0 * base_g1",
+      "falsifies": "IMPL-C5 feature-off exact identity",
+      "suite": "42 passed",
+      "went_red": false,
+      "covered_by": "R12 (NEW)"
+    },
+    {
+      "id": "MUT-E",
+      "mutation": "model.py self.mag_encoder = self.gyro_encoder",
+      "falsifies": "IMPL-C5 separate encoders",
+      "suite": "42 passed",
+      "went_red": false,
+      "covered_by": "R13 (NEW)"
+    }
+  ],
+  "new_findings_not_covered_by_primary": [
+    {
+      "id": "MUT-D",
+      "counterproposal_id": "R12",
+      "why_new": "round-1 evidence varied FEATURE_DIM only; no feature-off-identity mutation recorded; not in U-1..U-6",
+      "impact": "exact feature-off identity is what makes the N2 vs N3 contrast in G2 a clean single-variable comparison"
+    },
+    {
+      "id": "MUT-E",
+      "counterproposal_id": "R13",
+      "why_new": "strings alias/mag_encoder/separate appear in no recorded mutation",
+      "impact": "a single shared encoder would satisfy every test while collapsing the two-branch premise of the study"
+    }
+  ],
+  "dr0_carry_forward_disposition": {
+    "CF-1": "SATISFIED",
+    "CF-2": "SATISFIED",
+    "G1_bias_coupling": "ADDRESSED",
+    "m_N_collision": "ADDRESSED"
+  },
+  "verified_correct": [
+    "nu = z_tilde - h",
+    "H_m = [[h_m]_x, 0]",
+    "K = G1 H^T G2 shape (6,3)",
+    "right injection",
+    "propagation omega_tilde - b_hat_r",
+    "right-Jacobian reset with anti-identity guard",
+    "closed 5-field runtime allowlist",
+    "truth/calibration/oracle rejected by object identity",
+    "normalization from train split only, hashed, frozen",
+    "scope clean",
+    "smoke only, no premature pilot",
+    "frozen boundary intact"
+  ],
+  "governance_findings": [
+    {
+      "id": "G-A",
+      "type": "CONCURRENT_CLAUDE_ROLE_WRITER",
+      "recurred": true,
+      "verdict_direction_conflict": false,
+      "repair_round_consumed_by_concurrent_writer": true,
+      "residual_risk_closed_by": [
+        "R12",
+        "R13"
+      ],
+      "frozen_boundary_violated": false,
+      "sealed_digest_moved": false
+    },
+    {
+      "id": "G-B",
+      "type": "PROMPT05_AMENDED_OUTSIDE_ALLOWLIST",
+      "scientific_risk": "none",
+      "verified": "G0/G1/G2/G4 thresholds and all populations unchanged; only G3 rewritten to the equivalent tightening predicate (0 counterexamples in 200000 trials); preceded any test access; disclosed",
+      "required_action": "traceability record under experiments/side_gyro_mag_comp/**; not a repair round"
+    }
+  ],
+  "no_claim_permitted": [
+    "NIS/NEES or covariance validity for the learned path (P never enters K and receives no measurement update)"
+  ],
+  "must_disclose_in_final_report": [
+    "onboard magnetic reference differs from truth by 2.24%, a ~1.28 deg innovation-model floor applied equally to all arms",
+    "generator hardcodes identity mounting; SC-00 nonidentity-mounting clause is fixture-only"
+  ],
+  "gate_outcomes_asserted": null,
+  "experiments_run": 0,
+  "next_stage": "IMPLEMENTATION_REPAIR",
+  "next_actor": "CODEX",
+  "second_failure_consequence": "COMPLETE_BLOCKED",
+  "written_at_utc": "2026-08-06T12:45:30.086547+00:00"
+}

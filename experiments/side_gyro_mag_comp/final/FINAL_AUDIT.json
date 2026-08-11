@@ -1,0 +1,202 @@
+{
+  "schema_version": "side-study-final-audit-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "auditor": "claude-independent",
+  "audit_stage": "FINAL_AUDIT",
+  "decision": "PASS_FINAL_BLOCKED_WITH_VALID_EVIDENCE",
+  "audited_predicate": "The sealed final bundle reports a blocked outcome that follows the frozen decision mapping, asserts no unsupported result, and represents every number and every audit verdict truthfully.",
+  "predicate_result": true,
+  "codex_final_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "codex_decision_confirmed": true,
+  "terminal_reason": "BLOCKED_CONTRACT_GAP_R8_WEAK_AXIS_POPULATION_DEFINITION",
+  "scientific_rejection": false,
+  "audit_target_path": "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json",
+  "target_count": 1,
+  "checkpoint_digest_before_audit": "cb7b82943b6a0fa0d6d7e2740088f38228ecb1912f80c79954af9d586cff6ae7",
+  "checkpoint_digest_after_audit": "cb7b82943b6a0fa0d6d7e2740088f38228ecb1912f80c79954af9d586cff6ae7",
+  "checkpoint_stable": true,
+  "manifest_member_files_verified": 9,
+  "manifest_member_hash_mismatches": 0,
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "pass_qualification": {
+    "red_path_present": true,
+    "non_empty_population": true,
+    "unambiguous_target": true,
+    "single_predicate": true,
+    "stable_checkpoint": true
+  },
+  "mapping_verification": {
+    "experiments_executed": 0,
+    "result_files_found": 0,
+    "gate_outcome_mappings_reachable": [],
+    "reason": "No G0-G4 predicate was evaluated, so no charter section 11 gate-outcome mapping is reachable; only the blocked terminal applies.",
+    "mapping_applied_correctly": true
+  },
+  "prompt13_checklist": {
+    "decision_follows_frozen_mapping": "PASS",
+    "numbers_resolve_to_machine_evidence_with_scope": "PASS",
+    "no_failed_predicate_presented_as_pass": "PASS",
+    "no_external_blocker_as_scientific_result": "PASS",
+    "no_nis_nees_or_covariance_claim": "PASS",
+    "single_mag_weak_direction_disclosed": "PASS",
+    "main_phase2_and_spikera_untouched": "PASS",
+    "artifact_index_resolves_and_populations_nonempty": "PASS"
+  },
+  "recorded_clarifications": [
+    {
+      "id": "CL-1",
+      "item": "count of unfalsifiable invariants",
+      "final_result_states": 18,
+      "verified_correct_value": 20,
+      "detail": "An additive pass found two more uncovered by any recorded mutation: FiLM feature-off exact identity (g1 = 2.0*base_g1 survives) and encoder aliasing (self.mag_encoder = self.gyro_encoder survives), appended as R12 and R13. Unapplied counterproposal is R1-R13, not R1-R11.",
+      "direction": "enlarges the blocker; never softens it",
+      "changes_decision": false
+    },
+    {
+      "id": "CL-2",
+      "item": "nature of the CF-1/CF-2 finding",
+      "detail": "FINAL_RESULT.md line 30 could be misread as an actual leak. No leak occurred: deployable namespace has no calibration/truth/oracle symbol, RuntimeSensorPacket is a closed five-field allowlist, truth/calibration/oracle containers are rejected by object identity, and normalization is train-split-only, hashed and frozen. The deficiency is falsifiability, not contamination.",
+      "changes_decision": false
+    }
+  ],
+  "claim_status": {
+    "1_math_frame_consistency": {
+      "status": "VERIFIED_CORRECT_BUT_NOT_FALSIFIABLE",
+      "detail": "derivation and code correct; left injection and both sign flips survive the suite"
+    },
+    "2_compensation_vs_residual_bias": {
+      "status": "VERIFIED_CORRECT",
+      "detail": "no double-correction; identifiability gauge-fixed after DR0 repair"
+    },
+    "3_causal_8d_branch_routing": {
+      "status": "PARTIAL",
+      "detail": "8D and branch isolation genuinely covered; feature-off identity and encoder separation not falsifiable (R12/R13)"
+    },
+    "4_no_leakage": {
+      "status": "NO_LEAK_FOUND_ENFORCEMENT_NOT_FALSIFIABLE",
+      "detail": "CF-1 and CF-2 satisfied in code; removal of the controls is not detected (R1/R2)"
+    },
+    "5_split_and_pairing": {
+      "status": "CORRECT_IN_CODE_NO_RED_PATH",
+      "detail": "disjointness, R4 test-only, per-variant realization pairing correct; disjointness guard has no genuine red path"
+    },
+    "6_G0_oracle_headroom": {
+      "status": "UNKNOWN_NOT_RUN"
+    },
+    "7_G1_learned_benefit": {
+      "status": "UNKNOWN_NOT_RUN"
+    },
+    "8_G2_feature_increment": {
+      "status": "UNKNOWN_NOT_RUN"
+    },
+    "9_G3_shuffle_falsification": {
+      "status": "DESIGN_VERIFIED_GENUINE_RED_PATH_NEVER_EXECUTED",
+      "detail": "CI(T)>0 equivalent to L>=0.5D, 0 counterexamples in 200000 trials; inert shuffle correctly fails"
+    },
+    "10_G4_and_observability": {
+      "status": "HARMLESSNESS_UNKNOWN_NOT_RUN_OBSERVABILITY_HONEST",
+      "detail": "rank([h_m]_x)=2 and weak body-frame direction disclosed; no observability or high-cost-sensor equivalence claim"
+    }
+  },
+  "verified_correct_carry_forward": [
+    "nu_m = z_tilde - h_m with H_m = [[h_m]_x, 0_3x3], matching mekf.py body_vector_jacobian",
+    "K = G1 H^T G2 at (6,3); right injection; propagation omega_tilde - b_hat_r; right-Jacobian reset",
+    "magnetometer hard-iron then inverse-soft-iron then mounting is the exact inverse of the forward model",
+    "compensation target omega_true + b_r; b_hat_r subtracted exactly once",
+    "gauge fixing: (A_g,c_g) once per regime, b_r(0)~N(0,(2e-5)^2 I), min offset 2e-4 > 5 sigma 1e-4, excitation certificate",
+    "G3 predicate CI(T)>0 equivalent to L>=0.5D, verified over 200000 trials",
+    "clustered bootstrap on trajectory_id with seed nested, closing a sqrt(3) pseudo-replication channel",
+    "G1 (b_r,theta) coupling nonzero and trainable at init",
+    "scope clean: no attention/Transformer/SNN/SoW/reliability gate/learned QR/uncertainty head/extra sensor/closed-loop/FPGA/sweep/broad comparison"
+  ],
+  "claims_that_must_never_be_made": [
+    "compensation headroom",
+    "learned correction efficacy",
+    "incremental feature value",
+    "shuffle falsification",
+    "nominal harmlessness",
+    "performance",
+    "efficiency",
+    "novelty",
+    "physical covariance",
+    "NIS/NEES",
+    "calibrated uncertainty",
+    "flight",
+    "closed-loop",
+    "energy",
+    "generality"
+  ],
+  "mandatory_disclosure": "Onboard magnetic reference differs from truth by 2.24%, a ~1.28 deg innovation-model floor applied equally to all arms; bounds absolute accuracy without biasing between-arm contrasts.",
+  "governance_findings": [
+    {
+      "id": "G-1",
+      "type": "CONCURRENT_CLAUDE_ROLE_WRITER",
+      "stages": [
+        "DR0",
+        "IMPLEMENTATION"
+      ],
+      "verdict_direction_conflict": false,
+      "both_repair_rounds_consumed_by_concurrent_writer": true,
+      "mitigated_by": [
+        "CP-11",
+        "CP-12",
+        "R12",
+        "R13"
+      ],
+      "codex_owned_artifact_altered_by_claude_role": false,
+      "sealed_digest_moved": false,
+      "frozen_boundary_violated": false,
+      "severity": "PRINCIPAL_PROCESS_DEFECT_OF_THE_RUN",
+      "required_fix_for_successor": "exactly one Claude auditor instance holds the audit-write and state-transition role"
+    },
+    {
+      "id": "G-2",
+      "type": "PROMPT05_AMENDED_OUTSIDE_ALLOWLIST",
+      "scientific_risk": "none",
+      "verified": "G0/G1/G2/G4 thresholds and all populations unchanged; only G3 rewritten to the equivalent tightening predicate; preceded any test access; disclosed not concealed",
+      "outstanding": "no authorizing control-amendment record"
+    },
+    {
+      "id": "G-3",
+      "type": "DECISION_LEDGER_INCOMPLETE",
+      "detail": "no row for DR0 repair seal, DR0 re-audit PASS, implementation seal, or finalization"
+    },
+    {
+      "id": "G-4",
+      "type": "SEALED_CLAIMS_DIGEST_STALE",
+      "detail": "state-level claims digest still resolves to the DR0 claim set"
+    }
+  ],
+  "boundary_verification": {
+    "frozen_fingerprint_files_compared": 4880,
+    "frozen_changes": 0,
+    "codex_config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d",
+    "codex_config_unchanged": true,
+    "main_phase2_untouched": true,
+    "spikera_kalmannet_untouched": true,
+    "frozen_phase0_1_untouched": true,
+    "claude_edited_implementation_or_results": false
+  },
+  "resume": {
+    "resume_command_for_this_run": null,
+    "reason": "both repair rounds consumed; R8 contract gap terminal by charter section 10; retroactive definition would be the post-hoc semantics change the freeze prevents",
+    "successor_study_requirements": [
+      "freeze exact weak-axis and observable-plane membership formula and threshold, plus metric producers for every G1/G4 sensor-level predicate",
+      "carry forward counterproposal items R1-R13, including a machine-recorded mutation matrix proving every mandatory red path goes red under its own counterexample",
+      "resolve or withdraw SC-00 nonidentity-mounting clause, currently vacuous because the generator hardcodes C_SgB = C_BSm = I",
+      "independently audit the contract before any test access, then restart the implementation cycle",
+      "assign the Claude audit-write and state-transition role to exactly one instance"
+    ],
+    "verification_commands": [
+      "python3 agent_system/side_gyro_mag_comp/scripts/validate_stage_state.py agent_system/side_gyro_mag_comp/state/STAGE_STATE.json",
+      "python3 agent_system/side_gyro_mag_comp/scripts/validate_handoff.py experiments/side_gyro_mag_comp/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json",
+      "sha256sum experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json",
+      "uv run --no-project --python 3.12 --index https://download.pytorch.org/whl/cpu --with 'numpy==2.1.3' --with 'scipy==1.14.1' --with 'torch==2.5.1' --with 'pyyaml==6.0.2' --with 'pytest==8.3.4' python3 -m pytest -q tests/side_gyro_mag_comp_v1"
+    ]
+  },
+  "gate_outcomes_asserted": null,
+  "experiments_run": 0,
+  "terminal_state": "COMPLETE_BLOCKED",
+  "next_actor": "NONE",
+  "written_at_utc": "2026-08-06T12:59:03.498900+00:00"
+}

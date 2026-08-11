@@ -1,0 +1,185 @@
+{
+  "schema_version": "side-study-claude-counterproposal-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "IMPLEMENTATION_REPAIR",
+  "round": "1 of 1",
+  "issued_by": "claude-independent",
+  "responds_to_checkpoint": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "audit": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+  "failure_class": {
+    "name": "ASSERTION_DECOUPLED_FROM_EXECUTION",
+    "statement": "Across the math, firewall, N3S and gate layers, sealed artifacts declare properties that are computed or recorded independently of the code path they claim to constrain, so the named red-path test cannot become red when the property is false. 18 independent mutations of invariants that the sealed claims assert leave all 42 tests green.",
+    "why_a_single_class": "Every instance has the same shape: a value is compared to itself, or a record is built from literals rather than from what executed, or a test re-implements the equation it is meant to check. Fixing the instances one by one without fixing the pattern would leave the next instance undetected."
+  },
+  "repair_principle": "Bind every declaration to the execution it describes, then prove each binding with a mutation that must go red. No threshold, architecture, feature dimension, split, seed, loss weight, regime, variant or gate value may change. No new model, sensor, comparison or experiment is authorized.",
+  "required_repairs": [
+    {
+      "id": "R1",
+      "title": "Observed-ID split firewall",
+      "covers": [
+        "M13",
+        "M14",
+        "CF-2"
+      ],
+      "change": "Have the epoch routine return the exact tuple of trajectory IDs it iterated. Build SplitFirewallRecord in train_variant from those returned tuples instead of the literals train_ids/val_ids, and call validate_firewall after the epochs have run.",
+      "red_path_required": "test_sc_firewall_record_matches_executed_ids_red - feeding any test-split ID to the training-loss epoch or to the early-stopping/selection epoch must raise from validate_firewall."
+    },
+    {
+      "id": "R2",
+      "title": "Enforced deployable boundary",
+      "covers": [
+        "M2b",
+        "M2c",
+        "M2d",
+        "M29",
+        "CF-1"
+      ],
+      "change": "Make the deployable namespace check unremovable in effect: record a validation token inside the object each deployable entry point returns, and reject any replay whose token is absent. Keep the existing variant guard.",
+      "red_path_required": "test_sc_deployable_validator_invoked_at_each_entry_red - deleting the check in deployable_replay, in the N3S namespace, or in the saved checkpoint payload must go red, and opening deployable_replay to N1 or C1 must go red."
+    },
+    {
+      "id": "R3",
+      "title": "Non-tautological N3S checkpoint identity",
+      "covers": [
+        "M25",
+        "M26",
+        "M27"
+      ],
+      "change": "Emit the N3S and source digests from the estimators that actually replayed (their own state_dict), not from the input checkpoint variable, and require both to equal the input checkpoint digest inside verify_n3s_bridge.",
+      "red_path_required": "test_sc_n3s_requires_identical_loaded_checkpoint_red - skipping load_state_dict on the target or the source, or perturbing one loaded parameter, must raise."
+    },
+    {
+      "id": "R4",
+      "title": "Train/eval operator equivalence",
+      "covers": [
+        "M22",
+        "M23",
+        "M24"
+      ],
+      "change": "No change to either operator. Add a single equivalence check between the differentiable training unroll and the numpy runtime replay for one trajectory under one fixed state_dict.",
+      "red_path_required": "test_sc_train_eval_operator_equivalence_red - asserting per-step agreement of attitude and bias to atol 1e-12, and going red under a propagation sign flip, a left-instead-of-right injection, or an innovation sign flip in the training unroll."
+    },
+    {
+      "id": "R5",
+      "title": "Recurrent reset per trajectory",
+      "covers": [
+        "M20",
+        "M21"
+      ],
+      "change": "None to the implementation, which is already correct.",
+      "red_path_required": "test_sc_backbone_reset_per_trajectory_red - removing the backbone reset in either the runtime or the training path must go red; assert the transition lineage is empty immediately after reset and that the first-step gain of two consecutive trajectories replayed on one estimator is identical."
+    },
+    {
+      "id": "R6",
+      "title": "Residual bias present in the packet",
+      "covers": [
+        "M19",
+        "U-5"
+      ],
+      "change": "None to the generator, which is already correct.",
+      "red_path_required": "test_sc_packet_retains_residual_bias_red - consume the generated dataset and assert per axis that the OLS slope of the deterministically de-calibrated gyro packet minus true rate, regressed on the true residual bias, lies in [0.9, 1.1]; the adversary that drops the residual bias from the packet must go red. Re-point the learned-compensator retention test at a trained checkpoint on the diagnostic split rather than a zero-initialized head."
+    },
+    {
+      "id": "R7",
+      "title": "Exact repaired G3 predicate and frozen feature dimension",
+      "covers": [
+        "M10",
+        "M17",
+        "M7"
+      ],
+      "change": "None to the values.",
+      "red_path_required": "test_sc_g3_predicate_exact_form_red - relaxing the strict lower-endpoint inequality to non-strict, or altering the 0.5/0.5 contrast weights, must go red. test_sc_feature_dim_pinned_to_contract_red - assert the literal 8 from the contract against the implementation constant and the configured feature_dim_per_sensor, so changing the constant goes red directly."
+    },
+    {
+      "id": "R8",
+      "title": "Repair the remaining vacuous assertions",
+      "covers": [
+        "U-1",
+        "U-2",
+        "U-3",
+        "U-4",
+        "U-6"
+      ],
+      "change": "Rewrite the causal-prefix test to compare a prefix-only replay against the recomputed prefix of a full-sequence replay; give the split-overlap assertion a specific match pattern and a fixture in which overlap is the only reachable failure; pass the distinct per-variant trajectory objects to the same-realization check; replace the degenerate weak-axis population counters with a frozen-threshold definition; remove the self-raised adversary from the gain-shape test and add the missing right-injection assertion.",
+      "red_path_required": "Each rewritten test must go red under the counterexample named in the audit's additional_unfalsifiable_assertions list."
+    },
+    {
+      "id": "R9",
+      "title": "Metric producers so G1 and G4 are decidable before test access",
+      "covers": [
+        "gate_decidability_finding"
+      ],
+      "change": "Implement the SC-01 secondary metrics that currently have no producer - gyro corrected-rate RMSE, gyro integrated-increment error, magnetometer corrected-vector angular error, residual gyro-bias RMSE, p95 attitude error - and the divergence flag using the already-frozen 1.0 rad threshold and the non-finite condition. Metric definitions are taken verbatim from SC-01; no new variant, regime, seed or threshold.",
+      "rationale": "The gate functions already consume these arrays and nothing produces them. Defining them now keeps them pre-registered; defining them at the experiment stage would place their definition at the moment of test access."
+    },
+    {
+      "id": "R10",
+      "title": "Correct the provenance and declaration records",
+      "covers": [
+        "G-1",
+        "G-2",
+        "G-3"
+      ],
+      "change": "Declare prompts/side_gyro_mag_comp/05_CODEX_MINIMAL_EXPERIMENT_EXECUTION.md in outside_allowlist_modified_by_this_stage and drop the unsupported orchestrator_owned framing. Correct the implementation report's control-provenance paragraph to state only what an artifact supports: the file's mtime falls inside the implementation stage window and no record of an independent amendment exists. Either restore prompt 05 to its original bytes, which is preferred because SC-01 is canonical for gates and the recorded g3_authority already resolves the conflict, or keep the amendment and record it as a ledger row with digests before and after. Backfill the decision ledger with the DR0 reseal, the DR0 re-audit PASS, and the implementation seal and transition.",
+      "note": "No Codex result file needs to be deleted; these are declaration and narrative corrections."
+    },
+    {
+      "id": "R11",
+      "title": "Machine-recorded red-path matrix",
+      "covers": [
+        "the whole class"
+      ],
+      "change": "Produce experiments/side_gyro_mag_comp/implementation/RED_PATH_MATRIX.json recording, for every claim in the Codex handoff, the mutation applied, the test that went red, and the pass/fail of the full suite before and after. It must include all 18 mutations listed as confirmed green in the audit and show each one red after repair.",
+      "rationale": "This converts 'a red path exists' from prose into machine evidence and is what makes the next audit cheap and decidable."
+    },
+    {
+      "id": "R12",
+      "title": "FiLM feature-off must be provably EXACT identity",
+      "covers": [
+        "MUT-D"
+      ],
+      "source": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT_ADDENDUM.md",
+      "change": "None to the implementation, which is already correct (model.py bypass 'g1, g2 = base_g1, base_g2').",
+      "finding": "test_sc_film_feature_off_exact_equivalence_red compares two FEATURE-OFF runs, so it proves feature-independence only, never gamma=1/beta=0. Independently verified: mutating the bypass to 'g1 = 2.0 * base_g1' leaves the full suite at 42 passed. The existing mutation set only varied FEATURE_DIM, which is a different failure class.",
+      "red_path_required": "test_sc_film_feature_off_exact_equivalence_red must additionally run the backbone with feature_enabled=True on zeroed FiLM weights and biases and assert torch.equal(off.G1, on_zero.G1) and torch.equal(off.G2, on_zero.G2). Scaling or offsetting the feature-off bypass must go red.",
+      "scope_preservation": "Test-only. No threshold, architecture, feature dimension, conditioning mechanism, split, seed or endpoint change."
+    },
+    {
+      "id": "R13",
+      "title": "Gyro and magnetometer encoders must be provably SEPARATE",
+      "covers": [
+        "MUT-E"
+      ],
+      "source": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT_ADDENDUM.md",
+      "change": "None to the implementation, which already constructs two distinct encoders.",
+      "finding": "Sealed claim IMPL-C5 asserts separate causal gyro and mag encoders, and SC-00 requires two per-sensor encoders. Independently verified: aliasing 'self.mag_encoder = self.gyro_encoder' leaves the full suite at 42 passed, so a single shared encoder would satisfy every existing test while collapsing the branch-specific design. No mutation covering this was recorded in the round-1 evidence.",
+      "red_path_required": "A red path must assert the two encoders are distinct module instances with disjoint parameter storage AND that they produce different outputs for the same input after training; aliasing them must go red.",
+      "scope_preservation": "Test-only. No threshold, architecture, feature dimension, conditioning mechanism, split, seed or endpoint change."
+    }
+  ],
+  "explicitly_not_authorized": [
+    "any change to a gate threshold, contrast weight, seed, split size, population, learning rate, epoch count, loss weight, feature dimension, or architecture width",
+    "any new variant, regime, sensor, comparison, ablation, or rescue experiment",
+    "attention, Transformer, SNN, SoW, reliability gating, learned Q/R, uncertainty heads, extra runtime sensors, closed-loop or FPGA work",
+    "executing the full pilot; this stage remains unit tests and tiny smoke only",
+    "weakening any existing passing red path to accommodate a new one"
+  ],
+  "optional_alternative_for_R6_and_mounting": {
+    "context": "C_SgB and C_BSm are pinned to identity and never applied by the forward generator, so SC-00's sensor-to-body mounting statements are vacuously satisfied and corrected_B labels a sensor-frame vector.",
+    "smaller_option": "Restate SC-00 to declare identity mounting a frozen pilot invariant with no mounting-frame claim supported, consistent with the existing identity_mounting_pilot_invariant flag, and drop the dead fields.",
+    "larger_option": "Implement the deployable mounting transform and add a transposed-mounting red test.",
+    "auditor_preference": "The smaller option. Implementing a mounting transform expands scope without changing any of G0-G4."
+  },
+  "acceptance_criteria": [
+    "All 18 mutations recorded as confirmed green in the audit go red, evidenced by RED_PATH_MATRIX.json.",
+    "CF-1 and CF-2 are both satisfied in the full sense: constraint holds and the named test becomes red on violation.",
+    "G1 and G4 are decidable by the sealed code without further metric definition.",
+    "No frozen value changed; the reuse pins, .codex/config.toml, frozen Phase 0-1, main Phase 2 and SpikeRA-KalmanNet boundaries remain byte-identical.",
+    "The tiny smoke still reproduces bit-exactly from a clean checkout.",
+    "Declaration artifacts state only what an artifact supports."
+  ],
+  "consequence_if_unmet": "A second failed implementation audit closes the study with a final blocked result under the charter's one-repair-round rule. No advance to ORACLE_HEADROOM occurs.",
+  "next_actor": "CODEX",
+  "addendum_note": "R12 and R13 were appended by an additive independent audit pass recorded in experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT_ADDENDUM.md/.json. Both are instances of the same ASSERTION_DECOUPLED_FROM_EXECUTION class but were NOT covered by R1-R11 or by the round-1 mutation evidence. Because IMPLEMENTATION has consumed its only repair round, the repair must cover R1-R13 together; a gap left here cannot be repaired later and would close the study as COMPLETE_BLOCKED.",
+  "addendum_written_at_utc": "2026-08-06T12:44:15.408160+00:00"
+}

@@ -1,0 +1,334 @@
+{
+  "schema_version": "side-study-claude-red-path-evidence-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage_audited": "IMPLEMENTATION",
+  "checkpoint_digest": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "method": "Mutations applied to an isolated /tmp copy of the sealed sources. The repository was never modified. Each mutation ran the full suite against a verified green 42-test baseline. went_red=false means the invariant asserted by a sealed claim is not protected by any red path.",
+  "command": "uv run --no-project --python 3.12 --index https://download.pytorch.org/whl/cpu --with 'numpy==2.1.3' --with 'scipy==1.14.1' --with 'torch==2.5.1' --with 'pyyaml==6.0.2' --with 'pytest==8.3.4' python3 -m pytest -q -s tests/side_gyro_mag_comp_v1",
+  "batteries": {
+    "battery1_targeted": {
+      "note": "Per-mutation green baseline verified (baseline_exit=0 for every entry). An earlier run of this battery without -s was discarded because a pytest capture teardown error confounded the exit codes.",
+      "baselines_verified": true,
+      "data": [
+        {
+          "mutation": "M1_CF1_forbidden_symbols_disabled",
+          "named_tests": [
+            "test_sc_deployable_namespace_leakage_rejected_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 0,
+          "went_red": false,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M2_CF1_strip_runtime_validator_removed",
+          "named_tests": [
+            "test_sc_runtime_packet_allowlist_recursive_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 0,
+          "went_red": false,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M3_CF2_normalization_includes_test_ids",
+          "named_tests": [
+            "test_sc_pairing_split_firewall_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M4_CF2_firewall_equality_to_subset",
+          "named_tests": [
+            "test_sc_split_firewall_requires_exact_nonempty_unique_source_sets_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M4b_CF2_firewall_allows_empty",
+          "named_tests": [
+            "test_sc_split_firewall_requires_exact_nonempty_unique_source_sets_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M5_N3S_derangement_to_identity",
+          "named_tests": [
+            "test_sc_n3s_single_intervention_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M6_N3S_lineage_digest_constant",
+          "named_tests": [
+            "test_sc_recurrent_lineage_hashes_same_owner_length_different_hidden_bytes_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M7_FEATURE_DIM_8_to_6",
+          "named_tests": [
+            "test_sc_feature_dim_exactly_eight_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 0,
+          "went_red": false,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M8_GAIN_SHAPE_6x3_to_3x6",
+          "named_tests": [
+            "test_sc_split_gain_shape_and_right_injection_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        },
+        {
+          "mutation": "M9_causal_future_guard_removed",
+          "named_tests": [
+            "test_sc_future_sample_injection_rejection_red"
+          ],
+          "baseline_exit": 0,
+          "baseline_tail": "WARN `--no-project` was provided, but no project was found",
+          "exit_code": 1,
+          "went_red": true,
+          "pytest_tail": "WARN `--no-project` was provided, but no project was found"
+        }
+      ]
+    },
+    "MUTATION_RESULTS2.json": [
+      {
+        "baseline_exit": 0,
+        "baseline_summary": "42 passed in 3.04s"
+      },
+      {
+        "mutation": "M1b_forbidden_token_fully_disabled",
+        "exit_code": 1,
+        "went_red": true,
+        "summary": "2 failed, 40 passed in 2.71s",
+        "failing_tests": [
+          "test_sc_deployable_namespace_leakage_rejected_red",
+          "test_sc_runtime_packet_allowlist_recursive_red"
+        ]
+      },
+      {
+        "mutation": "M2b_deployable_replay_validator_removed",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.94s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M2c_n3s_validator_removed",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.75s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M2d_train_checkpoint_validator_removed",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.37s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M7b_FEATURE_DIM_8_to_6_FULLSUITE",
+        "exit_code": 1,
+        "went_red": true,
+        "summary": "4 failed, 38 passed in 2.35s",
+        "failing_tests": [
+          "test_sc_split_gain_shape_and_right_injection_red",
+          "test_sc_film_feature_off_exact_equivalence_red",
+          "test_sc_film_branch_isolation_red",
+          "test_sc_g1_bias_attitude_coupling_red"
+        ]
+      },
+      {
+        "mutation": "M10_g3_lower_bound_to_ge_zero",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.29s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M11_g4_threshold_3pct_to_10pct",
+        "exit_code": 1,
+        "went_red": true,
+        "summary": "1 failed, 41 passed in 2.44s",
+        "failing_tests": [
+          "test_sc_g0_g1_g2_g4_boundary_arithmetic_red"
+        ]
+      },
+      {
+        "mutation": "M12_g0_selection_uses_train_not_val",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.29s",
+        "failing_tests": []
+      }
+    ],
+    "MUTATION_RESULTS3.json": [
+      {
+        "baseline_exit": 0,
+        "baseline_summary": "42 passed in 2.98s"
+      },
+      {
+        "mutation": "M13_selection_epoch_uses_TEST_split",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.70s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M14_training_loss_uses_TEST_split",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.46s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M15_normalization_from_TEST_split",
+        "exit_code": 1,
+        "went_red": true,
+        "summary": "3 failed, 39 passed in 0.11s",
+        "failing_tests": [
+          "test_sc_pairing_split_firewall_red",
+          "test_sc_n3s_single_intervention_red",
+          "test_sc_actual_weak_and_observable_metrics_nonempty_red"
+        ]
+      },
+      {
+        "mutation": "M16_g3_uses_upper_instead_of_lower",
+        "exit_code": 1,
+        "went_red": true,
+        "summary": "1 failed, 41 passed in 2.30s",
+        "failing_tests": [
+          "test_sc_g3_repaired_sc01_predicate_boundary_red"
+        ]
+      },
+      {
+        "mutation": "M17_g3_contrast_weights_changed",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.57s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M18_g0_threshold_10pct_to_2pct",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.78s",
+        "failing_tests": []
+      }
+    ],
+    "MUTATION_RESULTS4.json": [
+      {
+        "baseline_exit": 0,
+        "baseline_summary": "42 passed in 2.50s"
+      },
+      {
+        "mutation": "M19_residual_bias_removed_from_packet",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 3.98s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M20_backbone_reset_removed_runtime",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 3.08s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M21_backbone_reset_removed_training",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.55s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M22_torch_unroll_propagation_sign_flip",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 4.45s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M23_torch_unroll_left_injection",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.23s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M24_torch_unroll_innovation_sign",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.11s",
+        "failing_tests": []
+      }
+    ],
+    "MUTATION_RESULTS5.json": [
+      {
+        "baseline_exit": 0,
+        "baseline_summary": "42 passed in 2.31s"
+      },
+      {
+        "mutation": "M25_n3s_target_does_not_load_n3_checkpoint",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.40s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M26_n3s_source_does_not_load_n3_checkpoint",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.20s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M27_n3s_declared_digest_falsified",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.18s",
+        "failing_tests": []
+      },
+      {
+        "mutation": "M29_deployable_replay_accepts_N1_C1",
+        "exit_code": 0,
+        "went_red": false,
+        "summary": "42 passed in 2.29s",
+        "failing_tests": []
+      }
+    ]
+  }
+}

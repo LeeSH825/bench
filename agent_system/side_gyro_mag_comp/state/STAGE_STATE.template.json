@@ -1,0 +1,47 @@
+{
+  "schema_version": "side-study-autonomous-stage-state-v2",
+  "study_id": "side-gyro-mag-comp-v1",
+  "automation_mode": "AUTONOMOUS_UNTIL_FINAL",
+  "human_review_mode": "FINAL_ONLY",
+  "current_stage": "DR0_DESIGN_REVIEW",
+  "stage_status": "READY",
+  "source_commit": "",
+  "sealed_checkpoint": "",
+  "active_prompt": "prompts/side_gyro_mag_comp/10_CODEX_AUTONOMOUS_PRIMARY.md",
+  "codex_handoff": null,
+  "claude_audit": null,
+  "repair_round_by_stage": {},
+  "next_actor": "CODEX",
+  "next_allowed_stage": "DR0_INDEPENDENT_AUDIT",
+  "method_decision": "UNDECIDED",
+  "terminal_reason": null,
+  "final_result_paths": {
+    "result_md": "experiments/side_gyro_mag_comp/final/FINAL_RESULT.md",
+    "decision_json": "experiments/side_gyro_mag_comp/final/FINAL_DECISION.json",
+    "audit_json": "experiments/side_gyro_mag_comp/final/FINAL_AUDIT.json"
+  },
+  "frozen_scope": {
+    "runtime_sensors": [
+      "gyro",
+      "magnetometer"
+    ],
+    "feature_dim_per_sensor": 8,
+    "conditioning": "branch_specific_film",
+    "excluded": [
+      "SNN",
+      "SoW",
+      "reliability_gate",
+      "attention",
+      "Transformer",
+      "learned_QR",
+      "uncertainty_head",
+      "temperature",
+      "outliers",
+      "extra_runtime_sensors",
+      "closed_loop",
+      "FPGA",
+      "broad_sweeps"
+    ]
+  },
+  "updated_at_utc": ""
+}

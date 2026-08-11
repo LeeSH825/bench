@@ -1,0 +1,66 @@
+schema_version: side-gyro-mag-comp-config-v1
+study_id: side-gyro-mag-comp-v1
+data:
+  namespace: side-gyro-mag-comp-data-v1
+  generation_seed: 271828
+  split_seed: 314159
+  dt_s: 0.1
+  sequence_length: 16
+  smoke_population_per_regime: {train: 4, validation: 2, test: 4}
+  method_lock_population_per_regime: {train: 40, validation: 10, test: 30}
+  training_regimes: [R0, R1, R2, R3]
+  test_regimes: [R0, R1, R2, R3, R4]
+  identity_mounting_pilot_invariant: true
+  normalization_source: R0-R3_training_split_only
+model:
+  dtype: float64
+  smoke_device: cpu
+  pilot_device: cuda_if_available
+  sensor_input_dim: 5
+  encoder_hidden_dim: 16
+  feature_dim_per_sensor: 8
+  split_prior_hidden_dim: 32
+  split_measurement_hidden_dim: 32
+  g1_head_dim: 36
+  g2_head_dim: 9
+  film_g1_head_dim: 72
+  film_g2_head_dim: 18
+  conditioning: branch_specific_film
+  gain_shape: [6, 3]
+training:
+  seeds: [31001, 31002, 31003]
+  optimizer: Adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  batch_trajectories: 8
+  max_epochs: 20
+  smoke_epochs: 2
+  early_stopping_patience: 4
+  checkpoint_rule: earliest_epoch_attaining_minimum_R0_R3_validation_attitude_rmse
+  gradient_clip_norm: 1.0
+  loss_weights:
+    corrected_gyro: 1.0
+    corrected_magnetometer: 1.0
+    downstream_attitude: 1.0
+    residual_bias: 0.25
+evaluation:
+  bootstrap_resamples: 10000
+  bootstrap_seed: 45173
+  divergence_threshold_rad: 1.0
+  n3s: fixed_whole_sequence_derangement_per_regime_and_training_seed
+  onboard_magnetic_reference: [0.31, -0.18, 0.933]
+gates:
+  canonical_precedence: docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md
+  prompt05_g3_status: superseded_by_repaired_audited_SC_01_only
+  contrast_order: candidate_minus_reference
+  G0: {regime: R3, candidate: N1, reference: N0, minimum_fractional_reduction: 0.10, ci_upper_strictly_below: 0.0}
+  G1: {regime: R4, candidate: N2, reference: N0, minimum_fractional_reduction: 0.05, ci_upper_strictly_below: 0.0, seed_direction_count: 2, gyro_regime: R1, mag_regime: R2}
+  G2: {regime: R4, candidate: N3, reference: N2, minimum_fractional_reduction: 0.05, ci_upper_strictly_below: 0.0, seed_direction_count: 2}
+  G3:
+    regime: R4
+    contrast: N3S-0.5*N2-0.5*N3
+    pass: paired_bootstrap_ci_lower_strictly_above_zero
+    crossing_zero: INCONCLUSIVE_UNDERPOWERED
+    old_disjunct_allowed: false
+  G4: {regime: R0, candidate: N3, reference: N0, maximum_fractional_penalty: 0.03, added_divergence_allowed: 0}
+exclusions: [SNN, SoW, attention, Transformer, learned_QR, uncertainty_head, extra_runtime_sensor]

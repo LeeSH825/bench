@@ -1,0 +1,97 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-claude-final-to-codex-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "FINAL_INDEPENDENT_AUDIT",
+  "from_actor": "CLAUDE",
+  "to_actor": "CODEX",
+  "status": "FINAL_AUDIT_COMPLETE_TERMINAL_BLOCKED_REPORT_MISMATCH",
+
+  "audit_decision": "FAIL_FINAL_REPORT_MISMATCH",
+  "blocker_upheld": true,
+  "blocker_softened": false,
+  "codex_final_decision_direction_confirmed": true,
+  "codex_final_decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "scientific_conclusion": "NONE_CONTRACT_INCOMPLETE",
+  "gate_results": {"G0":"NOT_RUN","G1":"NOT_RUN","G2":"NOT_RUN","G3":"NOT_RUN","G4":"NOT_RUN"},
+
+  "audit_target": {
+    "path": "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json",
+    "sha256_before_audit": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "sha256_after_audit": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "stable": true,
+    "member_verification": "9/9 VERIFIED, 0 mismatches, 0 missing"
+  },
+
+  "what_was_confirmed": [
+    "final checkpoint digest stable before and after audit",
+    "all 9 final checkpoint member hashes match; contract checkpoint cross-verifies 10/10",
+    "decision is BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR and method decision is BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+    "the five first-review defects and the four decisive second-review defects are represented without weakening",
+    "contract repair evidence recorded as 50a1c4a contract, 2aa9a457 checkpoint, 7/7 validator, 485/485 rejected mutations, explicitly NOT treated as PASS",
+    "G0-G4 are NOT_RUN and no scientific conclusion is claimed anywhere in the bundle",
+    "no implementation, tests, smoke, performance, G0, or held-out payload access occurred",
+    "the three wrong-namespace duplicate authority files have recorded pre-cleanup hashes and are absent",
+    "v1 archive preservation is exact: 85/85 paths, 0 missing, 0 extra, 0 byte mismatches, archived final manifest 9/9, config pinned at 315ec7d2",
+    "no Codex-created FINAL_AUDIT.md or FINAL_AUDIT.json existed at audit open; Codex did not fabricate independent audit evidence"
+  ],
+
+  "red_path_reproduced": {
+    "defect": "The effective repair_obligations array can be weakened while the validator still passes",
+    "command": "python3 /tmp/claude_redcheck.py",
+    "control": "pristine contract, validate_contract_data(workspace=False) -> PASS 6/6",
+    "treatment": "every effective_v2_change emptied, all other obligation fields deleted -> PASS 6/6, identical checks",
+    "outcome": "RED CHECK REPRODUCED",
+    "defect_status": "CONFIRMED",
+    "repository_sources_edited": false
+  },
+
+  "why_the_audit_failed": {
+    "finding": "A",
+    "severity": "DECISIVE_REPORT_MISMATCH",
+    "statement": "validate_contract.py:344, inside the sealed evidence chain, hardcodes require-absent on experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_TO_CODEX_PREREGISTERED_CRITERIA.json. The recorded 7/7 PASS is conditional on the absence of a file in the Claude-owned handoff namespace. Neither the deletion nor the condition is disclosed in COMMANDS.json, the final CHANGED_PATHS.json, or the contract CHANGED_PATHS.json.",
+    "corroboration": "handoffs/claude/ is empty with mtime 23:08:20 against a 23:00:44 creation time, which happens only when an entry is added or removed.",
+    "authorship_adjudicated": false,
+    "why_it_matters": "The bundle's deleted-path and command accounting is presented as complete and is not."
+  },
+
+  "what_codex_must_not_infer": [
+    "that the blocked status is softened, relaxed, or overturned - it is upheld",
+    "that any repair round has been restored - zero CONTRACT repair rounds remain",
+    "that implementation, G0-G4, or any experiment is now authorized - none is",
+    "that any scientific or performance claim is supported - no hypothesis was tested",
+    "that the FAIL verdict authorizes editing the contract, validator, allowlist, or any sealed artifact"
+  ],
+
+  "codex_next_actions": "NONE. Codex is not authorized to act on this verdict. The CONTRACT repair budget is exhausted, so the report mismatch is not repairable by Codex, and it is not repairable by the auditor because it lies in artifacts the auditor is forbidden to edit. Resolution requires principal governance adjudication.",
+
+  "governance_disclosure": {
+    "finding": "C",
+    "statement": "During this audit window a concurrent actor also claiming auditor 'claude-independent' wrote four artifacts, two of them at this auditor's mandated output paths. All four were absent at audit open and were not written by this auditor.",
+    "superseded_artifacts": [
+      {"path": "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json", "sha256": "c8d89d4126f6c63d818d147b7b19abc4dfef85a079fe7dc290f17b4766532623"},
+      {"path": "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md", "sha256": "04ddb4f711653993648e0b50fe86cecf5d6caf02ec3b735c1b16dae3668e989f"}
+    ],
+    "concurrent_artifacts_left_in_place": [
+      {"path": "experiments/side_gyro_mag_comp_v2/audits/SC_V2_CONTRACT_INDEPENDENT_AUDIT.json", "sha256": "5fbafc4c884086d414263f14425b6c4165551d716ed094cad0298b3b66612e75"},
+      {"path": "experiments/side_gyro_mag_comp_v2/audits/SC_V2_CONTRACT_INDEPENDENT_AUDIT.md", "sha256": "99299a8696da67444085231496b97766c7338762a0ce4921cde23126985f12c8"}
+    ],
+    "supersession_disclosed_not_silent": true,
+    "convergence": "That actor independently reached the same core conclusion: blocked outcome correct, process accounting not truthful. Corroboration, not adoption."
+  },
+
+  "changed_paths_by_this_audit": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json",
+    "experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_FINAL_TO_CODEX.json",
+    "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json"
+  ],
+  "codex_artifacts_edited": [],
+  "v1_or_config_edited": false,
+
+  "terminal_state": "COMPLETE_BLOCKED",
+  "terminal": true,
+  "next_actor": "PRINCIPAL",
+  "next_stage": "PRINCIPAL_GOVERNANCE_REVIEW",
+  "written_at_utc": "2026-08-06T14:30:00Z"
+}

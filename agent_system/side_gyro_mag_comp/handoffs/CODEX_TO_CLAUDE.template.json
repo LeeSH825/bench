@@ -1,0 +1,15 @@
+{
+  "schema_version": "side-study-codex-handoff-v2",
+  "status": "SEALED_FOR_AUDIT",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "",
+  "checkpoint_digest": "",
+  "audit_target_paths": [
+    ""
+  ],
+  "target_count": 1,
+  "claims": [],
+  "commands": [],
+  "machine_artifacts": [],
+  "next_actor": "CLAUDE"
+}

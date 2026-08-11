@@ -1,0 +1,84 @@
+{
+  "schema_version": "side-study-final-decision-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "terminal_reason": "BLOCKED_CONTRACT_GAP_R8_WEAK_AXIS_POPULATION_DEFINITION",
+  "decision_class": "TERMINAL_BLOCKED_PRE_EXPERIMENT",
+  "scientific_rejection": false,
+  "performance_claim": false,
+  "physical_covariance_claim": false,
+  "implementation_advance_authorized": false,
+  "experiment_execution_authorized": false,
+  "decisive_predicate": "The only implementation repair counterproposal requires a frozen-threshold weak/observable population definition, but no exact threshold or membership formula exists in any canonical or independently authorized artifact; inventing one would change evaluation semantics after DR0 freeze.",
+  "decisive_evidence": [
+    "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+    "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+    "experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json",
+    "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+    "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+    "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json"
+  ],
+  "audit_history": {
+    "dr0": "PASS_DR0_AUTONOMOUS_ADVANCE_AFTER_ONE_REPAIR",
+    "implementation": "FAIL_RED_PATH",
+    "implementation_repair_rounds_consumed": 1,
+    "implementation_repair_outcome": "BLOCKED_CONTRACT_GAP_BEFORE_EDITS",
+    "implementation_reaudit": "NOT_RUN_BECAUSE_MANDATORY_REPAIR_CONTRACT_IS_INCOMPLETE"
+  },
+  "gates": {
+    "G0": {"status": "NOT_RUN", "conclusion": "UNKNOWN"},
+    "G1": {"status": "NOT_RUN", "conclusion": "UNKNOWN"},
+    "G2": {"status": "NOT_RUN", "conclusion": "UNKNOWN"},
+    "G3": {"status": "NOT_RUN", "conclusion": "UNKNOWN"},
+    "G4": {"status": "NOT_RUN", "conclusion": "UNKNOWN"}
+  },
+  "axes": {
+    "mathematical_validity": "UNKNOWN",
+    "code_and_information_boundary": "FAIL",
+    "statistical_evidence": "UNKNOWN",
+    "scope_proportionality": "PASS",
+    "governance_and_integrity": "FAIL"
+  },
+  "completed_scope": {
+    "sealed_implementation_checkpoint": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+    "recorded_unit_tests": {"passed": 42, "failed": 0},
+    "tiny_smoke": {
+      "performance_evidence": false,
+      "records": 140,
+      "variants": ["C0", "C1", "N0", "N1", "N2", "N3", "N3S"],
+      "test_trajectories": 20,
+      "trajectories_per_regime": 4,
+      "regimes": ["R0", "R1", "R2", "R3", "R4"],
+      "training_seed": 31001,
+      "window": "whole_trajectory",
+      "metric": "attitude_geodesic_rmse_rad",
+      "n3s_bridge_records": 20
+    }
+  },
+  "method_lock_scope_not_run": {
+    "train_trajectories_per_regime": 40,
+    "validation_trajectories_per_regime": 10,
+    "test_trajectories_per_regime": 30,
+    "training_seeds": [31001, 31002, 31003],
+    "paired_bootstrap_resamples": 10000,
+    "paired_bootstrap_seed": 45173
+  },
+  "unsupported_conclusions": [
+    "compensation headroom",
+    "learned correction efficacy",
+    "incremental value of compensation features",
+    "feature-association shuffle falsification",
+    "nominal harmlessness",
+    "physical covariance or calibrated uncertainty",
+    "flight, closed-loop, energy, or broad generality"
+  ],
+  "minimum_next_action": "Start a newly authorized study whose pre-test canonical contract freezes and independently audits the exact weak-axis and observable-plane membership formula and threshold before implementation or test access; do not retroactively resume this consumed repair round.",
+  "external_resume_command": null,
+  "preserved_boundaries": {
+    "main_phase2": true,
+    "spikera_kalmannet": true,
+    "frozen_phase0_1": true,
+    "codex_config_toml": true
+  },
+  "written_at_utc": "2026-08-06T13:12:00+00:00"
+}
