@@ -476,9 +476,10 @@ def export_kalmannet_tsp_replay_package(
             KALMANNET_SYSTEM_MODEL_SCHEMA_VERSION
         )
         contract["warnings"] = list(contract["warnings"]) + [
-            "Package structure is validated, but KalmanNet_TSP replay "
-            "support remains disabled until a matching trained 9x6 "
-            "checkpoint is exercised by a registered real adapter."
+            "The KalmanNet_TSP adapter is structurally registered, but "
+            "checkpoint/runtime compatibility remains unverified until this "
+            "exact trained 9x6 package is exercised through the real "
+            "upstream-backed adapter."
         ]
         contract["notes"] = (
             "Phase 6F 9x6 ADCS KalmanNet_TSP replay package. Structural "

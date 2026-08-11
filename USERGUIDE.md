@@ -361,6 +361,10 @@
 
   ### 9.1 Smoke tests
 
+  CI keeps the historical manual harness and runs the bounded 26-file ADCS replay/Vizard pytest manifest separately:
+
+  .venv/bin/python -m bench.tests.adcs_replay_ci
+
   BENCH_DATA_CACHE=/tmp/bench_data_cache_userguide .venv/bin/python -m bench.tasks.smoke_data --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --task C_shift_plan_matrix_smoke_v0 --seed 0
 
   BENCH_DATA_CACHE=/tmp/bench_data_cache_userguide .venv/bin/python -m bench.runners.smoke_run --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --task-id C_shift_plan_matrix_smoke_v0 --model-id

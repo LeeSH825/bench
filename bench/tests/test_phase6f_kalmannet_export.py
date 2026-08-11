@@ -150,6 +150,13 @@ class Phase6FKalmanNetExportTests(unittest.TestCase):
         self.assertFalse(contract["requires_normalization"])
         self.assertFalse(contract["checkpoint_compatibility_verified"])
         self.assertTrue(contract["smoke_training"])
+        warning_text = " ".join(str(item) for item in contract["warnings"])
+        self.assertIn("adapter is structurally registered", warning_text)
+        self.assertIn(
+            "checkpoint/runtime compatibility remains unverified",
+            warning_text,
+        )
+        self.assertNotIn("support remains disabled", warning_text)
 
         probe = probe_checkpoint_contract(
             package,
