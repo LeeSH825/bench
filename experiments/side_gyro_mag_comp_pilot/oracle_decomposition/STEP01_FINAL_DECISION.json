@@ -1,0 +1,233 @@
+{
+  "decision": "MAG_DOMINANT_HEADROOM",
+  "fixed_n0_intervention_provenance": "exact_committed_N0_checkpoint_per_seed",
+  "n1_provenance": "separately_trained_oracle_input_checkpoints",
+  "r3_attitude_effects": {
+    "classical_mekf": {
+      "E_G": {
+        "mean": 0.0002566370318784113,
+        "paired_bootstrap_95_ci": [
+          3.047064895219002e-05,
+          0.00048457237690941265
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true
+      },
+      "E_GM": {
+        "mean": 0.04409968246442394,
+        "paired_bootstrap_95_ci": [
+          0.039300730269513036,
+          0.04895726647638884
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true
+      },
+      "E_G_minus_E_M": {
+        "mean": -0.04367445708839135,
+        "paired_bootstrap_95_ci": [
+          -0.048641647327152406,
+          -0.038744327245156765
+        ],
+        "resolved_negative": true,
+        "resolved_positive": false
+      },
+      "E_M": {
+        "mean": 0.04393109412026977,
+        "paired_bootstrap_95_ci": [
+          0.03909500017701629,
+          0.04881873478730504
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true
+      },
+      "E_M_minus_E_G": {
+        "mean": 0.04367445708839135,
+        "paired_bootstrap_95_ci": [
+          0.038744327245156765,
+          0.048641647327152406
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true
+      },
+      "combined_oracle_mean": 0.062410845029067526,
+      "gyro_oracle_mean": 0.10625389046161304,
+      "interaction_I": {
+        "mean": -8.804868772424243e-05,
+        "paired_bootstrap_95_ci": [
+          -0.00023511947837366433,
+          5.2143853861764116e-05
+        ],
+        "resolved_negative": false,
+        "resolved_positive": false
+      },
+      "mag_oracle_mean": 0.06257943337322171,
+      "raw_mean": 0.10651052749349146
+    },
+    "fixed_n0_split_knet": {
+      "E_G": {
+        "mean": 0.00020270477448974507,
+        "paired_bootstrap_95_ci": [
+          -8.911456788238887e-06,
+          0.0004151219375626091
+        ],
+        "resolved_negative": false,
+        "resolved_positive": false,
+        "seed_directions": [
+          {
+            "direction": "positive",
+            "mean": 0.000187199013891967,
+            "seed": 31001
+          },
+          {
+            "direction": "positive",
+            "mean": 0.00023394546179972907,
+            "seed": 31002
+          },
+          {
+            "direction": "positive",
+            "mean": 0.00018696984777753916,
+            "seed": 31003
+          }
+        ]
+      },
+      "E_GM": {
+        "mean": 0.011506370154402968,
+        "paired_bootstrap_95_ci": [
+          0.005853377520413604,
+          0.016809099915646313
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true,
+        "seed_directions": [
+          {
+            "direction": "positive",
+            "mean": 0.010864930770276681,
+            "seed": 31001
+          },
+          {
+            "direction": "positive",
+            "mean": 0.01292023701433665,
+            "seed": 31002
+          },
+          {
+            "direction": "positive",
+            "mean": 0.010733942678595572,
+            "seed": 31003
+          }
+        ]
+      },
+      "E_G_minus_E_M": {
+        "mean": -0.011210055026747075,
+        "paired_bootstrap_95_ci": [
+          -0.0165578561995337,
+          -0.005515029840224723
+        ],
+        "resolved_negative": true,
+        "resolved_positive": false,
+        "seed_directions": [
+          {
+            "direction": "negative",
+            "mean": -0.010586847011723717,
+            "seed": 31001
+          },
+          {
+            "direction": "negative",
+            "mean": -0.012585224442603349,
+            "seed": 31002
+          },
+          {
+            "direction": "negative",
+            "mean": -0.01045809362591415,
+            "seed": 31003
+          }
+        ]
+      },
+      "E_M": {
+        "mean": 0.011412759801236818,
+        "paired_bootstrap_95_ci": [
+          0.005766307156937285,
+          0.016732819248509355
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true,
+        "seed_directions": [
+          {
+            "direction": "positive",
+            "mean": 0.010774046025615689,
+            "seed": 31001
+          },
+          {
+            "direction": "positive",
+            "mean": 0.012819169904403073,
+            "seed": 31002
+          },
+          {
+            "direction": "positive",
+            "mean": 0.010645063473691688,
+            "seed": 31003
+          }
+        ]
+      },
+      "E_M_minus_E_G": {
+        "mean": 0.011210055026747075,
+        "paired_bootstrap_95_ci": [
+          0.005515029840224723,
+          0.016557856199533698
+        ],
+        "resolved_negative": false,
+        "resolved_positive": true,
+        "seed_directions": [
+          {
+            "direction": "positive",
+            "mean": 0.010586847011723717,
+            "seed": 31001
+          },
+          {
+            "direction": "positive",
+            "mean": 0.012585224442603349,
+            "seed": 31002
+          },
+          {
+            "direction": "positive",
+            "mean": 0.01045809362591415,
+            "seed": 31003
+          }
+        ]
+      },
+      "combined_oracle_mean": 0.06810113421420054,
+      "gyro_oracle_mean": 0.07940479959411376,
+      "interaction_I": {
+        "mean": -0.00010909442132359448,
+        "paired_bootstrap_95_ci": [
+          -0.00018037988444535426,
+          -4.2172652565313745e-05
+        ],
+        "resolved_negative": true,
+        "resolved_positive": false,
+        "seed_directions": [
+          {
+            "direction": "negative",
+            "mean": -9.631426923097051e-05,
+            "seed": 31001
+          },
+          {
+            "direction": "negative",
+            "mean": -0.00013287835186615466,
+            "seed": 31002
+          },
+          {
+            "direction": "negative",
+            "mean": -9.809064287365828e-05,
+            "seed": 31003
+          }
+        ]
+      },
+      "mag_oracle_mean": 0.0681947445673667,
+      "raw_mean": 0.07960750436860352
+    }
+  },
+  "schema_version": "oracle-decomposition-step01-final-decision-v1",
+  "step0_verdict": "PASS",
+  "step1_verdict": "COMPLETE",
+  "step2_authorized": false
+}

@@ -1,0 +1,117 @@
+{
+  "schema_version": "side-study-claude-to-codex-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "IMPLEMENTATION_AUDIT",
+  "status": "AUDIT_COMPLETE_REPAIR_REQUIRED",
+  "decision": "FAIL_RED_PATH",
+  "repairable": true,
+  "implementation_authorized": false,
+  "advance_to_oracle_headroom_authorized": false,
+  "audited_checkpoint_digest": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "checkpoint_stable_during_audit": true,
+  "claude_audit_md": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.md",
+  "claude_audit_json": "experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json",
+  "counterproposal": "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+  "prior_round_records": {
+    "dr0_reaudit_json": "experiments/side_gyro_mag_comp/audits/SC_DR0_REAUDIT.json",
+    "dr0_round1_counterproposal": "experiments/side_gyro_mag_comp/audits/SC_DR0_ROUND1_COUNTERPROPOSAL.json"
+  },
+  "next_actor": "CODEX",
+  "next_stage": "IMPLEMENTATION_REPAIR",
+  "re_audit_stage": "IMPLEMENTATION_AUDIT",
+  "implementation_repair_rounds_remaining_after_this": 0,
+
+  "audit_method": "24 mutations applied to an isolated /tmp copy of the sealed sources against a verified green 42-test baseline. The repository was not modified. 11 mutations went red as claimed; 18 invariants that the sealed claims assert left the suite fully green.",
+
+  "failure_class": "ASSERTION_DECOUPLED_FROM_EXECUTION - declarations are computed or recorded independently of the code path they claim to constrain, so the named red-path test cannot become red when the property is false.",
+
+  "blocking_findings": [
+    {
+      "id": "F-1",
+      "carry_forward": "CF-2",
+      "status": "NOT_SATISFIED",
+      "finding": "SplitFirewallRecord is built from the literals train_ids/val_ids rather than from the IDs the epochs actually consumed, so validate_firewall compares those fields to themselves. Checkpoint selection and early stopping evaluated on the test split leaves 42 tests green; training loss computed over the test split leaves 42 tests green. Only the normalization channel is genuinely protected.",
+      "repair": "R1"
+    },
+    {
+      "id": "F-2",
+      "carry_forward": "CF-1",
+      "status": "NOT_SATISFIED",
+      "finding": "The forbidden-symbol vocabulary is genuine and recursive, but all three deployable validator call sites can be deleted independently, and deployable_replay can be opened to the oracle variants N1/C1, with the suite green. The only test exercising the validator calls it directly rather than through the deployable entry points.",
+      "repair": "R2"
+    },
+    {
+      "id": "F-3",
+      "finding": "The differentiable training unroll duplicates the entire recursion in torch and is never cross-checked against the numpy runtime operator. A propagation sign flip, a left-instead-of-right quaternion injection, and an innovation sign flip each leave the suite green.",
+      "repair": "R4"
+    },
+    {
+      "id": "F-4",
+      "finding": "N3S identical-checkpoint evidence is tautological: both digest sides are emitted from the same variable and verify_n3s_bridge compares a value to itself. The N3S target estimator can skip load_state_dict entirely and replay an untrained model with the suite green while the emitted evidence still asserts identical digests.",
+      "repair": "R3"
+    },
+    {
+      "id": "F-5",
+      "finding": "The backbone recurrent reset per trajectory, in both the runtime and training paths, and the presence of the residual gyro bias in the generated sensor packet, have no red path.",
+      "repair": "R5, R6"
+    },
+    {
+      "id": "F-6",
+      "finding": "The repaired SC-01 G3 predicate tolerates relaxing the strict lower-endpoint inequality and altering the 0.5/0.5 contrast weights with the suite green. The feature-dimension test asserts against the implementation's own constant and so cannot detect a change to the frozen 8.",
+      "repair": "R7"
+    },
+    {
+      "id": "F-7",
+      "finding": "G1 and G4 are not decidable by the sealed code. The six sensor-metric arrays consumed by evaluate_g1_gate and the two divergence arrays consumed by evaluate_g4_gate have no producer anywhere, and the frozen divergence_threshold_rad is validated by load_config then never read.",
+      "repair": "R9"
+    },
+    {
+      "id": "F-8",
+      "finding": "Six further assertions are vacuous: the causal-prefix test compares two identical clones on identical inputs; the gain-shape adversary raises its own error and the test contains no injection check; the split-overlap assertion accepts an unrelated error; the same-realization check is called with one object repeated; the weak-axis population certificate cannot fail for any non-empty trajectory.",
+      "repair": "R8"
+    },
+    {
+      "id": "F-9",
+      "category": "GOVERNANCE",
+      "finding": "prompts/side_gyro_mag_comp/05_CODEX_MINIMAL_EXPERIMENT_EXECUTION.md was modified at 21:06:34, inside the implementation window in which Codex was the sole active writer, between two Codex source edits; every other prompt retains its original 18:48 mtime and the directory is untracked. SC_IMPLEMENTATION_REPORT.md asserts the amendment was made by an orchestrator under its own authority and that this implementation did not edit it, but no artifact anywhere records such an amendment. CHANGED_PATHS.json declares outside_allowlist_modified_by_this_stage as empty while listing that same file. The decision ledger is missing rows for the DR0 reseal, the DR0 re-audit PASS, and the implementation seal. No threshold drifted: the amended G3 text matches canonical SC-01, which governs gates regardless.",
+      "repair": "R10"
+    }
+  ],
+
+  "verified_and_not_in_dispute": [
+    "checkpoint digest stable before and after audit; all 28 manifest member hashes match",
+    "42 passed reproduced independently in an isolated copy",
+    "tiny smoke reproduced bit-exactly: 140 records, 20 N3S evidence blocks, normalization and config hashes, and all four checkpoint binaries identical",
+    "no realized contamination in the sealed run: normalization from the 16 training IDs, selection from the 8 validation IDs, R4 present only in the test split",
+    "the frozen equations are correct: right-error definition, right injection, reset Jacobian, error dynamics, magnetometer Jacobian sign confirmed by finite difference, 6x3 split gain, no residual-bias double counting, unit and dt consistency",
+    "FiLM exact-off equivalence and branch isolation are genuine; N3S derangement has zero fixed points with preserved protected hashes, a distinct target-owned recurrent lineage, and a non-degenerate effect on all 20 trajectories",
+    "no scope creep, no hard-excluded element in code, config or tests, no test-driven tuning, and no gate has seen test data",
+    "reuse pins, .codex/config.toml, frozen Phase 0-1, main Phase 2 and SpikeRA-KalmanNet boundaries all byte-identical"
+  ],
+
+  "why_not_information_leakage": "CF-2 nominates FAIL_INFORMATION_LEAKAGE as its failure consequence, and this verdict does not soften it. Bit-exact reproduction positively established that no leakage exists in the sealed artifacts, so asserting leakage would itself be unsupported. CF-1 and CF-2 both remain NOT SATISFIED and blocking; the accurate single predicate is that the guarantee is unverifiable because the mandated red paths do not exist.",
+
+  "scope_reminder": {
+    "authorized": "One minimum repair round implementing SC_IMPL_ROUND1_COUNTERPROPOSAL.json R1-R11 within the SC-02 allowlist.",
+    "not_authorized": [
+      "any change to a gate threshold, contrast weight, seed, split size, population, learning rate, epoch count, loss weight, feature dimension 8, branch-specific FiLM, or the 6x3 gain",
+      "any new variant, regime, sensor, comparison, ablation or rescue experiment",
+      "attention, Transformer, SNN, SoW, reliability gating, learned Q/R, uncertainty heads, extra runtime sensors, closed-loop, FPGA, broad comparison, automated hyperparameter search, test-driven tuning",
+      "executing the full pilot; this stage remains unit tests and tiny smoke only",
+      "weakening any existing passing red path to accommodate a new one"
+    ],
+    "one_writer": "Only sc_impl_worker may edit implementation in the repair stage."
+  },
+
+  "acceptance_for_re_audit": [
+    "RED_PATH_MATRIX.json shows all 18 mutations recorded as confirmed green in the audit now going red",
+    "CF-1 and CF-2 satisfied in the full sense: constraint holds and the named test becomes red on violation",
+    "G1 and G4 decidable by the sealed code without further metric definition",
+    "no frozen value changed and the tiny smoke still reproduces bit-exactly",
+    "declaration artifacts state only what an artifact supports"
+  ],
+
+  "second_failure_consequence": "A second failed implementation audit closes the study with a final blocked result and no advance to ORACLE_HEADROOM.",
+  "boundary_statement": "Main AI-ADCS Phase 2, SpikeRA-KalmanNet, and frozen Phase 0-1 evidence remain untouched and unauthorized. Claude edited no implementation, checkpoint, threshold, machine result, or Codex report; all mutation testing was performed on an isolated /tmp copy.",
+  "written_at_utc": "2026-08-06T12:58:00+00:00"
+}

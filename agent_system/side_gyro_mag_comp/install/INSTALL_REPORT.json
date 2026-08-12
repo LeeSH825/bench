@@ -1,0 +1,15 @@
+{
+  "status": "PASS_AUTONOMOUS_PACKAGE_INSTALL",
+  "repository": "/home/dss-pc-05/bench",
+  "package": "/home/dss-pc-05/AI_ADCS_Dual_Agent_Autonomous_Package_v2",
+  "backup_dir": "/home/dss-pc-05/bench/.agent_package_backups/side_gyro_mag_v2_20260806T102415Z",
+  "existing_codex_config_preserved": true,
+  "spike_ra_settings_policy": "preserve all unrelated existing sections and keys",
+  "human_review_mode": "FINAL_ONLY",
+  "codex_entry": "custom agent sc_autonomous_orchestrator",
+  "codex_entry_prompt": "prompts/side_gyro_mag_comp/10_CODEX_AUTONOMOUS_PRIMARY.md",
+  "claude_entry": "claude --agent sc-autonomous-audit-coordinator",
+  "claude_entry_prompt": "prompts/side_gyro_mag_comp/11_CLAUDE_AUTONOMOUS_AUDITOR.md",
+  "final_result": "experiments/side_gyro_mag_comp/final/FINAL_RESULT.md",
+  "timestamp_utc": "2026-08-06T10:24:15.633382+00:00"
+}

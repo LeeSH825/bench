@@ -4,12 +4,11 @@
 
   ### 1.1 Prerequisites
 
-  - Python >=3.9 is required (pyproject.toml), and this repo was validated with .venv/bin/python (Python 3.10.19).
+  - Python >=3.10 is required (pyproject.toml and README.md), and this repo was validated with .venv/bin/python (Python 3.10.19).
   - Core runtime deps are declared in pyproject.toml: numpy, scipy, pandas, matplotlib, pyyaml, tqdm, torch.
   - GPU is optional in current runner behavior: requesting CUDA falls back to CPU if unavailable.
-  - UNVERIFIED: one-command install flow for this exact environment.
-  - How to verify: run python3 -m pip install -e . at repo root, then run .venv/bin/python -m bench.runners.run_suite --help.
-  - Verified in: pyproject.toml, bench/runners/run_suite.py, README.md.
+  - Editable installation and the clean-source wheel release path are verified. Use `python -m pip install -e '.[dev,control]'`, then run `python scripts/verify_clean_wheel.py` to build from `git archive HEAD`, install outside the repository, import the required surfaces, and exercise every public CLI help path.
+  - Verified in: pyproject.toml, README.md, scripts/verify_clean_wheel.py, bench/runners/run_suite.py.
 
   ### 1.2 5-minute smoke run (verified commands)
 
@@ -328,7 +327,7 @@
   - timing.csv: per-batch inference timing.
   - checkpoints/model.pt: checkpoint for trained plans or saved model states.
   - checkpoints/train_state.json: train-state summary for trained plans.
-  - artifacts/preds_test.npz: optional prediction dump, adapter-dependent.
+  - artifacts/preds_test.npz: standardized runner-owned prediction artifact when prediction saving is enabled (enabled by default, and always enabled for visualization runs).
   - env.txt: lightweight runtime info.
   - env.json, pip_freeze.txt, requirements.lock (if present), git_versions.txt: reproducibility snapshots.
   - stdout.log, stderr.log: run-level logs.
@@ -340,9 +339,34 @@
   - stderr.log may be absent on clean successful runs.
   - Verified in: bench/runners/run_suite.py, bench/utils/io.py, observed run directories under runs/.
 
+  ### 8.1 ADCS replay and Vizard support boundary
+
+  - `replay_generated` is a structurally supported runner data mode; the `adcs_replay_v0` task family dispatches through `bench.tasks.replay_generated_data`.
+  - The Phase 5C/6A-6G/7 names are historical workflow labels. Shipping those modules and suites does not prove completion of a research stage or grant research authority.
+  - Identity baselines, mocks, package probes, and unit tests validate contracts only. They are not evidence of real KalmanNet inference or scientific performance.
+  - Real `kalmannet_tsp` replay requires a compatible external checkpoint package and upstream model source. The environment-gated real-package end-to-end test remains a manual verification gate.
+  - Basilisk availability/API probing, native Vizard `.bin` conversion, and manual frame/sign review in Vizard remain environment/manual gates. Passing portable-wheel tests does not claim a live Vizard launch or stream.
+  - Verified structural support in: bench/tasks/replay_generated_data.py, bench/visualization/phase6b_checkpoint_replay.py, bench/visualization/phase6g_kalmannet_export.py, bench/visualization/vizard_native_bridge.py.
+
+  ### 8.2 Legacy Spike-Split/SpikeRA support boundary
+
+  - The shipped Spike-Split, G1-SNN, and SpikeRA adapters belong to a legacy Euclidean `x=[sigma, omega]`, 6D `y=[gyro, delta-angle]` observation benchmark. They are not evidence for the current right-local Phase 2 architecture, where gyro is a propagation/process input.
+  - Event labels are permitted only for offline training-loss weighting and post-hoc diagnostic segmentation. Deployable `predict`/neural forward paths consume measurements and causal innovation-derived tensors, not truth, oracle context, or event labels.
+  - `suite_basilisk_spike_ra_stage2_event.yaml` and `suite_basilisk_spike_ra_phase_a_event_best_eval.yaml` are not immediately executable in a clean clone: their referenced checkpoints are runtime products intentionally excluded from Git and the wheel.
+  - Produce those checkpoints first by generating and running `suite_basilisk_spike_ra_phase_a_event.yaml` with seed 0 and the `trained:frozen` plan. The exact producer path and scenario identity must match the consuming suite before launch.
+  - Registry/config/unit checks establish structural support only. Basilisk generation and real upstream Split-KalmanNet execution remain environment-dependent functional gates.
+
   ## 9. Testing & Validation
 
   ### 9.1 Smoke tests
+
+  CI keeps the historical manual harness and runs the bounded 26-file ADCS replay/Vizard pytest manifest separately:
+
+  .venv/bin/python -m bench.tests.adcs_replay_ci
+
+  The legacy Euclidean Spike boundary remains outside that ADCS manifest and has its own bounded regression command:
+
+  .venv/bin/python -m unittest bench.tests.test_legacy_spike_contract
 
   BENCH_DATA_CACHE=/tmp/bench_data_cache_userguide .venv/bin/python -m bench.tasks.smoke_data --suite-yaml bench/configs/suite_plan_matrix_smoke.yaml --task C_shift_plan_matrix_smoke_v0 --seed 0
 

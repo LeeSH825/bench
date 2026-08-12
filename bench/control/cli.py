@@ -7,11 +7,10 @@
     python -m bench.control.cli import-legacy
     python -m bench.control.cli reconcile
 
-Launching lives here, in a CLI, and **not** in the dashboard: this build's UI is
-read-only, and a launch button without a launch backend would be a lie. The CLI
-and a future GUI launcher both go through the same
-:class:`~bench.control.process.manager.WorkerManager`, so adding the GUI later
-does not fork the launch path.
+CLI launching is always available. The HTTP API and dashboard are read-only by
+default; explicit local write mode enables their guarded actions and the New
+Run page. CLI and UI launches share the same
+:class:`~bench.control.process.manager.WorkerManager` path.
 """
 
 from __future__ import annotations
@@ -260,9 +259,8 @@ def build_parser() -> argparse.ArgumentParser:
     reconcile.set_defaults(func=cmd_reconcile)
 
     # -- checkpoint / stop / resume ------------------------------------------
-    # These live in the CLI, not the HTTP API: the API and dashboard stay
-    # read-only in this tranche (ADR-CSR-014). A write-control surface is a
-    # separate, independently-verified step.
+    # These commands remain available directly in the CLI. The API/dashboard
+    # expose guarded counterparts only when explicit local write mode is on.
     checkpoints = sub.add_parser("checkpoints", help="Inspect the checkpoint catalog")
     checkpoint_sub = checkpoints.add_subparsers(dest="checkpoint_command", required=True)
 

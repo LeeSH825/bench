@@ -140,6 +140,7 @@ def run_kf_baseline_smoke_plan(suite_yaml: Path) -> KFBaselineSmokeResult:
                 "metrics_step.csv",
                 "timing.csv",
                 "artifacts/preds_test.npz",
+                "artifacts/preds_test_meta.json",
             ]
             missing = [p for p in required if not (run_dir / p).exists()]
             if missing:
@@ -231,4 +232,3 @@ def run_kf_baseline_smoke_plan(suite_yaml: Path) -> KFBaselineSmokeResult:
         run_dir=last_run_dir,
         note="KF baselines pretrained,frozen smoke passed (artifacts + ledger + shape checks)",
     )
-

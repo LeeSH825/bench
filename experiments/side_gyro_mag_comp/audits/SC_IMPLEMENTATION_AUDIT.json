@@ -1,0 +1,207 @@
+{
+  "schema_version": "side-study-claude-audit-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage_audited": "IMPLEMENTATION",
+  "audit_stage": "IMPLEMENTATION_AUDIT",
+  "audit_round": "round 1 of 1 (implementation repair rounds consumed before this audit: 0)",
+  "auditor": "claude-independent",
+  "decision": "FAIL_RED_PATH",
+  "implementation_authorized": false,
+  "advance_to_oracle_headroom_authorized": false,
+  "repairable": true,
+  "audited_predicate": "Every named red-path test in the sealed implementation checkpoint actually becomes red under its own counterexample, so that the CF-1 information boundary, the CF-2 split firewall, the frozen right-error math, and the repaired SC-01 G3 predicate are verified rather than merely asserted.",
+  "predicate_result": false,
+  "audit_target_path": "experiments/side_gyro_mag_comp/implementation/CHECKPOINT_MANIFEST.json",
+  "target_count": 1,
+  "checkpoint_digest_algorithm": "sha256",
+  "checkpoint_digest_before_audit": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "checkpoint_digest_after_audit": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5",
+  "checkpoint_stable": true,
+  "manifest_member_files_verified": 28,
+  "manifest_member_hash_mismatches": 0,
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "implementation_repair_rounds_consumed_before_audit": 0,
+  "implementation_repair_rounds_remaining_after_audit": 0,
+
+  "pass_qualification": {
+    "red_path_present": true,
+    "red_path_method": "24 source mutations applied to an isolated /tmp copy of the sealed sources; the repository was never modified. Each mutation ran the full 42-test suite with a verified green baseline.",
+    "non_empty_population": true,
+    "unambiguous_target": true,
+    "single_predicate": true,
+    "stable_checkpoint": true
+  },
+
+  "independent_recomputations_performed": [
+    {"check": "checkpoint manifest self-digest", "result": "MATCH", "value": "68a08285878fa484291697c69e93ea855afe51521d90cc86061bc362b90a90a5"},
+    {"check": "all 28 manifest member sha256", "result": "MATCH", "mismatches": 0, "missing": 0},
+    {"check": "test suite reproduction in isolated copy", "result": "MATCH", "value": "42 passed", "claimed": "42 passed"},
+    {"check": "tiny smoke bit-exact reproduction", "result": "MATCH", "detail": "SMOKE_RESULT.json byte-equivalent after removing absolute checkpoint_path; all 140 result records, all 20 N3S evidence records, normalization_sha256, and config_sha256 identical"},
+    {"check": "smoke checkpoint binaries N0/N1/N2/N3 reproduced", "result": "MATCH", "detail": "all four sha256 identical to sealed manifest members"},
+    {"check": "train-only selection arithmetic", "result": "OK", "detail": "selected_epoch equals earliest-minimum validation attitude RMSE for N0(1), N1(1), N2(2), N3(2)"},
+    {"check": "normalization source set equals training ID set", "result": "OK", "detail": "16 IDs, R0-R3 only, identical for all four variants"},
+    {"check": "whole-trajectory split disjointness", "result": "OK", "detail": "train 16 / validation 8 / test 20; train∩test=∅, validation∩test=∅; R4 IDs appear only in test"},
+    {"check": "N3S reuses the sealed N3 checkpoint", "result": "TAUTOLOGICAL_EVIDENCE", "detail": "All 20 records carry n3_checkpoint_file_sha256 == n3s_checkpoint_file_sha256 == 0ce8b567... == sealed manifest N3.pt, but study.py assigns both fields from the same variable and both state-dict digests from the same object, so verify_n3s_bridge compares a value to itself. Mutation M25 proves the consequence: the N3S target estimator can skip load_state_dict entirely and run an untrained model with all 42 tests green while the emitted evidence still asserts identical digests. This recomputation therefore does not establish checkpoint reuse; my earlier reading of it as confirmation was corrected by mutation."},
+    {"check": "N3S single-intervention bridge", "result": "OK", "detail": "20/20 fixed_point_count=0, protected raw/corrected/timestamp/init/owner hashes identical N3 vs N3S, owner token equals target realization, source owner differs, recurrent lineage differs in 20/20, transition_count=16"},
+    {"check": "N3S intervention is non-degenerate", "result": "OK", "detail": "N3S metric differs from N3 in 20/20 trajectories and N3 differs from N2 in 20/20, so the feature path is connected"},
+    {"check": "smoke population non-emptiness", "result": "OK", "detail": "140 records, 7 variants x 20 test trajectories, 4 per regime R0-R4, zero non-finite values"},
+    {"check": "frozen boundary preservation", "result": "OK", "detail": "reuse-pinned bench/estimators/mekf.py, bench/metrics/mekf.py, bench/tasks/generator/mekf_fusion_events.py and .codex/config.toml all byte-identical to REUSE_PIN.json; no Phase 0-1, main Phase 2, or SpikeRA-KalmanNet path modified"}
+  ],
+
+  "red_path_matrix": {
+    "method": "mutation of an isolated copy; green baseline 42 passed verified before every mutation",
+    "protected_invariants_confirmed_red": [
+      {"mutation": "M1b", "change": "_forbidden_token disabled entirely", "result": "RED", "failing_tests": ["test_sc_deployable_namespace_leakage_rejected_red", "test_sc_runtime_packet_allowlist_recursive_red"]},
+      {"mutation": "M3", "change": "normalization computed from train + one test ID", "result": "RED", "failing_tests": ["test_sc_pairing_split_firewall_red"]},
+      {"mutation": "M4", "change": "firewall set equality relaxed to subset", "result": "RED"},
+      {"mutation": "M4b", "change": "firewall non-emptiness check disabled", "result": "RED"},
+      {"mutation": "M15", "change": "normalization computed from the test split", "result": "RED"},
+      {"mutation": "M5", "change": "N3S derangement replaced by identity", "result": "RED"},
+      {"mutation": "M6", "change": "recurrent lineage digest made constant", "result": "RED"},
+      {"mutation": "M8", "change": "GAIN_SHAPE 6x3 -> 3x6", "result": "RED"},
+      {"mutation": "M9", "change": "causal future-sample guard removed", "result": "RED"},
+      {"mutation": "M11", "change": "G4 penalty threshold 0.03 -> 0.10", "result": "RED"},
+      {"mutation": "M16", "change": "G3 uses CI upper instead of lower endpoint", "result": "RED"}
+    ],
+    "unprotected_invariants_confirmed_green": [
+      {"mutation": "M13", "change": "checkpoint selection / early stopping epoch evaluated on the TEST split while the firewall record still declares validation IDs", "result": "GREEN_42_PASSED", "violated_requirement": "CF-2", "severity": "BLOCKING"},
+      {"mutation": "M14", "change": "training loss computed over the TEST split", "result": "GREEN_42_PASSED", "violated_requirement": "CF-2", "severity": "BLOCKING"},
+      {"mutation": "M2b", "change": "validate_deployable_namespace removed from deployable_replay", "result": "GREEN_42_PASSED", "violated_requirement": "CF-1", "severity": "BLOCKING"},
+      {"mutation": "M2c", "change": "validate_deployable_namespace removed from n3s_replay_namespace", "result": "GREEN_42_PASSED", "violated_requirement": "CF-1", "severity": "BLOCKING"},
+      {"mutation": "M2d", "change": "validate_deployable_namespace removed from the saved checkpoint payload", "result": "GREEN_42_PASSED", "violated_requirement": "CF-1", "severity": "BLOCKING"},
+      {"mutation": "M22", "change": "differentiable training unroll propagates with (gyro + bias) instead of (gyro - bias)", "result": "GREEN_42_PASSED", "violated_requirement": "SC-00 right-error propagation", "severity": "BLOCKING"},
+      {"mutation": "M23", "change": "differentiable training unroll uses LEFT quaternion injection", "result": "GREEN_42_PASSED", "violated_requirement": "SC-00 right injection", "severity": "BLOCKING"},
+      {"mutation": "M24", "change": "differentiable training unroll flips the innovation sign", "result": "GREEN_42_PASSED", "violated_requirement": "SC-00 innovation anchor", "severity": "BLOCKING"},
+      {"mutation": "M20", "change": "backbone recurrent reset removed from the runtime path", "result": "GREEN_42_PASSED", "violated_requirement": "reset-per-trajectory", "severity": "BLOCKING"},
+      {"mutation": "M21", "change": "backbone recurrent reset removed from the training path", "result": "GREEN_42_PASSED", "violated_requirement": "reset-per-trajectory", "severity": "BLOCKING"},
+      {"mutation": "M19", "change": "residual gyro bias never enters the sensor packet", "result": "GREEN_42_PASSED", "violated_requirement": "SC-00 residual-bias retention", "severity": "BLOCKING"},
+      {"mutation": "M10", "change": "G3 strict inequality lower > 0 relaxed to lower >= 0", "result": "GREEN_42_PASSED", "violated_requirement": "repaired SC-01 G3", "severity": "BLOCKING"},
+      {"mutation": "M17", "change": "G3 contrast weights 0.5/0.5 -> 0.3/0.7", "result": "GREEN_42_PASSED", "violated_requirement": "repaired SC-01 G3", "severity": "BLOCKING"},
+      {"mutation": "M25", "change": "N3S target estimator never loads the N3 checkpoint and replays an untrained model", "result": "GREEN_42_PASSED", "violated_requirement": "N3S identical-checkpoint reuse", "severity": "BLOCKING"},
+      {"mutation": "M26", "change": "N3S source encoder never loads the N3 checkpoint", "result": "GREEN_42_PASSED", "violated_requirement": "N3S identical-checkpoint reuse", "severity": "BLOCKING"},
+      {"mutation": "M27", "change": "emitted N3S state-dict digest decoupled from the replayed model", "result": "GREEN_42_PASSED", "violated_requirement": "N3S evidence integrity", "severity": "BLOCKING"},
+      {"mutation": "M29", "change": "deployable_replay accepts the oracle variants N1 and C1", "result": "GREEN_42_PASSED", "violated_requirement": "CF-1 deployable/diagnostic namespace separation", "severity": "BLOCKING"},
+      {"mutation": "M7", "change": "FEATURE_DIM 8 -> 6", "result": "GREEN_for_the_named_test", "detail": "test_sc_feature_dim_exactly_eight_red asserts shape == (FEATURE_DIM,) using the implementation constant, so it cannot detect a change of the feature dimension; the change is caught only incidentally by four unrelated FiLM/gain tests", "severity": "MINOR"}
+    ],
+    "totals": {"mutations_applied_by_claude": 24, "confirmed_red": 11, "confirmed_green_but_should_be_red": 18, "note": "M7 counts once in the green column as a named-test tautology; M18 was discarded as a no-op anchor."}
+  },
+
+  "additional_unfalsifiable_assertions": [
+    {"id": "U-1", "location": "tests/side_gyro_mag_comp_v1/test_math_and_model_red.py test_sc_causal_prefix_invariance_red", "finding": "Both prefix output lists are collected before the divergent future samples are fed, so the test compares two identical clones on identical inputs. Deleting the divergent-sample lines leaves it green. It is a determinism check, not a causality check, and an encoder with a lookahead buffer would still pass."},
+    {"id": "U-2", "location": "tests/side_gyro_mag_comp_v1/test_math_and_model_red.py test_sc_split_gain_shape_and_right_injection_red", "finding": "The adversary block raises its own RuntimeError inside pytest.raises and exercises no production code; the test also contains no right-injection assertion despite its name. Shape coverage survives only through the separate monkeypatch test."},
+    {"id": "U-3", "location": "tests/side_gyro_mag_comp_v1/test_data_firewalls_red.py split-overlap assertion", "finding": "A bare pytest.raises(ValueError) accepts an unrelated 'empty training population' error, so deleting the whole-trajectory disjointness guard leaves the suite green."},
+    {"id": "U-4", "location": "bench/side_gyro_mag_comp_v1/study.py same-realization check", "finding": "assert_same_realization is called with one trajectory object repeated N times, so the pairing assertion can never fail at that call site even though the function itself is genuinely red-tested."},
+    {"id": "U-5", "location": "tests/side_gyro_mag_comp_v1/test_math_and_model_red.py residual-bias tests", "finding": "test_sc_deterministic_vs_residual_bias_separation_red and test_sc_gyro_oracle_retains_residual_bias_red are self-contained numpy arithmetic touching no production module; test_sc_learned_compensator_residual_bias_retention_red is a tautology because the correction head is zero-initialized, making the learned encoder bit-identical to the identity and its gradient exactly zero."},
+    {"id": "U-6", "location": "bench/side_gyro_mag_comp_v1/study.py weak_observable_metrics", "finding": "weak_axis_count and observable_plane_count are both assigned the total sample count, so the non-empty-population certificate cannot fail for any non-empty trajectory."}
+  ],
+
+  "mandatory_blocking_carry_forward_disposition": {
+    "CF-1": {
+      "status": "NOT_SATISFIED",
+      "satisfied_part": "The forbidden-symbol vocabulary is genuine and recursive. Injecting each of A_m, b_m, C_BSm, A_g, c_g, C_SgB and their aliases/inverses is rejected, and disabling the rejection turns two tests red (M1b). No deployable path in the sealed code consumes truth, oracle, future samples, or any calibration symbol; the reproduced smoke confirms this at runtime.",
+      "unsatisfied_part": "The placement of the validator in the deployable path is not red-path protected. All three enforcement call sites can be deleted independently with the full suite green (M2b, M2c, M2d), because the only test that exercises the validator calls it directly rather than through the deployable entry points. The deployable/diagnostic variant guard is likewise unprotected: deployable_replay can be opened to the oracle variants N1 and C1 with the suite green (M29). The validator is also purely syntactic, so a forbidden quantity passed under a renamed key is undetectable by construction."
+    },
+    "CF-2": {
+      "status": "NOT_SATISFIED",
+      "satisfied_part": "The normalization channel is genuinely protected: computing normalization from validation or test IDs turns test_sc_pairing_split_firewall_red red (M3, M15). validate_firewall enforces exact, non-empty, duplicate-free set equality and rejects any test-split intersection. In the sealed smoke, normalization sources equal the training ID set exactly, selection used validation only, and R4 never entered training or validation.",
+      "unsatisfied_part": "CF-2 explicitly requires the named test to become red on any test-split contribution to an early-stopping decision or checkpoint selection. It does not. Training loss and checkpoint selection can both be evaluated on the test split with all 42 tests green (M13, M14). Root cause: in train_variant the SplitFirewallRecord is constructed from the literals train_ids/val_ids rather than captured from the ID sequences actually consumed by _trajectory_epoch, so the declaration is decoupled from the executed data flow and validate_firewall becomes tautological for those three fields."
+    }
+  },
+
+  "leakage_finding": {
+    "realized_contamination_in_sealed_artifacts": false,
+    "evidence": "Independent bit-exact reproduction of the smoke shows normalization_source_ids equal to the 16 training IDs, selection driven by the 8 validation IDs, R4 present only in the test split, and no oracle/truth/calibration symbol in any deployable namespace.",
+    "guarantee_status": "UNPROVEN",
+    "note": "The decision is FAIL_RED_PATH rather than FAIL_INFORMATION_LEAKAGE because no leakage exists in the sealed run and asserting one would itself be unsupported. This is not a downgrade: CF-1 and CF-2 remain NOT_SATISFIED and blocking, and the split firewall is currently a declaration that no test can falsify for the selection and training-loss channels."
+  },
+
+  "math_findings": {
+    "equations_independently_re_derived_as_correct": [
+      "right-error definition q_true = q_hat (x) Exp(dtheta) with right multiplication injection and additive bias injection",
+      "reset covariance P+ = J_r(dtheta) P J_r(dtheta)^T using the correct SO(3) right Jacobian",
+      "error dynamics F[:3,:3] = -skew(omega), F[:3,3:] = -I consistent with the metric convention db = b_true - b_hat",
+      "magnetometer prediction h = C_BN(q_hat) m_N and Jacobian H[:, :3] = +skew(h), confirmed by an independent central finite-difference red path",
+      "Split gain K = G1 H^T G2 with shape 6x3 and split right/additive injection",
+      "deterministic compensation retains the stochastic residual gyro bias and the MEKF subtracts the estimated bias exactly once, with no double counting",
+      "unit and dt consistency throughout (rad, rad/s, dimensionless magnetic direction vectors, first dt = 0.1 s)",
+      "FiLM exact-off is a hard bypass, and branch isolation holds at factor level (gyro features -> G1 only, magnetometer features -> G2 only)"
+    ],
+    "unverifiable_because_untested": [
+      "the differentiable training unroll in study.py duplicates the entire recursion in torch and is never cross-checked against the numpy runtime operator; propagation sign, injection side, and innovation sign can each be inverted with the suite green (M22, M23, M24)",
+      "the backbone recurrent hidden state reset per trajectory (M20, M21)",
+      "the presence of the residual gyro bias in the generated sensor packet (M19)"
+    ],
+    "contract_vs_code_divergences_non_blocking": [
+      "C_SgB and C_BSm are fixed to identity and never applied by the forward generator, so every sensor-frame-to-body-frame statement in SC-00 is vacuously satisfied and corrected_B labels a sensor-frame vector; the config already declares identity_mounting_pilot_invariant: true, so restating SC-00 is the smaller correction",
+      "SC-00 places gyro/magnetometer noise after the scale matrix; the generator adds it before, so the recovered target carries untransformed noise",
+      "the SC-00 support constraint (singular values in [0.8,1.2], condition number <= 1.5) is never asserted in code",
+      "the initial G1 bias-attitude coupling has the opposite sign to the classical Riccati cross-covariance; it is trainable, so this is an initialization observation, not a math error"
+    ]
+  },
+
+  "gate_decidability_finding": {
+    "status": "INCOMPLETE",
+    "detail": "evaluate_g1_gate consumes n2_r1_gyro_rate, n0_r1_gyro_rate, n2_r1_increment, n0_r1_increment, n2_r2_mag_angle and n0_r2_mag_angle, and evaluate_g4_gate consumes n3_divergence and n0_divergence. No function in the repository produces any of these arrays. The frozen divergence threshold ('evaluation','divergence_threshold_rad') = 1.0 is validated by load_config and then never read. The only implemented metrics are attitude geodesic RMSE and the weak-axis/observable-plane decomposition.",
+    "consequence": "G1's three strict sensor sub-predicates and G4's no-added-divergence condition cannot be resolved by the sealed code. Deferring these producers to the experiment stage would require defining pre-registered metrics at the moment test access begins.",
+    "scope_note": "The gate arithmetic itself matches canonical SC-01 and no threshold has drifted."
+  },
+
+  "scope_findings": {
+    "scope_creep_present": false,
+    "hard_exclusions_verified_absent": ["SNN", "SoW", "reliability_gate", "attention", "Transformer", "learned_QR", "uncertainty_head", "temperature", "vibration", "outlier", "saturation", "MTQ", "extra_runtime_sensors", "closed_loop", "FPGA", "broad_comparison", "automated_hyperparameter_search"],
+    "test_driven_tuning_detected": false,
+    "detail": "Every gate constant, seed, population and architecture width is frozen in config and re-checked by load_config, which raises on any deviation. full_pilot_executed is false and no gate has been evaluated on test data, so post-hoc tuning has not occurred. The smoke emits no gate output and correctly carries performance_claim=false and physical_covariance_claim=false.",
+    "weak_axis_population_certificate": "DEGENERATE: weak_axis_count and observable_plane_count are both set to the total sample count, so the non-empty-population certificate cannot fail for any non-empty trajectory."
+  },
+
+  "governance_findings": {
+    "stage_state_valid": true,
+    "handoff_valid": true,
+    "handoff_fresh": true,
+    "one_writer_respected": true,
+    "frozen_boundaries_intact": true,
+    "reuse_pins_intact": true,
+    "codex_config_preserved": true,
+    "defects": [
+      {
+        "id": "G-1",
+        "severity": "BLOCKING",
+        "finding": "prompts/side_gyro_mag_comp/05_CODEX_MINIMAL_EXPERIMENT_EXECUTION.md was modified at 2026-08-06T21:06:34, inside the implementation stage window in which Codex was the sole active writer, between two Codex source edits. Every other prompt retains its original 18:48 mtime. The prompts directory is untracked, so no git authorship exists. SC_IMPLEMENTATION_REPORT.md asserts 'the orchestrator amended prompt05 G3 under its own authority' and 'This implementation did not edit prompt05', but no artifact anywhere records such an amendment: not the decision ledger, not the stage state, and no Claude audit or handoff ever mentions prompt 05. This is an unsupported provenance claim in a sealed report.",
+        "substantive_impact": "NONE_ON_THRESHOLDS",
+        "substantive_note": "The amended G3 text matches canonical SC-01 exactly, and SC-01 is canonical for gates under charter section 4, so no threshold drifted. The defect is provenance and control-document ownership, and the amendment was unnecessary because SC_IMPLEMENTATION_DECISION.json already records g3_authority."
+      },
+      {
+        "id": "G-2",
+        "severity": "BLOCKING",
+        "finding": "implementation/CHANGED_PATHS.json declares outside_allowlist_modified_by_this_stage: [] while separately listing prompt 05 under orchestrator_owned_control_amendments_observed. A file modified inside the stage window and absent from the 20-path allowlist makes the empty array false."
+      },
+      {
+        "id": "G-3",
+        "severity": "MINOR",
+        "finding": "DECISION_LEDGER.md was last written at 20:12:10 and records neither the DR0 repair reseal, nor the DR0 re-audit PASS that authorized implementation, nor the implementation seal and its transition. Charter rules require every automatic transition to record the exact audit or gate artifact."
+      }
+    ]
+  },
+
+  "codex_claim_disposition": {
+    "IMPL-C1-MATH": "PARTIALLY_SUPPORTED - equations correct and injection/reset/Jacobian red paths genuine; the training-path twin of the same math has no red path",
+    "IMPL-C2-RESIDUAL-BIAS": "NOT_SUPPORTED_AS_TESTED - no double counting confirmed by derivation, but the three named red-path tests are self-contained arithmetic and removing the residual bias from the packet leaves the suite green",
+    "IMPL-C3-CF1": "PARTIALLY_SUPPORTED - vocabulary protected, enforcement placement unprotected",
+    "IMPL-C4-CF2": "NOT_SUPPORTED - the stopping/selection claim is a declaration that no test can falsify; only the normalization channel is protected",
+    "IMPL-C5-CAUSAL-FEATURES": "PARTIALLY_SUPPORTED - FiLM exact-off and branch isolation genuine; the feature-dimension test is tautological and the causal-prefix test compares two identical models rather than a prefix against a full sequence",
+    "IMPL-C6-PAIRING": "SUPPORTED",
+    "IMPL-C7-N3S": "PARTIALLY_SUPPORTED - the derangement (zero fixed points), the preserved protected raw/corrected/timestamp/init/owner hashes, the distinct target-owned recurrent lineage, and the non-degenerate effect on all 20 trajectories are genuine and red-path protected. The central 'identical N3 checkpoint-file and state-dict digest' claim is not: both sides of every equality are emitted from the same variable, and the target estimator can skip loading the checkpoint altogether with the suite green (M25, M26, M27).",
+    "IMPL-C8-SMOKE": "SUPPORTED - independently reproduced bit-exactly",
+    "IMPL-C9-DIFFERENTIABLE-TRAINING": "PARTIALLY_SUPPORTED - all four loss weights demonstrably act and selection uses validation attitude RMSE only, but the unroll operator itself is unverified and the selection source is not bound to the declaration",
+    "IMPL-C10-GATES": "PARTIALLY_SUPPORTED - arithmetic matches canonical SC-01, but the repaired G3 predicate tolerates both a relaxed inequality and altered contrast weights, and G1/G4 have no metric producers"
+  },
+
+  "counterproposal_path": "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+  "red_path_evidence_path": "experiments/side_gyro_mag_comp/audits/SC_IMPL_RED_PATH_EVIDENCE.json",
+  "gate_outcomes_asserted": null,
+  "experiments_run": 0,
+  "next_stage": "IMPLEMENTATION_REPAIR",
+  "next_actor": "CODEX",
+  "second_failure_consequence": "A second failed implementation audit closes the study with a final blocked result and no advance to ORACLE_HEADROOM.",
+  "written_at_utc": "2026-08-06T12:58:00+00:00"
+}

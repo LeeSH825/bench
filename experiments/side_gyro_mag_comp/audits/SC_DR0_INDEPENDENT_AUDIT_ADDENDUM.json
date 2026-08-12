@@ -1,0 +1,148 @@
+{
+  "schema_version": "side-study-claude-audit-addendum-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage_audited": "DR0_DESIGN_REVIEW",
+  "audit_stage": "DR0_INDEPENDENT_AUDIT",
+  "auditor": "claude-independent-addendum",
+  "relationship": "ADDITIVE_TO_PRIMARY_AUDIT",
+  "primary_audit_json": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.json",
+  "overwrites_primary": false,
+  "decision": "FAIL_INFORMATION_BOUNDARY",
+  "decision_direction_matches_primary": true,
+  "repairable": true,
+  "implementation_authorized": false,
+  "audited_predicate": "The sealed DR0 contract bundle keeps every oracle calibration parameter and every test-split trajectory out of deployable runtime and model-selection paths.",
+  "predicate_result": false,
+  "audit_target_path": "experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+  "target_count": 1,
+  "checkpoint_digest_algorithm": "sha256",
+  "checkpoint_digest_before_audit": "298feba22320a5e1abd617455d4d7cc342f539229d443c2cda3577326788f730",
+  "checkpoint_digest_after_audit": "298feba22320a5e1abd617455d4d7cc342f539229d443c2cda3577326788f730",
+  "checkpoint_stable": true,
+  "manifest_member_files_verified": 7,
+  "manifest_member_hash_mismatches": 0,
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "pass_qualification": {
+    "red_path_present": true,
+    "non_empty_population": true,
+    "unambiguous_target": true,
+    "single_predicate": true,
+    "stable_checkpoint": true
+  },
+  "new_blockers_not_covered_by_primary_counterproposal": [
+    {
+      "id": "I1",
+      "class": "INFORMATION_BOUNDARY",
+      "title": "Deployable magnetometer path defined by oracle calibration parameters; no magnetometer encoder; f_m has no producer",
+      "evidence": {
+        "SC_00_line_19": "gyro deployable encoder defined: (omega_tilde_g^B, f_g)",
+        "SC_00_line_21": "omega_target^B qualified as a TARGET, so true A_g,c_g are a legitimate label",
+        "SC_00_line_29": "z_tilde_m^B = C_BSm A_m^-1 (y_m^Sm - b_m^Sm) with NO target/oracle qualifier",
+        "SC_00_line_33": "same symbol z_tilde_m^B feeds the DEPLOYABLE innovation nu_m",
+        "SC_00_line_39": "f_m consumed by FiLM_2 but produced by no defined encoder",
+        "SC_00_line_45": "runtime boundary forbids calibration parameters"
+      },
+      "defeats_claims": [
+        3,
+        4
+      ],
+      "covered_by_primary_counterproposal": false,
+      "counterproposal_id": "CP-11"
+    },
+    {
+      "id": "I4",
+      "class": "INFORMATION_BOUNDARY",
+      "title": "Train/test firewall scoped by regime rather than by split; R0-R3 test trajectories may feed normalization, early stopping and checkpoint selection",
+      "evidence": {
+        "SC_01_line_13": "'Training/validation/normalization use R0-R3 only.' restricts by REGIME; only R4 is protected from training/early stopping/normalization/thresholds/selection",
+        "SC_01_line_15": "'test 30 per R0-R4' confirms R0-R3 test splits exist",
+        "gate_exposure": "G0 scored on R3; G1 sensor metrics on R1 and R2; G4 on R0 - three of five gates are scored on regimes whose test split is unprotected"
+      },
+      "defeats_claims": [
+        4
+      ],
+      "covered_by_primary_counterproposal": false,
+      "counterproposal_id": "CP-12"
+    }
+  ],
+  "independent_derivations_confirmed_correct": [
+    {
+      "id": "D1",
+      "statement": "nu_m = z_tilde - h_m implies H_m = [[h_m]_x, 0_3x3]",
+      "result": "CONFIRMED",
+      "cross_check": "bench/estimators/mekf.py::body_vector_jacobian sets result[:, :3] = skew(prediction) with residual z - h"
+    },
+    {
+      "id": "D2",
+      "statement": "C_BSg A_g^-1 (y_g - c_g) = omega_true + b_r + noise; propagation omega_tilde - b_hat_r does not double-correct",
+      "result": "CONFIRMED",
+      "cross_check": "mekf.py continuous_error_matrices F[:3,3:] = -I"
+    },
+    {
+      "id": "D3",
+      "statement": "magnetometer hard-iron then inverse-soft-iron then mounting is the exact inverse of the forward model",
+      "result": "CONFIRMED"
+    },
+    {
+      "id": "D4",
+      "statement": "K = G1(6x6) H_m^T(6x3) G2(3x3) is 6x3; injection is right, not left",
+      "result": "CONFIRMED",
+      "cross_check": "mekf.py::inject_error_state"
+    },
+    {
+      "id": "D5",
+      "statement": "rank([h_m]_x) = 2 with null space span{h_m}; weak direction is body-frame attitude error parallel to h_m",
+      "result": "CONFIRMED"
+    },
+    {
+      "id": "D6",
+      "statement": "G3 L >= 0.5D is equivalent to RMSE_N3S >= (RMSE_N2+RMSE_N3)/2 and correctly FAILS when shuffling is inert",
+      "result": "CONFIRMED"
+    },
+    {
+      "id": "D7",
+      "statement": "SC-00 denies physical P/Q/R/S^-1 status for G1,G2,K and disclaims NIS/NEES validity",
+      "result": "CONFIRMED"
+    }
+  ],
+  "frozen_boundary_verification": {
+    "fingerprint_files_compared": 4880,
+    "phase0_1_main_phase2_spikera_changes": 0,
+    "codex_config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d",
+    "codex_config_unchanged": true
+  },
+  "governance_incident": {
+    "type": "CONCURRENT_CLAUDE_ROLE_WRITER",
+    "charter_reference": "section 6 one writer and four eyes",
+    "artifacts_written_by_concurrent_writer": [
+      "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.md",
+      "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.json",
+      "experiments/side_gyro_mag_comp/handoffs/claude/CLAUDE_TO_CODEX.json",
+      "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md",
+      "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json"
+    ],
+    "repair_round_consumed_by_concurrent_writer": true,
+    "verdict_direction_conflict": false,
+    "codex_owned_artifact_altered_by_claude_role": false,
+    "frozen_boundary_violated": false,
+    "sealed_digest_moved": false,
+    "residual_risk": "The single DR0 repair round was committed to a counterproposal omitting blockers I1 and I4; CP-11 and CP-12 were appended additively to the Claude handoff before Codex began the repair.",
+    "corrective_state_transition_required": false,
+    "reported_to_user_in_final_report": true
+  },
+  "per_claim_status": {
+    "1_math_frame_consistency": "CORE_ALGEBRA_VERIFIED_CORRECT; FAIL on packet frame labels",
+    "2_compensation_vs_residual_bias": "NO_DOUBLE_CORRECTION_VERIFIED; FAIL on identifiability (gauge degeneracy)",
+    "3_causal_8d_branch_routing": "FAIL - no magnetometer encoder, f_m unproduced (I1)",
+    "4_no_leakage": "FAIL - two uncovered channels (I1, I4)",
+    "5_split_and_pairing": "whole-trajectory disjointness OK; pairing UNKNOWN - no data-generation seed declared",
+    "6_G0_oracle_headroom": "PRE_REGISTRATION_ONLY - gate well-formed, exposed to I4",
+    "7_G1_learned_benefit": "PRE_REGISTRATION_ONLY - exposed to I4 and identifiability floor",
+    "8_G2_feature_increment": "PRE_REGISTRATION_ONLY - exposed to bootstrap-unit ambiguity",
+    "9_G3_shuffle_falsification": "DESIGN_VERIFIED_GENUINE_RED_PATH; FAIL on unnamed regime/aggregation",
+    "10_G4_and_observability": "OBSERVABILITY_DISCLOSURE_CORRECT_AND_HONEST; FAIL - divergence undefined"
+  },
+  "gate_outcomes_asserted": null,
+  "experiments_run": 0,
+  "written_at_utc": "2026-08-06T11:14:25.290636+00:00"
+}

@@ -1,108 +1,158 @@
-# Bench — Step 2–3 Scaffold
+# AI-ADCS Bench
 
-이 디렉토리는 **벤치마킹 프레임워크의 scaffold** 입니다.  
-Step 0–1에서 잠긴 스펙(suite + FAIRNESS/METRICS/DECISIONS)을 깨지 않도록,
-Step 2에서는 인터페이스/스키마/문서/유틸(스텁)을, Step 3에서는 실행 환경/재현성 스냅샷을 고정합니다.
+AI-ADCS Bench is a reproducible benchmark and control toolkit for KalmanNet
+family estimators, classical KF/MEKF baselines, and spacecraft-attitude data.
+It provides deterministic data generation, model adapters, suite execution,
+reports, checkpoint-aware run control, and post-hoc visualization.
 
----
+The repository feature map and portability boundary are documented in
+[`docs/FEATURE_INVENTORY.md`](docs/FEATURE_INVENTORY.md).
 
-## Source of Truth (SoT)
+## Install
 
-SoT 파일은 **/mnt/data 루트**에 있습니다.
+The supported Python floor is 3.10. Clone the pinned upstream model
+submodules when you need KalmanNet-family adapters.
 
-- `/mnt/data/벤치마킹 프레임워크 설계.txt`
-- `/mnt/data/suite_basic.yaml`
-- `/mnt/data/suite_shift.yaml`
-- `/mnt/data/FAIRNESS.md`
-- `/mnt/data/METRICS.md`
-- `/mnt/data/DECISIONS.md`
+The current Git history remains large even though generated products are no
+longer tracked. A shallow clone avoids transferring the old payload history:
 
-configs 미러링:
-- `bench/bench/configs/`에는 suite YAML **복사본(미러)** 를 둘 수 있으나,
-- **SoT는 항상 `/mnt/data/suite_*.yaml`** 입니다.
-
----
-
-## Step 3: Environment strategy (D14 예정)
-
-기본 전략(MVP):
-- **단일 env**: `pyproject.toml` + `requirements.lock`(pip freeze snapshot)
-
-fallback:
-- 의존성 충돌이 발생하면 **모델별 Docker 이미지로 실행**하고 결과(run_dir)만 수집합니다.
-- Docker 템플릿: `bench/docker/*`
-
----
-
-## Install (single env)
-
-권장:
 ```bash
-cd /mnt/data/bench
-python -m pip install -U pip
-python -m pip install -e .
+git clone --depth 1 --recurse-submodules --shallow-submodules \
+  <repository-url> bench
+cd bench
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[dev]'
 ```
 
-Torch 설치:
+Optional surfaces are installed explicitly:
 
-CUDA/CPU 환경에 맞는 torch wheel은 사용자 환경마다 다르므로,
-torch는 별도 설치를 권장합니다(또는 requirements.lock에 핀).
-
-requirements.lock 생성/갱신:
 ```bash
-cd /mnt/data/bench
-bash scripts/export_env_snapshot.sh
+python -m pip install -e '.[control]'   # FastAPI, Dash, telemetry
+python -m pip install -e '.[viz]'       # Streamlit Run Inspector
+python -m pip install -e '.[research]'  # research schema validation
+python -m pip install -e '.[basilisk]'  # Basilisk-backed generators
 ```
 
-## Reproducibility snapshots (per-run)
+Install the appropriate PyTorch build for the target CPU/CUDA platform when
+the default PyPI resolution is not suitable.
 
-RUN_DIR 표준에 따라, 각 run_dir에는 최소 아래가 저장되어야 합니다:
+## Smallest benchmark path
 
-env.json + pip_freeze.txt (+ 가능하면 requirements.lock 복사)
+All paths below are repository-relative; no external `/mnt/data` tree is
+required.
 
-git_versions.txt
-
-config_snapshot.yaml
-
-stdout/stderr 로그
-
-이 규칙은 Step 3에서 bench/bench/utils/io.py의
-write_env_snapshot() / write_git_snapshot() 훅으로 “기계적으로” 강제될 예정입니다.
-
-## Notes (Step 2 scope)
-
-third_party 레포는 수정하지 않습니다.
-(추후 git submodule/subtree로 third_party/*에 붙이고, adapter/orchestrator로만 통제)
-
-Step 3에서는 학습/평가 루프를 구현하지 않습니다.
-(실제 실행/수집/리포트는 Step 4~)
-
-
-## Step 5: smoke_model (adapter forward test)
-
-### third_party 경로 규칙
-- 벤치 루트 기준: `third_party/`
-  - `third_party/KalmanNet_TSP`
-  - `third_party/Adaptive-KNet-ICASSP24`
-- third_party 코드는 벤치에서 절대 수정하지 않는다.
-
-### 실행 (bench_generated NPZ -> adapter -> forward 1회)
 ```bash
-export BENCH_DATA_CACHE=/home/xynus/bench_data_cache  # (필요 시) 본인 캐시 경로
-python -m bench.models.smoke_model \
-  --suite-yaml /mnt/data/suite_shift.yaml \
-  --task C_shift_Rscale_v0 \
-  --model-id kalmannet_tsp \
-  --seed 0 \
-  --split test \
-  --batch-size 8
+export BENCH_DATA_CACHE="${PWD}/bench_data_cache"
+
+bench-smoke-data \
+  --suite-yaml bench/configs/suite_kf_baseline_smoke.yaml \
+  --task A_linear_kf_baseline_smoke_v0 \
+  --seed 0
+
+bench-run-suite \
+  --suite-yaml bench/configs/suite_kf_baseline_smoke.yaml \
+  --tasks A_linear_kf_baseline_smoke_v0 \
+  --models oracle_kf \
+  --seeds 0 \
+  --plans pretrained:frozen \
+  --device cpu
+
+bench-make-report \
+  --suite-yaml bench/configs/suite_kf_baseline_smoke.yaml
 ```
 
-Adaptive-KNet:
+Generated datasets, run records, and reports are written under
+`bench_data_cache/`, `runs/`, and `reports/`. They are intentionally ignored
+by Git; canonical research evidence remains under `experiments/`.
+
+## Control plane
+
+The versioned control plane includes:
+
+- immutable run allocation, worker supervision, registry, event journal, and
+  CPU/GPU telemetry;
+- checkpoint catalog inspection and validation;
+- persistent graceful-stop requests;
+- exact-resume planning and immutable resumed-child launch within the
+  explicitly certified execution envelope;
+- configuration preset browse, validation, hash preview, and launch;
+- FastAPI and Dash observation surfaces.
+
+CLI entry points:
+
 ```bash
-python -m bench.models.smoke_model \
-  --suite-yaml /mnt/data/suite_shift.yaml \
-  --task C_shift_Rscale_v0 \
-  --model-id adaptive_knet \
-  --seed 0 --split test --batch-size 8
+bench-control --help
+bench-control checkpoints --help
+bench-control stop --help
+bench-control resume --help
+bench-control-api --host 127.0.0.1 --port 8765
+bench-dashboard --host 127.0.0.1 --port 8766 \
+  --api http://127.0.0.1:8765
 ```
+
+The API and dashboard are read-only by default. To register the guarded HTTP
+launch/stop/resume routes and enable the config-driven New Run page, both
+processes must be started with explicit local write mode:
+
+```bash
+export BENCH_CONTROL_ENABLE_WRITES=1
+bench-control-api --host 127.0.0.1 --port 8765
+bench-dashboard --host 127.0.0.1 --port 8766 \
+  --api http://127.0.0.1:8765
+```
+
+Write mode refuses non-loopback binds. The control plane has no
+authentication, so do not expose it directly to a network. The exact-resume
+capability endpoint reports the certified and uncertified envelopes; absence
+from the certification matrix means unsupported, not best-effort support.
+
+## Offline visualization
+
+```bash
+python -m streamlit run viz/app/main.py
+```
+
+The Run Inspector reads completed artifacts and does not replace the control
+dashboard. ADCS replay and Vizard contract/tooling modules are included in the
+portable wheel. Historical Phase labels, mocks, and identity baselines establish
+structural support only; real KalmanNet package replay, Basilisk/native Vizard
+conversion, and manual frame/sign review remain explicit environment gates.
+
+## Packaging verification
+
+Editable installs can accidentally import untracked local files. The release
+check builds only `HEAD` from a Git archive, installs the wheel outside the
+repository, verifies the full benchmark/control/config/viz surface, and runs
+every public CLI help path:
+
+The release verifier requires the standard-library `venv` module (the
+`python3-venv` OS package on Debian/Ubuntu) and the development plus control
+extras in the invoking environment. It reuses those installed dependencies,
+but requires `bench` and `viz` themselves to import from the clean wheel:
+
+```bash
+python -m pip install -e '.[dev,control]'
+```
+
+```bash
+python scripts/verify_clean_wheel.py
+```
+
+For an already-built wheel:
+
+```bash
+python scripts/verify_portable_wheel.py dist/bench-*.whl
+```
+
+The wheel contains `bench`, its shipped suite YAML files, and `viz`. It does
+not contain run output, report output, data caches, or research evidence.
+
+## Research boundaries
+
+`DECISIONS.md`, `FAIRNESS.md`, and `METRICS.md` govern the benchmark contract.
+In a governed research checkout, the checkout's `AGENTS.md` and active
+control/state files also apply. Installing the package or passing a smoke test
+does not authorize a research stage, open sealed evaluation, or turn an
+execution result into scientific evidence.

@@ -1,0 +1,27 @@
+{
+  "schema_version": "side-study-checkpoint-manifest-v2",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "FINAL_SYNTHESIS",
+  "source_commit": "052d2f7217b964b1fa4e80bd643716b433780f08",
+  "hash_algorithm": "sha256",
+  "checkpoint_digest_rule": "sha256 over the raw bytes of this CHECKPOINT_MANIFEST.json file",
+  "files": [
+    {"path":"experiments/side_gyro_mag_comp/final/FINAL_RESULT.md","sha256":"2241cae17016456aff3a11aafc8c6dd11e25f4ba869bafc42e9f714f580d5b7b"},
+    {"path":"experiments/side_gyro_mag_comp/final/FINAL_DECISION.json","sha256":"293b6b6d1515997b743c335797325b56e46ba08f8170f14252f3705a184b3e1d"},
+    {"path":"experiments/side_gyro_mag_comp/final/FINAL_ARTIFACT_INDEX.json","sha256":"c30b916a5f5142335d0fa3eb9abc2653076ef464dbabb22b31393b9a44ee52ee"},
+    {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json","sha256":"74c0df75107af1a869794ba9310ee98cd64a33053626c31f89ec3d3875685d49"},
+    {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json","sha256":"32d5d2d8c3435c6bea8e9ccbb3ab4e32357c4347fc2cbaef65e40b3729ea1dd1"},
+    {"path":"docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md","sha256":"f57d7862e293eaed4c99afb7e0aefd37911731e6a550ba45e440863af02bb698"},
+    {"path":"docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md","sha256":"ee7c3411b0a45dd2b3805627b3b85fcd3545cf2a3d835acceca80aa2f7252aef"},
+    {"path":"agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md","sha256":"21b6784ddec8cfd2cef2bb5868f0fdeec2996c7dac4eb650239a293ec0b2ed99"},
+    {"path":".codex/config.toml","sha256":"315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"}
+  ],
+  "file_count": 9,
+  "excluded_from_manifest": [
+    {"path":"experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json","reason":"self-digest target"},
+    {"path":"experiments/side_gyro_mag_comp/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json","reason":"transport points to the single manifest target"},
+    {"path":"agent_system/side_gyro_mag_comp/state/STAGE_STATE.json","reason":"orchestrator-owned mutable coordination state"},
+    {"path":"experiments/side_gyro_mag_comp/final/FINAL_AUDIT.md","reason":"Claude-owned output created after seal"},
+    {"path":"experiments/side_gyro_mag_comp/final/FINAL_AUDIT.json","reason":"Claude-owned output created after seal"}
+  ]
+}

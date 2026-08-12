@@ -19,12 +19,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
+          pip install -e '.[dev]'
       - name: Run CPU regression
         env:
           BENCH_DATA_CACHE: ${{ github.workspace }}/bench_data_cache
         run: |
           python -m bench.tests.run_all --device cpu
+      - name: Run bounded ADCS replay and Vizard regressions
+        run: python -m bench.tests.adcs_replay_ci
       - name: Run representative shift suite and report
         env:
           BENCH_DATA_CACHE: ${{ github.workspace }}/bench_data_cache

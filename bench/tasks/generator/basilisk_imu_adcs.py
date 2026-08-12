@@ -268,6 +268,135 @@ def _imu_h_metadata(*, mode: str, dt: float, h: np.ndarray, imu_cfg: Mapping[str
     }
 
 
+def _resolve_event_disturbance_cfg(resolved_task: Mapping[str, Any]) -> Dict[str, Any]:
+    raw_obj = resolved_task.get("event_disturbance", {})
+    if not isinstance(raw_obj, Mapping):
+        raw_obj = {}
+    cfg = _json_clone(dict(raw_obj))
+    cfg.setdefault("enabled", False)
+    cfg.setdefault("event_start_frac", 0.45)
+    cfg.setdefault("event_duration_frac", 0.10)
+    cfg.setdefault("gyro_noise_scale_event", 10.0)
+    cfg.setdefault("gyro_bias_jump_std", 0.01)
+    cfg.setdefault("event_type", "measurement_gyro_bias_jump")
+    return cfg
+
+
+def _apply_measurement_event_disturbance(
+    *,
+    y_nominal: np.ndarray,
+    mapping: List[Dict[str, Any]],
+    event_cfg: Mapping[str, Any],
+    nominal_gyro_noise_std: float,
+    suite_name: str,
+    task_id: str,
+    scenario_id: str,
+    seed: int,
+) -> Tuple[np.ndarray, Dict[str, np.ndarray], Dict[str, Any], List[int]]:
+    y = np.asarray(y_nominal, dtype=np.float64)
+    if y.ndim != 3:
+        raise ValueError(f"measurement event expects y_nominal [N,T,D], got {y.shape}")
+    if not bool(event_cfg.get("enabled", False)):
+        return y, {}, {}, []
+
+    gyro_entry = next((item for item in mapping if str(item.get("alias")) == "gyro"), None)
+    if gyro_entry is None:
+        raise ValueError("event_disturbance requires a gyro measurement in imu field_mapping")
+    gyro_columns = [int(v) for v in gyro_entry.get("columns", [])]
+    if len(gyro_columns) != 3 or min(gyro_columns) < 0 or max(gyro_columns) >= int(y.shape[2]):
+        raise ValueError(f"invalid gyro measurement columns for event disturbance: {gyro_columns}")
+
+    event_start_frac = float(event_cfg.get("event_start_frac", 0.45))
+    event_duration_frac = float(event_cfg.get("event_duration_frac", 0.10))
+    gyro_noise_scale_event = float(event_cfg.get("gyro_noise_scale_event", 10.0))
+    gyro_bias_jump_std = float(event_cfg.get("gyro_bias_jump_std", 0.01))
+    if not math.isfinite(event_start_frac) or not 0.0 <= event_start_frac < 1.0:
+        raise ValueError("event_disturbance.event_start_frac must be finite and in [0, 1)")
+    if not math.isfinite(event_duration_frac) or event_duration_frac <= 0.0:
+        raise ValueError("event_disturbance.event_duration_frac must be finite and > 0")
+    if not math.isfinite(gyro_noise_scale_event) or gyro_noise_scale_event < 0.0:
+        raise ValueError("event_disturbance.gyro_noise_scale_event must be finite and >= 0")
+    if not math.isfinite(gyro_bias_jump_std) or gyro_bias_jump_std < 0.0:
+        raise ValueError("event_disturbance.gyro_bias_jump_std must be finite and >= 0")
+
+    n_total, t_len, y_dim = y.shape
+    event_start = int(event_start_frac * t_len)
+    event_duration = max(1, int(event_duration_frac * t_len))
+    event_end = min(t_len, event_start + event_duration)
+    event_duration = event_end - event_start
+    event_noise_std = float(nominal_gyro_noise_std) * gyro_noise_scale_event
+
+    event_flag = np.zeros((n_total, t_len, 1), dtype=np.float64)
+    event_bias_component = np.zeros((n_total, t_len, y_dim), dtype=np.float64)
+    event_noise_component = np.zeros((n_total, t_len, y_dim), dtype=np.float64)
+    event_start_seq = np.full((n_total,), event_start, dtype=np.float64)
+    event_end_seq = np.full((n_total,), event_end, dtype=np.float64)
+    event_duration_seq = np.full((n_total,), event_duration, dtype=np.float64)
+
+    for i in range(n_total):
+        event_rng = numpy_rng_v0(
+            stable_int_seed_v0(
+                "basilisk_imu_measurement_event",
+                suite_name,
+                task_id,
+                scenario_id,
+                int(seed),
+                int(i),
+            )
+        )
+        bias_jump = event_rng.normal(0.0, gyro_bias_jump_std, size=3)
+        event_noise = event_rng.normal(0.0, event_noise_std, size=(event_duration, 3))
+        event_flag[i, event_start:event_end, 0] = 1.0
+        for axis, column in enumerate(gyro_columns):
+            event_bias_component[i, event_start:event_end, column] = bias_jump[axis]
+            event_noise_component[i, event_start:event_end, column] = event_noise[:, axis]
+
+    y_event = y + event_bias_component + event_noise_component
+    extras = {
+        "event_flag_seq": event_flag.astype(np.float32),
+        "event_bias_component_seq": event_bias_component.astype(np.float32),
+        "event_noise_component_seq": event_noise_component.astype(np.float32),
+        "event_start_seq": event_start_seq.astype(np.float32),
+        "event_end_seq": event_end_seq.astype(np.float32),
+        "event_duration_seq": event_duration_seq.astype(np.float32),
+    }
+    meta = {
+        "enabled": True,
+        "event_type": str(event_cfg.get("event_type", "measurement_gyro_bias_jump")),
+        "event_start_frac": event_start_frac,
+        "event_duration_frac": event_duration_frac,
+        "event_start": int(event_start),
+        "event_end": int(event_end),
+        "event_duration": int(event_duration),
+        "deterministic_window_per_trajectory": True,
+        "gyro_measurement_columns": gyro_columns,
+        "gyro_noise_scale_event": gyro_noise_scale_event,
+        "nominal_gyro_noise_std": float(nominal_gyro_noise_std),
+        "event_noise_component_std": event_noise_std,
+        "noise_scale_semantics": (
+            "event_noise_component_std = nominal_gyro_noise_std * gyro_noise_scale_event"
+        ),
+        "gyro_bias_jump_std": gyro_bias_jump_std,
+        "bias_jump_semantics": "one sampled 3-axis offset per trajectory, active only during the event window",
+        "units": str(gyro_entry.get("units", "match_existing_gyro_measurement_units")),
+        "truth_dynamics_modified": False,
+        "storage": {
+            "event_flag": "event_flag_seq",
+            "event_bias_component": "event_bias_component_seq",
+            "event_noise_component": "event_noise_component_seq",
+            "event_start": "event_start_seq",
+            "event_end": "event_end_seq",
+            "event_duration": "event_duration_seq",
+        },
+        "stats": {
+            "event_fraction_observed": float(np.mean(event_flag)),
+            "event_bias_component_norm_mean": _mean_step_norm(event_bias_component),
+            "event_noise_component_norm_mean": _mean_step_norm(event_noise_component),
+        },
+    }
+    return y_event, extras, meta, gyro_columns
+
+
 def _resolve_bias_state_cfg(resolved_task: Mapping[str, Any]) -> Dict[str, Any]:
     raw_obj = resolved_task.get("bias_state", resolved_task.get("imu_bias", {}))
     if not isinstance(raw_obj, Mapping):
@@ -492,6 +621,7 @@ def generate_basilisk_imu_adcs_v0(
         raise ValueError(f"basilisk_imu_adcs_v0 requires x_dim=6, got x_dim={x_dim}")
 
     imu_cfg = _resolve_imu_cfg(resolved_task)
+    event_cfg = _resolve_event_disturbance_cfg(resolved_task)
     mode = str(imu_cfg.get("measurement_mode", "gyro_delta_angle"))
     if mode not in _FIELD_SPECS:
         raise ValueError(f"unsupported IMU measurement_mode={mode!r}; supported={sorted(_FIELD_SPECS)}")
@@ -575,7 +705,40 @@ def generate_basilisk_imu_adcs_v0(
             }
         )
 
+    event_extras: Dict[str, np.ndarray] = {}
+    event_meta: Dict[str, Any] = {}
+    event_gyro_columns: List[int] = []
+    if bool(event_cfg.get("enabled", False)):
+        y_all, event_extras, event_meta, event_gyro_columns = _apply_measurement_event_disturbance(
+            y_nominal=y_all,
+            mapping=mapping,
+            event_cfg=event_cfg,
+            nominal_gyro_noise_std=_std_from_cfg(imu_cfg, "gyro_noise_std", 0.0),
+            suite_name=suite_name,
+            task_id=task_cfg.task_id,
+            scenario_id=scenario_id,
+            seed=int(seed),
+        )
+        event_delta = (
+            np.asarray(event_extras["event_bias_component_seq"], dtype=np.float64)
+            + np.asarray(event_extras["event_noise_component_seq"], dtype=np.float64)
+        )
+        gyro_all += event_delta[:, :, event_gyro_columns]
+
     imu_error = y_all - clean_y_all
+    if event_meta:
+        event_mask = np.asarray(event_extras["event_flag_seq"][:, :, 0] > 0.5)
+        gyro_error = imu_error[:, :, event_gyro_columns]
+        event_std_by_axis = np.std(gyro_error[event_mask], axis=0)
+        non_event_std_by_axis = np.std(gyro_error[~event_mask], axis=0)
+        event_meta["stats"].update(
+            {
+                "event_gyro_error_std_by_axis": event_std_by_axis.astype(float).tolist(),
+                "non_event_gyro_error_std_by_axis": non_event_std_by_axis.astype(float).tolist(),
+                "event_gyro_error_std_mean": float(np.mean(event_std_by_axis)),
+                "non_event_gyro_error_std_mean": float(np.mean(non_event_std_by_axis)),
+            }
+        )
     q2_t = np.full((t_len,), float(q2), dtype=np.float32)
     r2_t = np.full((t_len,), float(r2_scalar), dtype=np.float32)
     sow_t = q2_t / np.maximum(r2_t, np.float32(1.0e-12))
@@ -720,6 +883,8 @@ def generate_basilisk_imu_adcs_v0(
         },
         "attitude_representation": "MRP",
     }
+    if event_meta:
+        meta_common["measurement_event"] = event_meta
 
     out = coerce_ntd_float32_output(
         GeneratorOutput(
@@ -742,6 +907,7 @@ def generate_basilisk_imu_adcs_v0(
                 "imu_clean_delta_v_seq": clean_delta_v_all.astype(np.float32),
                 "imu_clean_y_seq": clean_y_all.astype(np.float32),
                 "imu_error_seq": imu_error.astype(np.float32),
+                **event_extras,
                 "task_key": f"{task_family}:{task_cfg.task_id}:{scenario_id}",
             },
         )

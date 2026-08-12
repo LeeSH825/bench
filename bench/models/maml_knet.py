@@ -1092,11 +1092,6 @@ class MAMLKNetAdapter(ModelAdapter):
             label="x_hat",
         )
 
-        preds_path = None
-        if self._artifacts_dir is not None:
-            preds_path = self._artifacts_dir / "preds_test.npz"
-            np.savez_compressed(preds_path, x_hat=x_hat.numpy())
-
         self.adapt_updates_used = 0
         self._update_ledger(
             train_outer_updates_used=int(self.train_outer_updates_used),
@@ -1108,7 +1103,7 @@ class MAMLKNetAdapter(ModelAdapter):
             "status": "ok",
             "x_hat": x_hat,
             "cov": None,
-            "preds_path": (str(preds_path) if preds_path is not None else None),
+            "preds_path": None,
         }
 
     def load(self, ckpt_path: str) -> None:

@@ -1,0 +1,113 @@
+suite:
+  name: basilisk_spike_split_cpu_phase_a_event_kalmannet
+  version: "0.1.0"
+  description: >
+    CPU event-only baseline run for KalmanNet_TSP under the same conditions as
+    the completed CPU Phase A event-only Spike-Split suite.
+
+seeds: [0]
+
+tasks:
+  - task_id: Basilisk_IMU_ADCS_event_spike_split_cpu_phase_a_event_v0
+    task_name: "Basilisk IMU ADCS Measurement Event KalmanNet_TSP Baseline"
+    task_family: basilisk_imu_adcs_v0
+    system_type: nonlinear
+    x_dim: 6
+    y_dim: 6
+    sequence_length_T: 200
+    dataset_sizes: {N_train: 100, N_val: 20, N_test: 20}
+    simulation:
+      dt: 0.1
+      inertia: [10.0, 8.0, 6.0]
+      disturbance_torque: [0.0, 0.0, 0.0]
+      sigma0_std: 0.05
+      sigma0_max_norm: 0.25
+      omega0_std: 0.01
+    noise:
+      Q: {type: "scaled_identity", q2: 1.0e-8}
+    observation:
+      type: basilisk_imu_sensor
+      h_type: imu_sensor_packet
+      measurement_mode: gyro_delta_angle
+    imu:
+      measurement_mode: gyro_delta_angle
+      gyro_noise_std: 2.0e-4
+      accel_noise_std: 0.0
+      gyro_bias_std: 0.0
+      accel_bias_std: 0.0
+      sensor_pos_B: [0.0, 0.0, 0.0]
+      body_to_platform_euler321_rad: [0.0, 0.0, 0.0]
+    event_disturbance:
+      enabled: true
+      event_start_frac: 0.45
+      event_duration_frac: 0.10
+      gyro_noise_scale_event: 10.0
+      gyro_bias_jump_std: 0.01
+      event_type: measurement_gyro_bias_jump
+    control_input_u: false
+    ground_truth: {has_gt: true}
+    sweep: {}
+
+models:
+  - model_id: kalmannet_tsp
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo: {path: "third_party/KalmanNet_TSP"}
+    estimator_class_path: "KNet.KalmanNet_nn.KalmanNetNN"
+    input_layout: "BTD"
+    batch_size: 10
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    max_grad_norm: 1.0
+    train_steps_hint: 500
+    val_eval_interval_updates: 50
+    train_init_from_gt: true
+    eval_init_from_gt: false
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: "cpu"
+  precision: "fp32"
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: "bench_generated"
+  model_cache_dir: "runs/_model_cache/basilisk_spike_split_cpu_phase_a_event_kalmannet"
+  budget:
+    train_max_updates: 500
+    train_batch_size: 10
+    eval_batch_size: 20
+  early_stopping:
+    monitor: "val/mse_db"
+    mode: "min"
+    patience_evals: 0
+    min_delta: 0.0
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db", "timing_ms_per_step", "nll"]
+  nll_policy:
+    if_no_covariance: "NA"
+  shift_recovery_definition:
+    enabled: false
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  artifacts:
+    - "config_snapshot.yaml"
+    - "run_plan.json"
+    - "budget_ledger.json"
+    - "checkpoints/model.pt"
+    - "checkpoints/train_state.json"
+    - "metrics.json"
+    - "metrics_step.csv"
+    - "timing.csv"
+  tables:
+    summary_csv: "reports/summary_basilisk_spike_split_cpu_phase_a_event_kalmannet.csv"

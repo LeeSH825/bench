@@ -1,0 +1,31 @@
+{
+  "schema_version": "side-study-changed-paths-v1",
+  "stage": "IMPLEMENTATION",
+  "paths": [
+    "bench/configs/side_gyro_mag_comp_v1.yaml",
+    "bench/side_gyro_mag_comp_v1/__init__.py",
+    "bench/side_gyro_mag_comp_v1/data.py",
+    "bench/side_gyro_mag_comp_v1/model.py",
+    "bench/side_gyro_mag_comp_v1/study.py",
+    "tests/side_gyro_mag_comp_v1/test_data_firewalls_red.py",
+    "tests/side_gyro_mag_comp_v1/test_math_and_model_red.py",
+    "tests/side_gyro_mag_comp_v1/test_training_gates_and_runtime_red.py",
+    "experiments/side_gyro_mag_comp/implementation/SC_IMPLEMENTATION_REPORT.md",
+    "experiments/side_gyro_mag_comp/implementation/SC_IMPLEMENTATION_DECISION.json",
+    "experiments/side_gyro_mag_comp/implementation/COMMANDS.json",
+    "experiments/side_gyro_mag_comp/implementation/CHANGED_PATHS.json",
+    "experiments/side_gyro_mag_comp/implementation/TEST_RESULTS.json",
+    "experiments/side_gyro_mag_comp/implementation/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp/implementation/smoke/SMOKE_RESULT.json",
+    "experiments/side_gyro_mag_comp/implementation/smoke/checkpoints/N0.pt",
+    "experiments/side_gyro_mag_comp/implementation/smoke/checkpoints/N1.pt",
+    "experiments/side_gyro_mag_comp/implementation/smoke/checkpoints/N2.pt",
+    "experiments/side_gyro_mag_comp/implementation/smoke/checkpoints/N3.pt",
+    "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json"
+  ],
+  "path_count": 20,
+  "outside_allowlist_modified_by_this_stage": [],
+  "orchestrator_owned_control_amendments_observed": [
+    "prompts/side_gyro_mag_comp/05_CODEX_MINIMAL_EXPERIMENT_EXECUTION.md"
+  ]
+}

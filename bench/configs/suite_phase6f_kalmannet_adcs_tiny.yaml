@@ -1,0 +1,120 @@
+suite:
+  name: phase6f_kalmannet_adcs_tiny
+  version: "0.1.0"
+  description: >
+    Tiny CPU-oriented 9x6 ADCS replay training contract for KalmanNet_TSP.
+    This suite defines the intended direct-observation task. The benchmark
+    runner structurally supports replay_generated training, but this tiny
+    smoke contract is not verified real-model inference or a scientific
+    benchmark result.
+
+seeds: [0]
+
+tasks:
+  - task_id: phase6f_adcs_bias_tiny_v0
+    task_name: "Phase 6F tiny KalmanNet ADCS bias task"
+    enabled: true
+    task_family: adcs_replay_v0
+    system_type: adcs_replay
+    x_dim: 9
+    y_dim: 6
+    sequence_length_T: 25
+    dataset_sizes:
+      N_train: 32
+      N_val: 8
+      N_test: 8
+    time:
+      dt_s: 0.5
+    state_schema:
+      attitude:
+        type: mrp
+        name: sigma_BN
+        indices: [0, 1, 2]
+      angular_rate:
+        type: rad_s
+        name: omega_BN_B
+        indices: [3, 4, 5]
+      gyro_bias:
+        type: rad_s
+        name: gyro_bias
+        indices: [6, 7, 8]
+        optional: true
+    initial_state:
+      sigma_BN: [0.0, 0.0, 0.0]
+      omega_BN_B_rad_s: [0.001, -0.002, 0.003]
+      gyro_bias_rad_s: [0.0001, -0.0001, 0.0002]
+    dynamics:
+      type: simple_attitude_bias
+      attitude_motion: constant_rate
+      gyro_bias_model: constant
+      process_noise_std:
+        attitude_mrp: 0.0
+        angular_rate_rad_s: 0.0
+        gyro_bias_rad_s: 0.0
+    noise:
+      form: diag
+      replay_measurement:
+        attitude_mrp: 0.001
+        angular_rate_rad_s: 0.0001
+        gyro_bias_rad_s: 0.0
+    observation:
+      type: partial
+      h_type: linear
+      observed_state: [0, 1, 2, 3, 4, 5]
+    control_input_u: false
+    ground_truth:
+      has_gt: true
+    vizard:
+      position_source: dummy_circular_orbit
+    replay:
+      enabled: true
+      trajectory_id: 0
+      expected_model_input: y_obs
+      notes: >
+        Phase 6F training/export smoke contract. Not intended for benchmark
+        reporting.
+    sweep: {}
+
+models:
+  - model_id: kalmannet_tsp
+    enabled: true
+    display_name: "KalmanNet_TSP"
+    adapter: "bench.models.kalmannet_tsp:KalmanNetTSPAdapter"
+    repo:
+      path: "third_party/KalmanNet_TSP"
+    input_layout: "BTD"
+    batch_size: 4
+    lr: 1.0e-4
+    weight_decay: 1.0e-3
+    val_eval_interval_updates: 5
+    in_mult_KNet: 5
+    out_mult_KNet: 40
+    capabilities:
+      supports_adaptation: false
+      outputs_covariance: false
+      needs_system_model: true
+
+runner:
+  device: cpu
+  precision: fp32
+  deterministic: true
+  enabled_policy:
+    task_default: true
+    model_default: true
+    skip_if_disabled: true
+  data_mode: replay_generated
+  budget:
+    train_max_updates: 5
+    train_batch_size: 4
+    eval_batch_size: 4
+  tracks:
+    - track_id: frozen
+      adaptation_enabled: false
+
+metrics:
+  list: ["mse", "rmse", "mse_db"]
+
+reporting:
+  output_dir_template: "runs/{suite.name}/{task_id}/{model_id}/{track_id}/seed_{seed}/scenario_{scenario_id}"
+  tables:
+    summary_csv: "reports/summary_phase6f_kalmannet_adcs_tiny.csv"

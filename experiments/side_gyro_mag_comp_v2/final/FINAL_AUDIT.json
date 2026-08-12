@@ -1,0 +1,344 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-final-audit-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "auditor": "claude-sole-independent-final-auditor",
+  "audit_stage": "FINAL_INDEPENDENT_AUDIT",
+  "fresh_audit_context": true,
+  "subagents_used": [],
+  "source_commit": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+
+  "decision": "FAIL_FINAL_REPORT_MISMATCH",
+  "blocker_upheld": true,
+  "blocker_softened": false,
+  "codex_final_decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "codex_method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "codex_decision_direction_confirmed": true,
+  "scientific_conclusion": "NONE_CONTRACT_INCOMPLETE",
+  "scientific_result_inferred_by_auditor": false,
+  "gate_outcomes": {"G0":"NOT_RUN","G1":"NOT_RUN","G2":"NOT_RUN","G3":"NOT_RUN","G4":"NOT_RUN"},
+  "experiments_run": 0,
+  "result_files_found": 0,
+
+  "audit_target": {
+    "path": "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json",
+    "declared_sha256": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "recomputed_sha256_before_audit": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "recomputed_sha256_after_audit": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+    "checkpoint_stable": true,
+    "digest_rule": "sha256 over raw checkpoint-manifest bytes",
+    "target_count": 1,
+    "declared_member_count": 9,
+    "manifest_member_files_verified": 9,
+    "manifest_member_hash_matches": 9,
+    "manifest_member_hash_mismatches": 0,
+    "manifest_member_files_missing": 0,
+    "member_verification_result": "9/9 VERIFIED",
+    "members": [
+      {"path":"docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json","sha256":"50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json","sha256":"2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/contract/CONTRACT_MUTATION_RESULT.json","sha256":"1ccc31eba3c7e8dbf6c4ee59eec75fa950799f84f18e30563267a192397191fa","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json","sha256":"e38e481c251e019def6f5a74191cf68b6388f2c42a9583f55d1f933df18a50e2","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/final/FINAL_RESULT.md","sha256":"2f7c7381ed1d7f5aec5f7d3059922b821a60a849af59803bdd649fa83e3d92b7","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/final/FINAL_DECISION.json","sha256":"40849e3b25f82f8839f29ff2b94fe5285f0a3184d127671f691e6ebbc536d13d","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/final/FINAL_ARTIFACT_INDEX.json","sha256":"3802a05177b13e3c7ba22deb4dcf568f74c263d4ae048f8721fc4a3d1d0d98d6","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/final/COMMANDS.json","sha256":"c5726a45d08cdbd2fd2e9c5ed3dcfeeae8ac81f5f4accb3bd2bb89d88b4a8959","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp_v2/final/CHANGED_PATHS.json","sha256":"819c0f9a5f451816dafccf1185060c6baf5e79118aa589647579b818926e24fb","result":"MATCH"}
+    ],
+    "contract_checkpoint_cross_verification": {
+      "path": "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+      "sha256": "2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd",
+      "members_verified": 10,
+      "members_declared": 10,
+      "mismatches": 0
+    }
+  },
+
+  "pass_qualification_of_this_final_audit": {
+    "predicate_nonempty": true,
+    "predicate_unambiguous": true,
+    "single_predicate": true,
+    "single_predicate_detail": "One interrogative in conjunctive form; its five conjuncts are each independently decidable against machine evidence. All five were evaluated.",
+    "non_empty_population": true,
+    "non_empty_population_detail": "9 final manifest members, 10 contract manifest members, 15 metric descriptors, 13 repair obligations, 85 archive paths.",
+    "unambiguous_target": true,
+    "unambiguous_target_detail": "A single canonical final checkpoint manifest, digest-stable across the audit window.",
+    "stable_checkpoint": true,
+    "red_path_present": true,
+    "overall": "MET"
+  },
+
+  "red_path": {
+    "claim_under_test": "The effective repair_obligations array is not derived from or deep-equal to the immutable source projection and can be weakened while the validator still passes.",
+    "command": "python3 /tmp/claude_redcheck.py",
+    "method": "Loaded agent_system/side_gyro_mag_comp_v2/control/validate_contract.py by importlib from its real path; deep-copied the pristine sealed contract; invoked validate_contract_data(contract, workspace=False) on a control and a treatment. Entirely in memory. No repository source edited.",
+    "workspace_conjunct_excluded": true,
+    "workspace_exclusion_rationale": "validate_workspace is a time-of-check assertion over live git state that has legitimately drifted since the contract seal; excluding it isolates the contract-data predicate under test.",
+    "control": {
+      "input": "pristine sealed canonical contract 50a1c4a6...",
+      "result": "PASS",
+      "checks_passed": 6,
+      "checks": ["archive_identity_84_plus_1_and_9_of_9","source_and_immutable_pins","exact_r1_r13_and_r9_source_projections","method_boundary_identity_and_all_valid_observability","split_aware_metric_bindings_and_exact_g0_g4_arithmetic","repair_invariants_stage_stop_and_exclusions"]
+    },
+    "treatment": {
+      "mutation": "Every effective_v2_change in repair_obligations emptied to \"\" (except R8, held at the literal substring \"all-valid observability semantics\" that the validator checks); every other obligation field deleted; R1-R13 id sequence preserved.",
+      "result": "PASS",
+      "checks_passed": 6,
+      "checks_identical_to_control": true
+    },
+    "outcome": "RED CHECK REPRODUCED - weakened repair_obligations SURVIVED validation",
+    "defect_status": "CONFIRMED",
+    "supporting_measurements": {
+      "source_required_repairs_rows": 13,
+      "projection_field_deep_equal_to_source": true,
+      "pristine_effective_array_deep_equal_to_source": false,
+      "weakened_effective_array_deep_equal_to_source": false,
+      "validator_reference_count_for_repair_obligations": 1,
+      "validator_reference_line": 281,
+      "binding_gap": "exact_r1_r13_and_r9_source_projections binds canonical_source_projections.required_repairs_verbatim, a separate declarative field; validate_policy checks the effective array only for [R1..R13] id equality plus three R8 substring assertions (validate_contract.py:281-286). Nothing joins the two."
+    },
+    "mutation_matrix_cannot_cover_this": {
+      "category_counts_contain_repair_obligations": false,
+      "conclusion": "The 485-mutation matrix never mutates the effective repair_obligations array. The recorded qualification INSUFFICIENT_NOT_A_PASS is accurate and, on this evidence, understated rather than overstated."
+    },
+    "repository_sources_unchanged_by_red_check": true
+  },
+
+  "four_recorded_second_review_defects": [
+    {"id":"D-1","defect":"Metric producers bind a source .py path but not the exact emitted JSON/CSV evidence path, evidence schema, and report-resolution rule.","auditor_status":"CONFIRMED_STRUCTURALLY","evidence":"PRODUCER_FIELDS is exactly {machine_path, callable, output_schema, value_field}. output_schema holds a schema name (side-gyro-mag-comp-v2-metric-record-v1), not an emitted artifact path. No producer carries any emitted-evidence path, evidence-file schema, or report-resolution field.","weakened_in_bundle":false},
+    {"id":"D-2","defect":"The effective repair_obligations array is not derived from or deep-equal to the immutable source projection and can be weakened while the validator still passes.","auditor_status":"CONFIRMED_BY_REPRODUCED_RED_CHECK","evidence":"See red_path.","weakened_in_bundle":false},
+    {"id":"D-3","defect":"Wrong-namespace Claude-authored artifacts escaped the changed-path and v1-freeze validation boundary.","auditor_status":"CONFIRMED_STRUCTURALLY","evidence":"V2_PREFIXES covers only the three *_v2 namespaces, so actual_v2_changed_paths() is structurally blind to agent_system/side_gyro_mag_comp/. The v1-freeze conjunct (validate_contract.py:337) uses git diff --name-only against a tracked pathspec, which does not report untracked files. An untracked artifact in the v1 namespace passes both boundaries unseen.","weakened_in_bundle":false},
+    {"id":"D-4","defect":"The declared metric producer path is excluded by the frozen implementation allowlist.","auditor_status":"CONFIRMED_DECISIVELY","evidence":"All 15 metric descriptors declare producer.machine_path = bench/side_gyro_mag_comp_v2/evaluation.py. That path is outside every entry of authorized_v2_paths, and validate_changed_path_list (validate_contract.py:313) affirmatively rejects any declared changed path beginning with bench/. The path does not exist and cannot lawfully be made to exist.","weakened_in_bundle":false}
+  ],
+  "four_defects_represented_without_weakening": true,
+  "five_first_review_defects_represented_without_weakening": true,
+
+  "repair_exhaustion_verification": {
+    "contract_repair_rounds_consumed": 1,
+    "contract_repair_rounds_remaining": 0,
+    "one_contract_repair_exhausted": true,
+    "repair_evidence_recorded_as": {
+      "canonical_contract_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+      "contract_checkpoint_sha256": "2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd",
+      "validator_result": "PASS_7_OF_7",
+      "mutation_result": "PASS_485_OF_485_MUTATIONS_REJECTED",
+      "qualification": "INSUFFICIENT_NOT_A_PASS"
+    },
+    "qualification_correctly_not_treated_as_pass": true
+  },
+
+  "forbidden_execution_verification": {
+    "implementation_files_found": 0,
+    "results_files_found": 0,
+    "bench_side_gyro_mag_comp_v2_exists": false,
+    "tests_side_gyro_mag_comp_v2_exists": false,
+    "implementation_commands_recorded": 0,
+    "test_commands_recorded": 0,
+    "smoke_commands_recorded": 0,
+    "performance_commands_recorded": 0,
+    "G0_G4_commands_recorded": 0,
+    "test_or_held_out_payload_commands_recorded": 0,
+    "no_implementation_or_G0_G4_or_test_or_performance_access_occurred": true,
+    "sealed_main_phase2_evaluation_payloads_inspected_by_auditor": false
+  },
+
+  "v1_and_config_preservation": {
+    "independently_recomputed": true,
+    "adopted_from_report": false,
+    "archive_branch": "codex/side-gyro-mag-comp-v1-terminal-archive",
+    "archive_branch_tip_equals_archive_commit": true,
+    "base_evidence_commit": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+    "self_contained_archive_commit": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+    "archive_parent_is_exact_base": true,
+    "base_staged_path_count": 84,
+    "companion_staged_paths": [".codex/config.toml"],
+    "archive_total_unique_path_count": 85,
+    "paths_present_in_working_tree": 85,
+    "missing_paths": 0,
+    "byte_mismatches": 0,
+    "extra_versionable_paths": 0,
+    "extra_versionable_paths_observed_as_of": "audit window, prior to 2026-08-06T14:29Z; see post_audit_close_addendum",
+    "extra_enumeration_method": "full recursive enumeration of all v1 namespaces including ignored files, plus .codex/config.toml",
+    "path_for_path_full_working_tree_match": true,
+    "archived_v1_final_manifest_path": "experiments/side_gyro_mag_comp/final/CHECKPOINT_MANIFEST.json",
+    "archived_v1_final_manifest_result": "PASS_9_OF_9",
+    "config_path": ".codex/config.toml",
+    "config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d",
+    "config_matches_pin": true,
+    "config_modified": false,
+    "v1_working_namespace_preserved": true,
+    "v1_archive_preserved": true,
+    "immutable_v1_r1_r13_sources_verified": [
+      {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json","sha256":"087713e7c05b4166af3bc6e144bb98dac46c713e94c12dc402c07300b9064839","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT.json","sha256":"74c0df75107af1a869794ba9310ee98cd64a33053626c31f89ec3d3875685d49","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPLEMENTATION_AUDIT_ADDENDUM.md","sha256":"e4f74facdce348790b3703b5884d50c879281530b76be14923df08b730e2e9d2","result":"MATCH"},
+      {"path":"experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json","sha256":"32d5d2d8c3435c6bea8e9ccbb3ab4e32357c4347fc2cbaef65e40b3729ea1dd1","result":"MATCH"}
+    ],
+    "reported_value_not_reproducible_from_its_own_description": {
+      "field": "path_byte_set_sha256",
+      "declared": "d9668c89768781cd98041533c06000cf97f560054fb4c763753204809f0dcd9a",
+      "auditor_recomputation_under_auditor_serialization": "587e629b79e58f50f6bad54ef44042f66b462babb3b24ff1f1517e1c2b450ae4",
+      "assessment": "No sealed artifact specifies the serialization, so the digest is not reproducible from its own description. Every substantive claim it summarizes (85/85, 0 missing, 0 extra, 0 mismatch, 9/9, pinned config) verified directly and independently.",
+      "is_basis_for_audit_failure": false
+    }
+  },
+
+  "wrong_namespace_cleanup_verification": {
+    "files": [
+      {"path":"agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json","pre_cleanup_sha256_recorded":true,"pre_cleanup_sha256":"6b439b774b2b467ff0f785f2ad90798c9ec70d5572245d5bc35eb37bba74c2e5","absent_now":true},
+      {"path":"agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md","pre_cleanup_sha256_recorded":true,"pre_cleanup_sha256":"d9803219e65a7932a8b9c8363b7e10519abf835da51ad3818610bd199dd24751","absent_now":true},
+      {"path":"agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md","pre_cleanup_sha256_recorded":true,"pre_cleanup_sha256":"a1230cd7e6e2d20a14e74941bd4b62ec709032397d87ee3dcf7fb738665f8e3f","absent_now":true}
+    ],
+    "hashes_recorded_and_files_absent": true,
+    "absence_observed_as_of": "audit window, prior to 2026-08-06T14:29Z",
+    "superseded_by_addendum": "post_audit_close_addendum",
+    "auditor_certifies_deletion_was_authorized": false,
+    "auditor_note": "The verifiable part is confirmed: the three files are absent and their pre-cleanup hashes are recorded, and they are not presented as valid v2 authority or audit. Whether the peer was authorized to adjudicate and delete Claude-owned governance artifacts is a governance question that cannot be settled from bytes, and this audit does not certify it."
+  },
+
+  "no_codex_fabricated_final_audit": {
+    "FINAL_AUDIT_md_absent_at_audit_open": true,
+    "FINAL_AUDIT_json_absent_at_audit_open": true,
+    "codex_fabricated_independent_audit_evidence": false
+  },
+
+  "findings": [
+    {
+      "id": "A",
+      "severity": "DECISIVE_REPORT_MISMATCH",
+      "title": "An undisclosed deletion in the Claude-owned handoff namespace is a machine precondition of the sealed PASS",
+      "location": "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py:344; experiments/side_gyro_mag_comp_v2/final/CHANGED_PATHS.json; experiments/side_gyro_mag_comp_v2/final/COMMANDS.json; experiments/side_gyro_mag_comp_v2/contract/CHANGED_PATHS.json",
+      "statement": "The sealed validator hardcodes require(not Path('experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_TO_CODEX_PREREGISTERED_CRITERIA.json').exists()). The recorded 7/7 PASS is therefore conditional on the absence of a named file in the Claude-owned handoff directory. No sealed artifact discloses either the deletion or the condition.",
+      "evidence": [
+        "validate_contract.py:344 is a require-absent assertion naming the exact path, with error message 'Codex-created artifact remains in Claude-owned handoff path'",
+        "experiments/side_gyro_mag_comp_v2/handoffs/claude/ is empty, yet its mtime is 2026-08-06 23:08:20 +0900 while the directory was created at 23:00:44; an empty directory's mtime advances only when an entry is added or removed",
+        "the contract-stage independent audit records the file at 23:03:49 as pre-registered acceptance criteria",
+        "final CHANGED_PATHS.json records 8 finalization paths, 3 duplicate-authority deletions and 8 bytecode deletions, none in the Claude-owned namespace",
+        "contract CHANGED_PATHS.json records 13 paths and independent_audit_paths_created: [], with no deletion field",
+        "COMMANDS.json logs four records, none touching this path",
+        "targeted search across all sealed artifacts returns no disclosure"
+      ],
+      "authorship_of_deleted_file_adjudicated": false,
+      "authorship_note": "The validator error string frames it as a stray Codex artifact; the contract-stage audit claims it as the auditor's pre-registered criteria; the bytes are gone. Authorship is not the basis of this finding.",
+      "why_this_fails_the_audit": "The bundle's deleted-path and command accounting is presented as complete and is not. A terminal bundle whose evidence chain conditions its PASS on the removal of a peer-owned artifact, recording neither, is not an accurate final report.",
+      "changes_terminal_direction": false
+    },
+    {
+      "id": "B",
+      "severity": "CORROBORATING",
+      "title": "The sealed defect set is known to be incomplete",
+      "statement": "experiments/side_gyro_mag_comp_v2/audits/SC_V2_CONTRACT_INDEPENDENT_AUDIT.json (sha256 5fbafc4c884086d414263f14425b6c4165551d716ed094cad0298b3b66612e75) records a fifth blocking contract gap, the absence of the v1 gauge-fixing and identifiability anchors, explicitly flagged as appearing in neither Codex review.",
+      "codex_could_have_incorporated_it": false,
+      "codex_could_have_incorporated_it_reason": "That artifact is timestamped one minute after the Codex final seal.",
+      "is_a_misrepresentation_by_codex": false,
+      "effect": "Strengthens the blocked finding. Does not soften it.",
+      "independently_verified_by_this_auditor": false,
+      "independently_verified_note": "Recorded as reported by that artifact; this auditor did not re-derive the identifiability analysis and does not rely on it for the decision."
+    },
+    {
+      "id": "C",
+      "severity": "GOVERNANCE_DISCLOSED",
+      "title": "Concurrent Claude-role writer during the audit window",
+      "statement": "This auditor was designated sole independent final auditor. During the audit window a concurrent actor also claiming auditor 'claude-independent' wrote four artifacts, two of them at this auditor's mandated output paths. All four were absent at audit open. This auditor did not write them.",
+      "artifacts": [
+        {"path":"experiments/side_gyro_mag_comp_v2/audits/SC_V2_CONTRACT_INDEPENDENT_AUDIT.json","sha256":"5fbafc4c884086d414263f14425b6c4165551d716ed094cad0298b3b66612e75","appeared_kst":"23:24"},
+        {"path":"experiments/side_gyro_mag_comp_v2/audits/SC_V2_CONTRACT_INDEPENDENT_AUDIT.md","sha256":"99299a8696da67444085231496b97766c7338762a0ce4921cde23126985f12c8","appeared_kst":"23:25"},
+        {"path":"experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json","sha256":"c8d89d4126f6c63d818d147b7b19abc4dfef85a079fe7dc290f17b4766532623","appeared_kst":"23:27:48","superseded_by_this_audit":true},
+        {"path":"experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md","sha256":"04ddb4f711653993648e0b50fe86cecf5d6caf02ec3b735c1b16dae3668e989f","appeared_kst":"23:28:43","superseded_by_this_audit":true}
+      ],
+      "concurrent_actor_decision": "CONFIRM_BLOCKED_ON_ENLARGED_GROUNDS with predicate_result false; declared use of two subagents",
+      "why_not_adopted": "Adopting artifacts this auditor did not author as its own independent audit would commit precisely the adoption failure this governance structure exists to prevent. This audit was authored in their place under explicit principal instruction.",
+      "supersession_disclosed_not_silent": true,
+      "supersession_note": "Digests of the superseded artifacts are recorded above so the supersession is attributable rather than silent - the same standard this audit holds Codex to in Finding A.",
+      "convergence": "That actor's core conclusion and this one converge independently: the blocked outcome is right and the bundle's process accounting is not truthful. Its GV-1 'deleted_without_record' is the same artifact as Finding A, reached separately. This is corroboration, not adoption.",
+      "claims_not_relied_upon": [
+        "the 2650-file frozen-boundary fingerprint taken before this audit session",
+        "the contract-seal digest timeline 21fdb01b -> a2954c83 -> 50a1c4a6 and 93afc0c0 -> absent -> 31292d65 -> 2aa9a457",
+        "the assertion that validate_contract.py did not exist on disk until 23:11:09"
+      ],
+      "claims_not_relied_upon_reason": "Not reproducible by this auditor from present repository state; recorded as unverified rather than adopted."
+    }
+  ],
+
+  "sealed_validator_pass_reproducibility": {
+    "declared": {"decision":"PASS","exit_code":0,"check_count":7,"errors":[]},
+    "re_execution_today": {"decision":"FAIL","exit_code":1,"errors":["CHANGED_PATHS does not equal actual v2 git changes from archive baseline"]},
+    "treated_as_fabrication": false,
+    "rationale": "The failing conjunct is a time-of-check assertion over live git state. The v2 changed-path set has legitimately grown since the contract seal by the six final/ artifacts, the final handoff, and the four artifacts in Finding C. The auditor's control run confirms all six contract-data checks still pass on the pristine contract, so the sealed 7/7 is plausible as of its seal time.",
+    "finding_recorded_against_sealed_validation_result": false
+  },
+
+  "audit_predicate": "Does the sealed final bundle accurately preserve the two local review outcomes, explain why the 485/485 mutation result is insufficient, stop after the exhausted CONTRACT repair without implementation or G0-G4 execution, preserve the archive/config boundary, and avoid fabricating independent audit evidence?",
+  "predicate_conjunct_results": [
+    {"conjunct":"accurately preserves the two local review outcomes","result":true},
+    {"conjunct":"explains why the 485/485 mutation result is insufficient","result":true},
+    {"conjunct":"stops after the exhausted CONTRACT repair without implementation or G0-G4 execution","result":true},
+    {"conjunct":"preserves the archive/config boundary","result":false,"detail":"Holds for the v1 archive, v1 working namespace and config. Fails at the Claude-owned handoff boundary per Finding A."},
+    {"conjunct":"avoids fabricating independent audit evidence","result":true}
+  ],
+  "predicate_result": false,
+
+  "changed_paths": {
+    "exact_paths_written_by_this_audit": [
+      "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+      "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json",
+      "experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_FINAL_TO_CODEX.json",
+      "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json"
+    ],
+    "path_count": 4,
+    "codex_final_artifacts_edited": [],
+    "contract_edited": false,
+    "validator_edited": false,
+    "v1_paths_edited": [],
+    "config_edited": false,
+    "implementation_paths_created": [],
+    "test_paths_created": [],
+    "checkpoints_edited": [],
+    "results_edited": [],
+    "paths_deleted_by_this_audit": [],
+    "out_of_repository_scratch": ["/tmp/claude_redcheck.py"],
+    "red_check_edited_repository_sources": false
+  },
+
+  "claims_that_must_never_be_made_from_this_study": [
+    "compensation headroom","learned correction efficacy","incremental feature value","shuffle falsification","nominal harmlessness","performance","efficiency","novelty","physical covariance","NIS/NEES","calibrated uncertainty","observability beyond the tested dynamics and reference vector","high-cost-sensor equivalence","flight","closed-loop","energy","generality"
+  ],
+  "no_hypothesis_was_tested": true,
+
+  "post_audit_close_addendum": {
+    "reason": "A claim recorded during the audit window ceased to hold after this audit's outputs were written. It is corrected here rather than left stale.",
+    "event": "The concurrent Claude-role writer of Finding C recreated the three v1-namespace governance files at 2026-08-06 23:29:14 to 23:30:02 KST, after this auditor had observed them absent and after FINAL_AUDIT.md and FINAL_AUDIT.json were written.",
+    "files": [
+      {"path":"agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json","codex_pre_cleanup_sha256":"6b439b774b2b467ff0f785f2ad90798c9ec70d5572245d5bc35eb37bba74c2e5","sha256_now":"ac097d06e1e7d8d678ab32e9d25eba746d9352c2bc3d5594d95834e6db930311","byte_identical_to_pre_cleanup":false},
+      {"path":"agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md","codex_pre_cleanup_sha256":"d9803219e65a7932a8b9c8363b7e10519abf835da51ad3818610bd199dd24751","sha256_now":"53c2e48aee9cfcd49e5886b4971a45acec41febccb77ac68cf54f7211895b660","byte_identical_to_pre_cleanup":false},
+      {"path":"agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md","codex_pre_cleanup_sha256":"a1230cd7e6e2d20a14e74941bd4b62ec709032397d87ee3dcf7fb738665f8e3f","sha256_now":"44bb40be2a9a1296d8c4569c60fe9b1ee36683dd2af51bc595c6d261cc6bc17f","byte_identical_to_pre_cleanup":false}
+    ],
+    "classification": "New reconstructions, not byte-restorations of the deleted originals.",
+    "corrections_to_this_audit": [
+      "wrong_namespace_cleanup_verification.absent_now was true when observed and is false as of audit close.",
+      "v1_and_config_preservation.extra_versionable_paths was 0 when observed; as of audit close there are 3 extra untracked files in the v1 state namespace."
+    ],
+    "what_is_unaffected": {
+      "archive_member_integrity": "85/85 archive paths present, 0 missing, 0 byte mismatches, re-verified after the recreation",
+      "config_sha256_unchanged": true,
+      "archived_v1_final_manifest": "PASS_9_OF_9",
+      "final_checkpoint_target_and_members": "digest stable, 9/9 members match",
+      "reason_unaffected": "The three recreated files are untracked governance artifacts in the v1 state namespace, not members of the v1 archive or of any checkpoint manifest."
+    },
+    "effect_on_decision": "None. The decision remains FAIL_FINAL_REPORT_MISMATCH on Finding A, and the blocked status remains upheld. This event further evidences Finding C.",
+    "auditor_action_taken": "Recorded only. This auditor did not create, modify, or delete these files."
+  },
+
+  "terminal_state": "COMPLETE_BLOCKED",
+  "terminal": true,
+  "terminal_reason": "CONTRACT_INCOMPLETE_AFTER_ONE_EXHAUSTED_REPAIR_WITH_FINAL_REPORT_ACCOUNTING_MISMATCH",
+  "final_audit_outcome": "FAIL_FINAL_REPORT_MISMATCH",
+  "repairable_by_codex": false,
+  "repairable_by_codex_reason": "The CONTRACT repair budget is exhausted, so no further contract, validator or allowlist repair is authorized.",
+  "repairable_by_auditor": false,
+  "repairable_by_auditor_reason": "The defect lies in Codex final artifacts and the sealed validator, which this auditor is forbidden to edit.",
+  "next_actor": "PRINCIPAL",
+  "next_stage": "PRINCIPAL_GOVERNANCE_REVIEW",
+  "human_review_due": true,
+  "human_review_due_reason": "human_review_mode is FINAL_ONLY; the final stage is reached, the final report failed independent audit, and Finding C records a concurrent Claude-role writer collision that only the principal can adjudicate.",
+  "written_at_utc": "2026-08-06T14:30:00Z"
+}

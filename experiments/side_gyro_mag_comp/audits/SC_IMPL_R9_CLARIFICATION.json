@@ -1,0 +1,215 @@
+{
+  "schema_version": "side-study-claude-clarification-v1",
+  "study_id": "side-gyro-mag-comp-v1",
+  "artifact_kind": "NARROW_INDEPENDENT_CLARIFICATION",
+  "stage": "IMPLEMENTATION_REPAIR",
+  "scope_statement": "This is a narrow clarification inside the already-consumed IMPLEMENTATION repair round. It is not a new audit, not the implementation re-audit, not a new repair round, and not authorization to execute any experiment or to open the method-lock test payload.",
+  "issued_by": "claude-independent-auditor",
+  "issued_at_utc": "2026-08-06T13:05:00+00:00",
+  "responds_to": {
+    "counterproposal": "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json",
+    "item": "R9",
+    "codex_pause_reason": "R9 states 'Metric definitions are taken verbatim from SC-01', but SC-01 names three secondary metrics without fixing component-vs-vector aggregation, terminal-vs-path increment aggregation, or mean-vs-RMS angular aggregation."
+  },
+
+  "decision": "B_MINIMUM_NON_ENDPOINT_CHANGING_CLARIFICATION_PERMITTED",
+  "decision_alternatives_considered": [
+    "A_BLOCKED_CONTRACT_GAP",
+    "B_MINIMUM_NON_ENDPOINT_CHANGING_CLARIFICATION_PERMITTED"
+  ],
+
+  "predicate": "A metric-aggregation clarification is lawful at this point if and only if all four hold: (P1) SC-01 genuinely leaves the aggregation undetermined and no canonical formula exists repo-wide, so a choice is unavoidable rather than elective; (P2) no value of any affected metric has been computed on any split, so the choice is blind; (P3) the clarification changes no threshold, no declared endpoint, no population, no split, no seed, and no inference procedure; and (P4) the clarification is CONSERVATIVE-DOMINANT, i.e. the resulting gate acceptance region is contained in the acceptance region of every admissible reading of SC-01's own words, so no discretionary choice by the implementer can manufacture a PASS. P1-P4 all hold under the construction specified below, therefore B, not A.",
+
+  "why_not_A": [
+    "The gap is an aggregation of two secondary diagnostic quantities feeding G1's sensor sub-clause, not the declared primary method-lock endpoint (R4 trajectory-level attitude geodesic RMSE), which already has a producer and is already computed.",
+    "G1's sensor sub-clause is a bare strict inequality with no numeric threshold, so no aggregation choice can be steered toward a frozen number.",
+    "The conservative-dominant construction removes the implementer's discretion entirely: G1's sensor clause is required to hold under EVERY admissible reading. That is the logically weakest commitment consistent with SC-01 and is the only reading that does not require inventing a choice SC-01 never made. It therefore adds no endpoint; it declines to invent one.",
+    "R9 already authorized implementing these producers inside the consumed repair round. The defect is confined to one inaccurate word in Claude's own counterproposal ('verbatim'), which overstated SC-01. Correcting a Claude-owned counterproposal's premise is Claude-owned and is not an implementation edit.",
+    "Declaring BLOCKED_CONTRACT_GAP here would close the study for a defect that is fully repairable within the authority already granted, which is a disproportionate terminal outcome and not required by the fail-closed rule once P1-P4 are satisfied."
+  ],
+  "what_would_have_forced_A": "If any admissible reading had been unconstrainable by conjunction (e.g. a numeric threshold whose meaning depends on the chosen scale), or if any value of these metrics already existed on any split, or if the clarification had required editing SC-00/SC-01 or any frozen value, the verdict would be A.",
+
+  "test_data_access": {
+    "affected_metrics_ever_computed_on_any_split": false,
+    "producer_exists_for_affected_metrics": false,
+    "method_lock_experiment_executed": false,
+    "results_directory_exists": false,
+    "results_directory_checked": "experiments/side_gyro_mag_comp/results (absent)",
+    "prior_test_split_access_of_record": "The authorized tiny smoke (prompt 03) evaluated ONLY the primary metric attitude_geodesic_rmse_rad on smoke test IDs including R4 (140 records, window whole_trajectory, split test, single seed 31001, 4 trajectories per regime), sealed in experiments/side_gyro_mag_comp/implementation/smoke/SMOKE_RESULT.json. No method-lock test evaluation has occurred.",
+    "claude_disclosure": "For this clarification Claude read contracts, prompts, source code, and the smoke record's schema. While enumerating the smoke record's metric/window/split key space, one primary-metric value was incidentally visible (results[0].value). No value of any metric governed by this clarification exists in the repository or was seen, because no producer exists. Blindness with respect to the clarified quantities is therefore complete.",
+    "conclusion": "P2 holds. The clarification is pre-registered, not post-hoc."
+  },
+
+  "evidence_paths": [
+    {"path": "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md", "sha256": "ee7c3411b0a45dd2b3805627b3b85fcd3545cf2a3d835acceca80aa2f7252aef", "role": "gate contract; line 47 names the metrics, line 58 states G1; neither fixes aggregation"},
+    {"path": "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md", "sha256": "f57d7862e293eaed4c99afb7e0aefd37911731e6a550ba45e440863af02bb698", "role": "fixes the ERROR quantities (omega_target^B, z_tilde_m^B) even though SC-01 does not fix their aggregation"},
+    {"path": "bench/side_gyro_mag_comp_v1/study.py", "sha256": "313bedf2775e1606c67bbed2f31fa9012b84b8acb3a27b1f0397c0a70351b647", "role": "evaluate_g1_gate consumes n2_r1_gyro_rate / n2_r1_increment / n2_r2_mag_angle arrays that no code produces; sealed gate arithmetic is mean-based strict inequality"},
+    {"path": "bench/side_gyro_mag_comp_v1/data.py", "sha256": "7e3248cc6a73f0c0b9849d9fc69c993672e58bcc41ceb1095de53525b70e7aaf", "role": "OracleSidecar.gyro_target_B_rad_s and mag_target_B already realize SC-00's exact targets in the diagnostic namespace; no new data path is needed"},
+    {"path": "bench/side_gyro_mag_comp_v1/model.py", "role": "SideStepRecord.gyro_corrected_B / mag_corrected_B already expose the per-variant corrected vectors for raw and learned modes"},
+    {"path": "experiments/side_gyro_mag_comp/implementation/smoke/SMOKE_RESULT.json", "sha256": "029155ffc4c9a7d88feb56eed1775c214e0108ece98050846efd93d649c7bd05", "role": "sole record of prior test-split access; contains only metric attitude_geodesic_rmse_rad"},
+    {"path": "experiments/side_gyro_mag_comp/audits/SC_IMPL_ROUND1_COUNTERPROPOSAL.json", "sha256": "087713e7c05b4166af3bc6e144bb98dac46c713e94c12dc402c07300b9064839", "role": "the R9 item whose premise is corrected here"},
+    {"path": "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json", "sha256": "882a5a8048f0469c15e9c5c7d61b1d5fd348a41f8bfd16e7d4032237915bb466", "role": "IMPLEMENTATION_REPAIR, next_actor CODEX, repair_round_by_stage.IMPLEMENTATION = 1"},
+    {"path": "prompts/side_gyro_mag_comp/05_CODEX_MINIMAL_EXPERIMENT_EXECUTION.md", "role": "names the same secondary metrics with no formula; confirms the gap is repo-wide"},
+    {"path": "experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.md", "role": "DR0 flagged interpretability of these metrics; the DR0 repair added gauge fixing only and did not add formulas"}
+  ],
+  "repo_wide_search_independently_confirmed": {
+    "claim": "No canonical formula for the three aggregations exists anywhere in the repository.",
+    "method": "recursive grep for 'increment', 'corrected.rate|corrected_rate', 'angular' across docs, prompts, experiments, bench, tests, agent_system",
+    "result": "Only SC-01 lines 27/47/58, prompt 05 line 30, and Claude's own R9 text mention these metrics for this study. All other hits belong to frozen Phase 0-1 or main Phase 2 and are out of scope and not canonical for this study.",
+    "verdict": "P1 holds; Codex's report of the gap is independently confirmed and is not implementer error."
+  },
+
+  "authorized_action": {
+    "authority_basis": "R9 of SC_IMPL_ROUND1_COUNTERPROPOSAL.json, with its 'verbatim from SC-01' premise corrected by this clarification. No new repair round is created or consumed.",
+    "canonical_artifact_to_add": {
+      "path": "experiments/side_gyro_mag_comp/implementation/SC_METRIC_DEFINITION_LOCK.json",
+      "operation": "CREATE_ONLY",
+      "owner": "CODEX",
+      "status_required": "sealed and digest-recorded BEFORE any experiment-stage execution and before any method-lock test access",
+      "subordination_clause_required": "The lock is subordinate to SC-00 and SC-01, defines aggregation only, and changes no threshold, endpoint, population, split, seed, or inference procedure."
+    },
+    "mechanical_declaration_updates_permitted": [
+      "experiments/side_gyro_mag_comp/implementation/CHANGED_PATHS.json (add the lock path and the producer/test paths)",
+      "experiments/side_gyro_mag_comp/implementation/CHECKPOINT_MANIFEST.json (add the lock digest)",
+      "experiments/side_gyro_mag_comp/implementation/RED_PATH_MATRIX.json (already required by R11)",
+      "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md (one row recording this clarification and the lock digest; already required by R10)"
+    ],
+    "explicitly_not_authorized": [
+      "editing SC-00, SC-01, or any prompt",
+      "changing any threshold, contrast weight, seed, split, population, learning rate, epoch count, loss weight, feature dimension, architecture, or the declared primary endpoint",
+      "changing the paired bootstrap resamples, percentile, cluster, or seed 45173",
+      "changing the G1 R4 primary sub-clause, or G0, G2, G3, G4",
+      "executing the method-lock experiment or opening the method-lock test payload",
+      "any new variant, regime, sensor, comparison, ablation, or rescue experiment",
+      "advancing STAGE_STATE.json on the basis of this clarification"
+    ],
+
+    "common_quantities": {
+      "index": "t = 1..T are the trajectory's gyro/magnetometer event times after reset_trajectory; dt_t = t_t - t_{t-1} with t_0 the reset time",
+      "omega_tilde_B_t": "the body-frame corrected gyro rate the variant actually supplies to propagation at t, BEFORE subtracting b_hat_r (model.py SideStepRecord.gyro_corrected_B). For raw-mode variants this is the pass-through packet; identity mounting is the frozen pilot invariant.",
+      "omega_target_B_t": "SC-00 residual-bias-retaining target C_BSg A_g^-1 (y_g,t^Sg - c_g^Sg), already realized as data.py OracleSidecar.gyro_target_B_rad_s. Diagnostic namespace only; never deployable.",
+      "e_t": "omega_tilde_B_t - omega_target_B_t in R^3, unit rad/s",
+      "z_tilde_B_t": "the variant's corrected magnetometer body vector (model.py SideStepRecord.mag_corrected_B)",
+      "z_target_B_t": "SC-00 inverse compensation C_BSm A_m^-1 (y_m,t^Sm - b_m^Sm), already realized as data.py OracleSidecar.mag_target_B",
+      "theta_t": "atan2(norm(cross(u,v)), dot(u,v)) in [0,pi] with u = z_tilde_B_t/||z_tilde_B_t||, v = z_target_B_t/||z_target_B_t||; if either norm < 1e-12 the trajectory metric is non-finite and the divergence rule applies",
+      "reference_choice_is_not_discretionary": "The magnetometer reference is the SC-00 oracle-corrected vector, not the noise-free field C_BN(q_true) m_N. SC-00 defines the compensation target as the inverse-calibration of the SAME raw packet and its gyro counterpart explicitly retains the transformed noise; a noise-free reference would require denoising that SC-00 never asks for. This is fixed by contract text, not by customary naming."
+    },
+
+    "metric_definitions": [
+      {
+        "id": "M1",
+        "sc01_name": "gyro corrected-rate RMSE",
+        "gate_bearing": true,
+        "gate_population": "R1 test trajectory IDs",
+        "canonical_record_metric": "gyro_corrected_rate_rmse_rad_s",
+        "canonical_formula": "sqrt( (1/T) * sum_t ||e_t||^2 )",
+        "unit": "rad/s",
+        "second_admissible_reading": {"metric": "gyro_corrected_rate_rmse_axis_mean_rad_s", "formula": "(1/3) * sum_i sqrt( (1/T) * sum_t e_{t,i}^2 )"},
+        "reading_declared_equivalent_not_a_separate_conjunct": {"formula": "sqrt( (1/(3T)) * sum_{t,i} e_{t,i}^2 )", "reason": "exactly canonical/sqrt(3); a strictly increasing positive rescaling, so every strict inequality, fractional reduction and CI sign is identical. Asserted by test, not gated separately."}
+      },
+      {
+        "id": "M2",
+        "sc01_name": "gyro integrated-increment error",
+        "gate_bearing": true,
+        "gate_population": "R1 test trajectory IDs",
+        "cumulative_series": "S_t = sum_{u<=t} e_u * dt_u in R^3, unit rad",
+        "canonical_record_metric": "gyro_integrated_increment_error_path_rms_rad",
+        "canonical_formula": "sqrt( (1/T) * sum_t ||S_t||^2 )",
+        "unit": "rad",
+        "second_admissible_reading": {"metric": "gyro_integrated_increment_error_terminal_rad", "formula": "||S_T||"},
+        "reading_excluded_by_contract_structure": {"formula": "RMSE of per-step increment errors ||e_t * dt_t||", "reason": "under the pilot's uniform dt this equals dt * M1 exactly, so SC-01's requirement that N2 strictly reduce BOTH the rate RMSE and the increment error would be logically vacuous. Excluded by the contract's own conjunction, not by convention."}
+      },
+      {
+        "id": "M3",
+        "sc01_name": "magnetometer corrected-vector angular error",
+        "gate_bearing": true,
+        "gate_population": "R2 test trajectory IDs",
+        "canonical_record_metric": "mag_corrected_vector_angular_error_mean_rad",
+        "canonical_formula": "(1/T) * sum_t theta_t",
+        "unit": "rad",
+        "second_admissible_reading": {"metric": "mag_corrected_vector_angular_error_rms_rad", "formula": "sqrt( (1/T) * sum_t theta_t^2 )"},
+        "angle_form_is_not_discretionary": "atan2(||u x v||, u.v) is required; arccos(clip(u.v)) is forbidden as the producer because it is numerically unstable near 0 and pi and is not exactly equal in floating point."
+      },
+      {
+        "id": "M4",
+        "sc01_name": "residual gyro-bias RMSE",
+        "gate_bearing": false,
+        "record_metric": "residual_gyro_bias_rmse_rad_s",
+        "formula": "sqrt( (1/T) * sum_t ||b_hat_r,t - b_r,t_true||^2 ) using the posterior b_hat_r after the update at t",
+        "note": "diagnostic; SC-01 line 27 explicitly removes R4 gyro/bias metrics from the G1 sensor predicates. Single pinned definition is sufficient because no gate consumes it."
+      },
+      {
+        "id": "M5",
+        "sc01_name": "p95 attitude error",
+        "gate_bearing": false,
+        "record_metric": "attitude_geodesic_p95_rad",
+        "formula": "numpy.percentile(phi, 95, method='linear') over the SAME per-step geodesic error phi_t already used by attitude_geodesic_rmse_rad",
+        "note": "diagnostic; must reuse the existing geodesic error function so it cannot drift from the primary metric."
+      },
+      {
+        "id": "D",
+        "sc01_name": "divergence",
+        "gate_bearing": true,
+        "record_metric": "divergence_flag",
+        "formula": "1 if any estimate or any per-trajectory metric of that trajectory is non-finite, or if max_t phi_t > 1.0 rad (strict); else 0",
+        "note": "already fully frozen by SC-01 line 51; reproduced here only for completeness. No new threshold."
+      }
+    ],
+
+    "record_and_window_aggregation": {
+      "record_key": "{experiment, regime, model, window, metric, seed, trajectory_id} - unchanged",
+      "window": "whole_trajectory for every metric above; no sub-window, no burn-in, no truncation, no event window",
+      "record_granularity": "exactly one record per (experiment, regime, model, window, metric, seed, trajectory_id); T is that trajectory's full post-reset event count",
+      "no_cross_trajectory_pooling_inside_a_record": true,
+      "gate_array_shape": "(number of test trajectory IDs in the stated regime, 3 training seeds), paired by trajectory_id and raw realization across compared variants",
+      "gate_aggregation": "UNCHANGED sealed arithmetic: the strict sub-predicate is float(np.mean(candidate)) < float(np.mean(reference)), an unweighted mean over IDs and seeds. No CI, no two-of-three rule is added to the sensor sub-clause.",
+      "population_requirement": "each gate array must be non-empty and all-finite; an empty or non-finite population is a hard error, never a silent pass"
+    },
+
+    "conservative_dominant_rule": {
+      "statement": "G1's sensor sub-clause passes only if the strict reduction of N2 versus N0 holds under EVERY admissible reading: M1 canonical AND M1 axis-mean on R1, M2 path AND M2 terminal on R1, M3 mean AND M3 RMS on R2.",
+      "justification": "This is the intersection of the acceptance regions of the admissible readings, hence contained in each. No aggregation choice available to the implementer can create a PASS that another lawful reading of SC-01 would deny. It asserts SC-01 as written without choosing on SC-01's behalf.",
+      "direction_of_effect": "strictness-increasing only; it can never relax G1",
+      "scope_limit": "This is the ONLY gate-arithmetic touch authorized. G1's R4 primary sub-clause (5%, CI below zero, two-of-three) and G0, G2, G3, G4 are byte-unchanged.",
+      "reporting_rule": "The canonical record metric of each pair is the value reported in tables and narrative; the second reading is reported alongside it. Neither may be silently dropped."
+    },
+
+    "required_red_path": {
+      "test_name": "test_sc_metric_definition_lock_red",
+      "mutations_that_must_go_red": [
+        "replacing the gyro reference omega_target_B with omega_true_B, i.e. scoring a compensator that removes the residual bias as if it were correct (ties the metric to SC-00's residual-retention requirement)",
+        "replacing the magnetometer reference z_target_B with the noise-free C_BN(q_true) m_N",
+        "dropping any one conjunct from the G1 sensor sub-clause",
+        "swapping M2 path-RMS for terminal-only, or M3 mean for RMS, in the canonical record",
+        "replacing the atan2 angle by a formula that differs beyond 1e-12 on the fixture",
+        "changing the window from whole_trajectory or introducing any truncation",
+        "any empty or non-finite gate population must raise, not pass"
+      ],
+      "positive_assertions_required": [
+        "an analytic fixture with closed-form M1, M2 and M3 values matched to atol 1e-12",
+        "sqrt(3) * component-pooled M1 == canonical M1 to atol 1e-12 (the declared equivalence)",
+        "dt * M1 == per-step-increment RMSE to atol 1e-12 (proving the excluded reading is degenerate)"
+      ],
+      "matrix_binding": "every mutation above must appear in RED_PATH_MATRIX.json with the test that went red and the full-suite result before and after (R11)"
+    }
+  },
+
+  "consequence": {
+    "if_codex_implements_exactly_this": "The IMPLEMENTATION repair may lawfully complete. G1 and G4 become decidable by sealed code before any test access, satisfying acceptance criterion 3 of SC_IMPL_ROUND1_COUNTERPROPOSAL.json. This clarification neither creates nor consumes a repair round and confers no PASS; the implementation re-audit remains outstanding and independent.",
+    "if_codex_deviates": "Any aggregation outside the admissible sets, any dropped conjunct, any missing red path, any unsealed lock, or any edit to SC-00/SC-01/thresholds/endpoint is a second implementation failure. The IMPLEMENTATION repair round is already consumed, so the study closes COMPLETE_BLOCKED with no advance to ORACLE_HEADROOM.",
+    "if_codex_finds_a_conflict": "If Codex judges that any formula here cannot be implemented without changing a frozen value, it must stop and return BLOCKED_CONTRACT_GAP rather than adapt a frozen value. Silent adaptation is a terminal integrity failure.",
+    "ordering_constraint": "The lock must be sealed before the experiment stage begins. Defining these metrics after test access would place their definition at the moment of test access and would invalidate G1 irrecoverably."
+  },
+
+  "boundaries_preserved": {
+    "spikera_kalmannet": "untouched",
+    "main_phase2": "untouched",
+    "frozen_phase0_1": "untouched",
+    "codex_config_toml": "untouched",
+    "claude_writes_this_round": [
+      "experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.json",
+      "experiments/side_gyro_mag_comp/audits/SC_IMPL_R9_CLARIFICATION.md"
+    ],
+    "state_transition_written_by_claude": "NONE; next_actor remains CODEX"
+  }
+}

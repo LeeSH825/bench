@@ -1,9 +1,10 @@
 """FastAPI application factory.
 
-Read-only by construction: the app registers only `GET` routes. There is no
-`POST /runs`, no stop/terminate/resume action, and no write path of any kind.
-Launching happens from the CLI (`bench.control.cli`), which is a separate
-process from the one serving this API.
+The default application registers only observation and configuration-preview
+routes.  Setting ``BENCH_CONTROL_ENABLE_WRITES=1`` before startup additionally
+registers the separately gated launch, graceful-stop, and exact-resume action
+routes.  Write mode is restricted to a loopback bind because the service has
+no authentication.
 
 Binding: the server binds `127.0.0.1` by default and refuses `0.0.0.0` unless
 `BENCH_CONTROL_ALLOW_PUBLIC_BIND=1` is set. The control plane has no
@@ -31,17 +32,19 @@ ALLOW_PUBLIC_BIND_ENV = "BENCH_CONTROL_ALLOW_PUBLIC_BIND"
 
 
 def create_app(control_root_path: Optional[str] = None) -> FastAPI:
-    """Build the read-only API application."""
+    """Build the default read-only or explicitly write-enabled application."""
     if control_root_path is not None:
         configure(control_root_path)
 
+    write_mode = writes_enabled()
+    mode_label = "write control enabled" if write_mode else "read-only"
     app = FastAPI(
-        title="Benchmark Control Plane (read-only)",
+        title=f"Benchmark Control Plane ({mode_label})",
         version=CONTROL_PLANE_VERSION,
         description=(
-            "Read-only observation API for benchmark runs. This service does not "
-            "start, stop, or modify runs; the run registry and the worker processes "
-            "are the authoritative owners of run state."
+            "Observation and configuration-preview API for benchmark runs. "
+            "Launch, graceful-stop, and exact-resume routes are registered only "
+            "when local write mode is explicitly enabled."
         ),
     )
     app.include_router(system_router)
@@ -54,7 +57,7 @@ def create_app(control_root_path: Optional[str] = None) -> FastAPI:
     # Write routes are *registered*, not merely permitted, so in the default
     # build a POST to a write path is a routing miss rather than a permission
     # decision — and nothing about them appears in the OpenAPI schema.
-    if writes_enabled():
+    if write_mode:
         from .routers.actions import router as actions_router
 
         app.include_router(actions_router)
@@ -64,8 +67,8 @@ def create_app(control_root_path: Optional[str] = None) -> FastAPI:
         return {
             "service": "bench control plane",
             "version": CONTROL_PLANE_VERSION,
-            "read_only": not writes_enabled(),
-            "write_control_enabled": writes_enabled(),
+            "read_only": not write_mode,
+            "write_control_enabled": write_mode,
             "docs": "/docs",
             "health": "/api/v1/system/health",
         }

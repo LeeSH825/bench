@@ -1,0 +1,44 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-codex-to-claude-handoff-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "CONTRACT_INDEPENDENT_AUDIT",
+  "from_actor": "CODEX",
+  "to_actor": "CLAUDE",
+  "status": "READY_FOR_INDEPENDENT_AUDIT",
+  "single_audit_target": {
+    "path": "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+    "sha256": "2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd",
+    "digest_rule": "sha256 over the raw bytes of the checkpoint manifest"
+  },
+  "canonical_contract": {
+    "path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+    "sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe"
+  },
+  "machine_validation": {
+    "path": "experiments/side_gyro_mag_comp_v2/contract/VALIDATION_RESULT.json",
+    "decision": "PASS",
+    "command": ["python3", "agent_system/side_gyro_mag_comp_v2/control/validate_contract.py", "--contract", "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json", "--mutation-matrix"],
+    "mutation_count": 485,
+    "all_mutations_rejected": true
+  },
+  "audit_predicate": "Does the sealed v2 contract preserve all frozen method, R1-R13, information-boundary, identity, population, seed, bootstrap, G0-G4, stage, repair, stop, and exclusion obligations while applying only the user-authored all-valid weak/plane override, with complete fail-closed machine descriptors and correct self-contained archive provenance?",
+  "required_audit_checks": [
+    "checkpoint digest stable before and after audit",
+    "all 10 repaired checkpoint member hashes match",
+    "archive provenance is exact: base 84 paths plus companion .codex/config.toml and 9/9 final-manifest self-containment",
+    "R1-R13 are present without weakening and only R8 obsolete threshold phrase is superseded",
+    "every G0-G4 and descriptive metric descriptor is complete and has exactly threshold or descriptive_only semantics",
+    "weak/plane all-valid posterior semantics and dataset-total invalidation are exact",
+    "truth/oracle/future/evaluation inputs are excluded from deployable runtime",
+    "whole-trajectory identity and same raw realization are frozen",
+    "separate causal encoders, 8D per sensor, branch-specific FiLM, and right-local correction are frozen",
+    "stage order, one-repair rule, sequential stop mapping, and hard exclusions are fail-closed",
+    "no estimator/model/data/test/config code, payload access, smoke run, or performance run occurred"
+  ],
+  "implementation_authorized_by_handoff": false,
+  "independent_audit_artifact_created_by_codex": false,
+  "next_state_on_valid_pass": "IMPLEMENTATION",
+  "next_state_on_repairable_fail": "CONTRACT_REPAIR",
+  "repair_round_remaining": 0,
+  "second_contract_failure_disposition": "CONTRACT_BLOCKED"
+}

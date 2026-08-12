@@ -1,0 +1,47 @@
+{
+  "G0": {
+    "authorized_next": true,
+    "ci": [
+      -0.024083909083112195,
+      -0.010813566633354758
+    ],
+    "fractional_reduction": 0.216668251192605,
+    "passed": true,
+    "seed_directions": [
+      true,
+      true,
+      true
+    ],
+    "status": "PASS"
+  },
+  "G1": {
+    "authorized_next": false,
+    "ci": [
+      -0.01407579696359747,
+      -0.00493016080538042
+    ],
+    "fractional_reduction": 0.11970907562707635,
+    "gyro_increment_strict": false,
+    "gyro_rate_strict": false,
+    "mag_angle_strict": true,
+    "passed": false,
+    "seed_directions": [
+      true,
+      true,
+      true
+    ],
+    "status": "FAIL"
+  },
+  "G2": {
+    "authorized_next": false,
+    "status": "NOT_RUN"
+  },
+  "G3": {
+    "authorized_next": false,
+    "status": "NOT_RUN"
+  },
+  "G4": {
+    "authorized_next": false,
+    "status": "NOT_RUN"
+  }
+}

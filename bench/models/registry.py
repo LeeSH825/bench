@@ -15,6 +15,9 @@ from .kalmannet_tsp import KalmanNetTSPAdapter
 from .adaptive_knet import AdaptiveKNetAdapter
 from .maml_knet import MAMLKNetAdapter
 from .split_knet import SplitKNetAdapter
+from .spike_split_knet import SpikeSplitKNetAdapter
+from .g1_snn_split_knet import G1SNNSplitKNetAdapter
+from .spike_ra_knet import SpikeRAKNetAdapter
 from .me_split_knet import MESplitKNetV0Adapter
 from .mb_kf import ModelBasedKFAdapter
 from .basilisk_mrp_ekf import BasiliskMRPEKFAdapter
@@ -25,6 +28,9 @@ _REGISTRY: Dict[str, Type[ModelAdapter]] = {
     "adaptive_knet": AdaptiveKNetAdapter,
     "maml_knet": MAMLKNetAdapter,
     "split_knet": SplitKNetAdapter,
+    "spike_split_knet": SpikeSplitKNetAdapter,
+    "g1_snn_split_knet": G1SNNSplitKNetAdapter,
+    "spike_ra_knet": SpikeRAKNetAdapter,
     "me_split_knet_v0": MESplitKNetV0Adapter,
     "me_split_knet_v0_ds100": MESplitKNetV0Adapter,
     "me_split_knet_v0_ds025": MESplitKNetV0Adapter,

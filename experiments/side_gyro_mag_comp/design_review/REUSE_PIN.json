@@ -1,0 +1,10 @@
+{
+  "schema_version": "side-study-reuse-pin-v1",
+  "hash_algorithm": "sha256",
+  "files": [
+    {"path": "bench/estimators/mekf.py", "sha256": "2b857fe358deeb7af7427d13c79beced4f84f4598014cc8b562d9e7d60fea63e"},
+    {"path": "bench/metrics/mekf.py", "sha256": "8fd7ea2838a415a60a54e28142293803505f3e214b2c46624ede43f8f89f5b09"},
+    {"path": "bench/tasks/generator/mekf_fusion_events.py", "sha256": "b79d2f6d7e5f7a92daa2330d9222540d6ebaa3647ae3fb3badf4ece995cd70b4"},
+    {"path": ".codex/config.toml", "sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"}
+  ]
+}

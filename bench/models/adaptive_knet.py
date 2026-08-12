@@ -693,11 +693,6 @@ class AdaptiveKNetAdapter(ModelAdapter):
             label="x_hat",
         )
 
-        preds_path = None
-        if self._artifacts_dir is not None:
-            preds_path = self._artifacts_dir / "preds_test.npz"
-            np.savez_compressed(preds_path, x_hat=x_hat.numpy())
-
         self._update_ledger(
             train_updates_used=int(self.train_updates_used),
             adapt_updates_used=int(self.adapt_updates_used),
@@ -708,7 +703,7 @@ class AdaptiveKNetAdapter(ModelAdapter):
             "status": "ok",
             "x_hat": x_hat,
             "cov": None,
-            "preds_path": (str(preds_path) if preds_path is not None else None),
+            "preds_path": None,
         }
 
     @torch.no_grad()

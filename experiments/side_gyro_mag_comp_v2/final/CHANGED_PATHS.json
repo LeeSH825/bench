@@ -1,0 +1,38 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-final-changed-paths-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "FINAL_SYNTHESIS",
+  "finalization_paths": [
+    "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json",
+    "experiments/side_gyro_mag_comp_v2/final/CHANGED_PATHS.json",
+    "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp_v2/final/COMMANDS.json",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_ARTIFACT_INDEX.json",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_DECISION.json",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_RESULT.md",
+    "experiments/side_gyro_mag_comp_v2/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json"
+  ],
+  "finalization_path_count": 8,
+  "preservation_cleanup_deleted_paths": [
+    "agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json",
+    "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md",
+    "agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md"
+  ],
+  "cleanup_reason": "invalid externally Claude-authored duplicate v2 authority in frozen v1 namespace; hashes preserved in FINAL_DECISION.json; not relocated or treated as audit evidence",
+  "generated_cache_cleanup_deleted_paths": [
+    "bench/side_gyro_mag_comp_v1/__pycache__/__init__.cpython-312.pyc",
+    "bench/side_gyro_mag_comp_v1/__pycache__/data.cpython-312.pyc",
+    "bench/side_gyro_mag_comp_v1/__pycache__/model.cpython-312.pyc",
+    "bench/side_gyro_mag_comp_v1/__pycache__/study.cpython-312.pyc",
+    "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312-pytest-8.3.4.pyc",
+    "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312.pyc",
+    "tests/side_gyro_mag_comp_v1/__pycache__/test_math_and_model_red.cpython-312-pytest-8.3.4.pyc",
+    "tests/side_gyro_mag_comp_v1/__pycache__/test_training_gates_and_runtime_red.cpython-312-pytest-8.3.4.pyc"
+  ],
+  "generated_cache_cleanup_reason": "remove recreatable ignored bytecode extras so the full v1 working-tree namespace is path-exact with archive tip",
+  "contract_validator_allowlist_repaired": false,
+  "v1_archive_members_modified": [],
+  "config_modified": false,
+  "implementation_model_data_test_config_paths_created": [],
+  "independent_audit_paths_created_by_codex": []
+}

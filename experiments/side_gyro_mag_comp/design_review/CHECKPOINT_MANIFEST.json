@@ -1,0 +1,34 @@
+{
+  "schema_version": "side-study-checkpoint-manifest-v2",
+  "study_id": "side-gyro-mag-comp-v1",
+  "stage": "DR0_REPAIR",
+  "hash_algorithm": "sha256",
+  "checkpoint_digest_rule": "sha256 over the raw bytes of this CHECKPOINT_MANIFEST.json file",
+  "claims_digest_algorithm": "sha256 over UTF-8 canonical JSON of SEALED_CLAIMS.json /claims with sorted keys and compact separators",
+  "claims_digest": "b014058b5091c35bf23f40430816519f155ba949296e923410f66c0398997135",
+  "files": [
+    {"path":"docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md","sha256":"f57d7862e293eaed4c99afb7e0aefd37911731e6a550ba45e440863af02bb698"},
+    {"path":"docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md","sha256":"ee7c3411b0a45dd2b3805627b3b85fcd3545cf2a3d835acceca80aa2f7252aef"},
+    {"path":"docs/research/side_gyro_mag_comp/SC_02_REPOSITORY_REUSE_MAP.md","sha256":"fff707d535759c6e8ba444e735c2ef15dd311ae537675e69b1e849e4cfbad122"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/SC_DR0_REVIEW.md","sha256":"c54f466c795d25483c7f6da7b103555dfc335589b107952353910789b0af583f"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/SC_DR0_DECISION.json","sha256":"9a491a7e21824ea5dd12648ce70aedcbc85f15f2940aa61dc41f84f06f2d33e5"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/COMMANDS.json","sha256":"42ce6c8831a6d2e48adf54c8f06de9c318b8c1dcaa505a4226c818e04659dab3"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/CHANGED_PATHS.json","sha256":"4ce19924d5a520c35cd92ab4cac4573a05ca38ddf70e3e8a40f7f32ff9114559"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/RUN_BUDGET.json","sha256":"f49da64a095065f0728dab79d559318c4abedc1472526fba35b7809079181db7"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/REUSE_PIN.json","sha256":"54f77c640dc0acc797b2d9e2cdc7c95016f83ae18af3b28a0cf1e99ff342b685"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/BASELINE_DIRTY_PATHS.json","sha256":"5c2d30aefbdf4300b236955f9e708e29b3eb2647f6f55a6d2b98b51cac7c279b"},
+    {"path":"experiments/side_gyro_mag_comp/design_review/SEALED_CLAIMS.json","sha256":"7c25789ef94914a4cbdce34314adcb56275e14ae1bf35255b9c3e4b926d588cc"},
+    {"path":"agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md","sha256":"f5951d1fba5c785e5cb99c9af0ea101de71817a621f881949dce209357b571ea"},
+    {"path":"bench/estimators/mekf.py","sha256":"2b857fe358deeb7af7427d13c79beced4f84f4598014cc8b562d9e7d60fea63e"},
+    {"path":"bench/metrics/mekf.py","sha256":"8fd7ea2838a415a60a54e28142293803505f3e214b2c46624ede43f8f89f5b09"},
+    {"path":"bench/tasks/generator/mekf_fusion_events.py","sha256":"b79d2f6d7e5f7a92daa2330d9222540d6ebaa3647ae3fb3badf4ece995cd70b4"},
+    {"path":".codex/config.toml","sha256":"315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"}
+  ],
+  "file_count": 16,
+  "excluded_from_manifest": [
+    {"path":"experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json","reason":"self-digest target"},
+    {"path":"experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json","reason":"transport duplicates manifest-sealed SEALED_CLAIMS and digest"},
+    {"path":"agent_system/side_gyro_mag_comp/state/STAGE_STATE.json","reason":"mutable actor-coordination state; claims_digest and checkpoint_digest are mirrored there"},
+    {"path":"experiments/side_gyro_mag_comp/audits/SC_DR0_INDEPENDENT_AUDIT.json","reason":"Claude-owned prior audit"}
+  ]
+}

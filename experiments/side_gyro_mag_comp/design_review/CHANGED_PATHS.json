@@ -1,0 +1,21 @@
+{
+  "schema_version": "side-study-changed-paths-v1",
+  "stage": "DR0_DESIGN_REVIEW",
+  "paths": [
+    "docs/research/side_gyro_mag_comp/SC_00_MATH_AND_INFORMATION_CONTRACT.md",
+    "docs/research/side_gyro_mag_comp/SC_01_MINIMAL_HYPOTHESIS_AND_GATE_CONTRACT.md",
+    "docs/research/side_gyro_mag_comp/SC_02_REPOSITORY_REUSE_MAP.md",
+    "experiments/side_gyro_mag_comp/design_review/SC_DR0_REVIEW.md",
+    "experiments/side_gyro_mag_comp/design_review/SC_DR0_DECISION.json",
+    "experiments/side_gyro_mag_comp/design_review/COMMANDS.json",
+    "experiments/side_gyro_mag_comp/design_review/CHANGED_PATHS.json",
+    "experiments/side_gyro_mag_comp/design_review/CHECKPOINT_MANIFEST.json",
+    "experiments/side_gyro_mag_comp/design_review/SEALED_CLAIMS.json",
+    "experiments/side_gyro_mag_comp/design_review/RUN_BUDGET.json",
+    "experiments/side_gyro_mag_comp/design_review/REUSE_PIN.json",
+    "experiments/side_gyro_mag_comp/design_review/BASELINE_DIRTY_PATHS.json",
+    "experiments/side_gyro_mag_comp/handoffs/codex/CODEX_TO_CLAUDE.json",
+    "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.md",
+    "agent_system/side_gyro_mag_comp/state/STAGE_STATE.json"
+  ]
+}

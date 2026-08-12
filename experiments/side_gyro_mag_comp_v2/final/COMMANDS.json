@@ -1,0 +1,58 @@
+{
+  "schema_version": "side-gyro-mag-comp-v2-final-command-log-v1",
+  "study_id": "side-gyro-mag-comp-v2",
+  "stage": "FINAL_SYNTHESIS",
+  "commands": [
+    {
+      "purpose": "record pre-cleanup hashes of three wrong-namespace untracked authority files",
+      "argv": ["sha256sum", "agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json", "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md", "agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md"],
+      "exit_code": 0,
+      "results": [
+        "6b439b774b2b467ff0f785f2ad90798c9ec70d5572245d5bc35eb37bba74c2e5",
+        "d9803219e65a7932a8b9c8363b7e10519abf835da51ad3818610bd199dd24751",
+        "a1230cd7e6e2d20a14e74941bd4b62ec709032397d87ee3dcf7fb738665f8e3f"
+      ]
+    },
+    {
+      "purpose": "delete only the three invalid duplicate-v2 authority files from the v1 namespace",
+      "mechanism": "apply_patch Delete File",
+      "paths": [
+        "agent_system/side_gyro_mag_comp/state/STAGE_STATE.v2.json",
+        "agent_system/side_gyro_mag_comp/state/DECISION_LEDGER.v2.md",
+        "agent_system/side_gyro_mag_comp/state/DEFERRED_REGISTER.v2.md"
+      ],
+      "result": "DELETED"
+    },
+    {
+      "purpose": "remove eight explicit recreatable bytecode-cache extras found by independent full-filesystem v1 comparison",
+      "paths": [
+        "bench/side_gyro_mag_comp_v1/__pycache__/__init__.cpython-312.pyc",
+        "bench/side_gyro_mag_comp_v1/__pycache__/data.cpython-312.pyc",
+        "bench/side_gyro_mag_comp_v1/__pycache__/model.cpython-312.pyc",
+        "bench/side_gyro_mag_comp_v1/__pycache__/study.cpython-312.pyc",
+        "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312-pytest-8.3.4.pyc",
+        "tests/side_gyro_mag_comp_v1/__pycache__/test_data_firewalls_red.cpython-312.pyc",
+        "tests/side_gyro_mag_comp_v1/__pycache__/test_math_and_model_red.cpython-312-pytest-8.3.4.pyc",
+        "tests/side_gyro_mag_comp_v1/__pycache__/test_training_gates_and_runtime_red.cpython-312-pytest-8.3.4.pyc"
+      ],
+      "pre_cleanup_hashes": "NOT_CAPTURED_BEFORE_INDEPENDENT_REMOVAL",
+      "classification": "ignored generated non-authority caches",
+      "result": "DELETED"
+    },
+    {
+      "purpose": "post-cleanup archive preservation proof",
+      "algorithm": "Enumerate the exact 84 paths from git diff-tree of base commit plus the exact companion path from git diff-tree of archive tip; recursively enumerate every file including ignored files in all v1 study namespaces plus the v1 config and .codex/config.toml; require exact set equality; compare raw bytes and SHA-256 of every live path to git show ARCHIVE_TIP:path; independently verify all archived final-manifest member hashes.",
+      "base_commit": "235619cbd7b7af7dcc24db89c247673cd72a0363",
+      "archive_tip": "9cf80cc85f2a01297cfd7932c1ce3cfcd87a15c0",
+      "exit_code": 0,
+      "result": {"expected_paths":85,"actual_full_working_tree_paths":85,"missing":0,"extra":0,"byte_mismatches":0,"path_byte_set_sha256":"d9668c89768781cd98041533c06000cf97f560054fb4c763753204809f0dcd9a","final_manifest":"PASS_9_OF_9","config_sha256":"315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d"}
+    }
+  ],
+  "contract_or_validator_repair_commands": [],
+  "implementation_commands": [],
+  "test_commands": [],
+  "smoke_commands": [],
+  "performance_commands": [],
+  "G0_G4_commands": [],
+  "test_or_held_out_payload_commands": []
+}

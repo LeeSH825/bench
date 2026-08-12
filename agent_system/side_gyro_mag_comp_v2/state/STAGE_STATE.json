@@ -1,0 +1,71 @@
+{
+  "schema_version": "side-study-autonomous-stage-state-v2",
+  "study_id": "side-gyro-mag-comp-v2",
+  "automation_mode": "AUTONOMOUS_UNTIL_FINAL",
+  "human_review_mode": "FINAL_ONLY",
+  "current_stage": "FINAL_INDEPENDENT_AUDIT",
+  "stage_status": "COMPLETE_BLOCKED",
+  "terminal": true,
+  "next_actor": "PRINCIPAL",
+  "next_allowed_stage": "PRINCIPAL_GOVERNANCE_REVIEW",
+  "repair_round_by_stage": {
+    "CONTRACT": 1
+  },
+  "contract_repair_rounds_remaining": 0,
+  "canonical_contract_path": "docs/research/side_gyro_mag_comp_v2/SC_V2_CANONICAL_CONTRACT.json",
+  "sealed_contract_sha256": "50a1c4a69053f2d573b479dd819cf7ac0bd95472a932276c6eca994bf01773fe",
+  "contract_checkpoint_manifest_path": "experiments/side_gyro_mag_comp_v2/contract/CHECKPOINT_MANIFEST.json",
+  "contract_checkpoint_manifest_sha256": "2aa9a4573c02d506961a1ae17c7578b4f0545493c72fb98a3f1b30dcaad1e0cd",
+  "checkpoint_manifest_path": "experiments/side_gyro_mag_comp_v2/final/CHECKPOINT_MANIFEST.json",
+  "checkpoint_manifest_sha256": "eb6421fbbf31fd0fc412280d2be604261a7ffba5553b065fd1bad807077dff4b",
+  "checkpoint_digest_stable_across_final_audit": true,
+  "checkpoint_member_verification": "9/9 VERIFIED, 0 mismatches, 0 missing",
+  "codex_handoff_path": "experiments/side_gyro_mag_comp_v2/handoffs/codex/CODEX_FINAL_TO_CLAUDE.json",
+  "claude_handoff_path": "experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_FINAL_TO_CODEX.json",
+  "claude_audit_path": "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json",
+  "claude_audit_report_path": "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+  "expected_final_audit_paths": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json"
+  ],
+  "independent_audit_status": "COMPLETE",
+  "independent_audit_decision": "FAIL_FINAL_REPORT_MISMATCH",
+  "independent_audit_blocker_upheld": true,
+  "independent_audit_blocker_softened": false,
+  "final_decision": "BLOCKED_CONTRACT_INCOMPLETE_AFTER_ONE_REPAIR",
+  "method_decision": "BLOCKED_IMPLEMENTATION_OR_INTEGRITY",
+  "terminal_reason": "CONTRACT_INCOMPLETE_AFTER_ONE_EXHAUSTED_REPAIR_WITH_FINAL_REPORT_ACCOUNTING_MISMATCH",
+  "gate_results": {"G0":"NOT_RUN","G1":"NOT_RUN","G2":"NOT_RUN","G3":"NOT_RUN","G4":"NOT_RUN"},
+  "scientific_conclusion": "NONE_CONTRACT_INCOMPLETE",
+  "no_hypothesis_was_tested": true,
+  "final_result_paths": {
+    "result_md": "experiments/side_gyro_mag_comp_v2/final/FINAL_RESULT.md",
+    "decision_json": "experiments/side_gyro_mag_comp_v2/final/FINAL_DECISION.json",
+    "artifact_index_json": "experiments/side_gyro_mag_comp_v2/final/FINAL_ARTIFACT_INDEX.json"
+  },
+  "implementation_authorized": false,
+  "experiment_authorized": false,
+  "test_payload_accessed": false,
+  "performance_or_smoke_run_executed": false,
+  "v1_archive_preserved": true,
+  "v1_archive_verification": "85/85 paths, 0 missing, 0 extra, 0 byte mismatches; archived v1 final manifest 9/9",
+  "config_sha256": "315ec7d2282939ea0344b6de5ec5dc2c6dbab3bbee91fa3d1e63912b29a2c20d",
+  "config_modified": false,
+  "audit_failure_repairable_by_codex": false,
+  "audit_failure_repairable_by_claude": false,
+  "human_review_due": true,
+  "governance_disclosure": {
+    "finding": "C",
+    "type": "CONCURRENT_CLAUDE_ROLE_WRITER",
+    "statement": "A concurrent actor claiming auditor 'claude-independent' wrote to the mandated final audit output paths during the audit window. The sole independent final auditor authored its own audit in their place under explicit principal instruction and recorded the superseded digests.",
+    "superseded_final_audit_json_sha256": "c8d89d4126f6c63d818d147b7b19abc4dfef85a079fe7dc290f17b4766532623",
+    "superseded_final_audit_md_sha256": "04ddb4f711653993648e0b50fe86cecf5d6caf02ec3b735c1b16dae3668e989f"
+  },
+  "changed_paths_by_final_audit": [
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.md",
+    "experiments/side_gyro_mag_comp_v2/final/FINAL_AUDIT.json",
+    "experiments/side_gyro_mag_comp_v2/handoffs/claude/CLAUDE_FINAL_TO_CODEX.json",
+    "agent_system/side_gyro_mag_comp_v2/state/STAGE_STATE.json"
+  ],
+  "updated_at_utc": "2026-08-06T14:30:00Z"
+}
