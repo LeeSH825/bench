@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,9 +13,6 @@ from viz.app.components.overlay_picker import discover_run_index, discover_runs
 from viz.app.views.run_inspector import available_gain_sources
 from viz.contract import ContractError, UnsupportedArtifactVersion
 from viz.io.loader import assert_overlay_compatible, load_run
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class VizReleaseReadinessTests(unittest.TestCase):
@@ -72,10 +68,13 @@ class VizReleaseReadinessTests(unittest.TestCase):
             self.assertIn("x_hat", selected)
 
     def test_malformed_selected_trajectory_is_rejected_without_fallback(self) -> None:
-        source = REPO_ROOT / "runs/viz_v4c_fixtures/combined_only"
         with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
-            run_dir = Path(tmp) / "malformed"
-            shutil.copytree(source, run_dir)
+            run_dir = _write_run(
+                Path(tmp),
+                "malformed",
+                trajectory_ids=_fixture_ids(),
+                full_diagnostics=False,
+            )
             target = run_dir / "series/traj_0000.npz"
             with np.load(target, allow_pickle=False) as data:
                 arrays = {key: np.array(data[key], copy=True) for key in data.files}
@@ -86,20 +85,64 @@ class VizReleaseReadinessTests(unittest.TestCase):
                 run.load_trajectory(stored_index=0)
 
     def test_learned_filter_has_no_physical_covariance_and_split_has_component_labels(self) -> None:
-        knet_dir = REPO_ROOT / "runs/viz_v4c_cross_models/A_linear_split_train_smoke_v0/kalmannet_tsp/frozen/seed_0/scenario_1a547ae6bce5"
-        split_dir = REPO_ROOT / "runs/viz_v4c_cross_models/A_linear_split_train_smoke_v0/split_knet/frozen/seed_0/scenario_1a547ae6bce5"
-        knet = load_run(knet_dir)
-        knet_traj = knet.load_trajectory(stored_index=0)
-        self.assertNotIn("P", knet_traj)
-        self.assertNotIn("S", knet_traj)
-        self.assertEqual(available_gain_sources(knet.meta, knet_traj), [("gain", "Learned Kalman gain")])
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            root = Path(tmp)
+            knet = load_run(
+                _write_run(
+                    root,
+                    "knet",
+                    model_id="kalmannet_tsp",
+                    trajectory_ids=_fixture_ids(),
+                    full_diagnostics=False,
+                    adapter_meta={
+                        "adapter_id": "kalmannet_tsp",
+                        "gain_semantics": "learned_kalman_gain",
+                    },
+                )
+            )
+            knet_traj = knet.load_trajectory(stored_index=0)
+            self.assertNotIn("P", knet_traj)
+            self.assertNotIn("S", knet_traj)
+            self.assertEqual(
+                available_gain_sources(knet.meta, knet_traj),
+                [("gain", "Learned Kalman gain")],
+            )
 
-        split = load_run(split_dir)
-        split_traj = split.load_trajectory(stored_index=0)
-        labels = [label for _key, label in available_gain_sources(split.meta, split_traj)]
-        self.assertEqual(labels, ["Learned combined Kalman gain", "Learned G1 factor", "Learned G2 factor"])
-        self.assertNotIn("P", split_traj)
-        self.assertNotIn("S", split_traj)
+            n_seq, n_step = 16, 20
+            split_diagnostics = {
+                "innov": np.full((n_seq, n_step, 1), 0.01, dtype=np.float32),
+                "gain": np.full((n_seq, n_step, 2, 1), 0.25, dtype=np.float32),
+                "gain_g1": np.full((n_seq, n_step, 2, 2), 0.5, dtype=np.float32),
+                "gain_g2": np.full((n_seq, n_step, 1, 1), 0.5, dtype=np.float32),
+            }
+            split = load_run(
+                _write_run(
+                    root,
+                    "split",
+                    model_id="split_knet",
+                    trajectory_ids=_fixture_ids(),
+                    full_diagnostics=False,
+                    diagnostics=split_diagnostics,
+                    adapter_meta={
+                        "adapter_id": "split_knet",
+                        "diagnostic_semantics": {
+                            "gain": "learned_combined_kalman_gain",
+                            "gain_g1": "learned_split_factor_g1",
+                            "gain_g2": "learned_split_factor_g2",
+                            "innov": "measurement_residual_used_by_update",
+                            "validity_mask": "innov_valid",
+                        },
+                    },
+                )
+            )
+            split_traj = split.load_trajectory(stored_index=0)
+            labels = [label for _key, label in available_gain_sources(split.meta, split_traj)]
+            self.assertEqual(
+                labels,
+                ["Learned combined Kalman gain", "Learned G1 factor", "Learned G2 factor"],
+            )
+            self.assertNotIn("P", split_traj)
+            self.assertNotIn("S", split_traj)
 
     def test_split_source_overlay_mismatch_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
@@ -111,9 +154,15 @@ class VizReleaseReadinessTests(unittest.TestCase):
                 assert_overlay_compatible(base, other, source_trajectory_id=10)
 
     def test_failed_run_remains_visible_as_failed_status(self) -> None:
-        path = REPO_ROOT / "runs/viz_v4a_fixtures/failed_train_nan"
-        run = load_run(path)
-        self.assertEqual(run.meta["run_status"], "train_nan")
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmp:
+            path = _write_run(
+                Path(tmp),
+                "failed_train_nan",
+                trajectory_ids=_fixture_ids(),
+                run_status="train_nan",
+            )
+            run = load_run(path)
+            self.assertEqual(run.meta["run_status"], "train_nan")
 
     def test_gain_capability_is_key_driven(self) -> None:
         meta = {"diagnostic_semantics": {"gain": "learned_combined_kalman_gain"}}
