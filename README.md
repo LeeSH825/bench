@@ -23,6 +23,7 @@ cd bench
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
+python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.5.1'
 python -m pip install -e '.[dev]'
 ```
 
@@ -32,11 +33,19 @@ Optional surfaces are installed explicitly:
 python -m pip install -e '.[control]'   # FastAPI, Dash, telemetry
 python -m pip install -e '.[viz]'       # Streamlit Run Inspector
 python -m pip install -e '.[research]'  # research schema validation
-python -m pip install -e '.[basilisk]'  # Basilisk-backed generators
+python -m pip install -e '.[basilisk]'  # Frozen Basilisk generators (bsk 2.10.2)
 ```
 
-Install the appropriate PyTorch build for the target CPU/CUDA platform when
-the default PyPI resolution is not suitable.
+The command above keeps CPU-only environments from resolving multi-gigabyte
+CUDA dependencies. GPU environments should instead install the matching
+PyTorch 2.5.1 CUDA wheel before installing bench.
+
+To reproduce the full release test environment, install all checked surfaces:
+
+```bash
+python -m pip install -e '.[dev,control,viz,basilisk]'
+python -m pytest -q
+```
 
 ## Smallest benchmark path
 
@@ -133,7 +142,7 @@ extras in the invoking environment. It reuses those installed dependencies,
 but requires `bench` and `viz` themselves to import from the clean wheel:
 
 ```bash
-python -m pip install -e '.[dev,control]'
+python -m pip install -e '.[dev,control,viz]'
 ```
 
 ```bash

@@ -3,12 +3,18 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import numpy as np
 
-from viz.app.components.overlay_picker import filter_run_index, scenario_label, split_label
+from viz.app.components.overlay_picker import (
+    filter_run_index,
+    scenario_label,
+    split_label,
+)
 from viz.app.components.regime_strip import build_regime_strip
 from viz.app.views.run_inspector import (
     build_run_inspector_bundle,
@@ -19,7 +25,6 @@ from viz.contract import ContractError, deterministic_traj_index
 from viz.io import loader as loader_module
 from viz.io.loader import assert_overlay_compatible, load_run
 from viz.io.writer import write_viz_artifacts
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,6 +52,9 @@ def _write_run(
     task_id: str = "navigation_linear_v0",
     scenario_id: str = "scenario_navigation",
     full_diagnostics: bool = True,
+    diagnostics: Mapping[str, Any] | None = None,
+    adapter_meta: Mapping[str, Any] | None = None,
+    run_status: str = "ok",
 ) -> Path:
     t = np.arange(n_step, dtype=np.float32)
     x_true = np.zeros((n_seq, n_step, 2), dtype=np.float32)
@@ -71,15 +79,19 @@ def _write_run(
         seed=3,
         track_id="frozen",
         init_id="checkpoint_a",
-        run_status="ok",
+        run_status=run_status,
         time_s=t,
         time_meta={"time_source": "fixture", "time_unit": "s", "dt_s": 1.0},
         x_true=x_true,
         y_obs=y_obs,
         x_hat=x_hat,
         split_extras={"event_flag_seq": event, "eclipse_flag_seq": eclipse},
-        diagnostics=_diagnostics(n_seq=n_seq, n_step=n_step, full=full_diagnostics),
-        adapter_meta={"adapter_id": model_id},
+        diagnostics=(
+            _diagnostics(n_seq=n_seq, n_step=n_step, full=full_diagnostics)
+            if diagnostics is None
+            else diagnostics
+        ),
+        adapter_meta={"adapter_id": model_id} if adapter_meta is None else adapter_meta,
         k_traj=k_traj,
         data_split=data_split,
         split_source="explicit",

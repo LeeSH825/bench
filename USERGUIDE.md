@@ -4,10 +4,10 @@
 
   ### 1.1 Prerequisites
 
-  - Python >=3.10 is required (pyproject.toml and README.md), and this repo was validated with .venv/bin/python (Python 3.10.19).
+  - Python >=3.10 is required (pyproject.toml and README.md). The frozen Basilisk contract is validated with Python 3.10.13 and bsk 2.10.2.
   - Core runtime deps are declared in pyproject.toml: numpy, scipy, pandas, matplotlib, pyyaml, tqdm, torch.
   - GPU is optional in current runner behavior: requesting CUDA falls back to CPU if unavailable.
-  - Editable installation and the clean-source wheel release path are verified. Use `python -m pip install -e '.[dev,control]'`, then run `python scripts/verify_clean_wheel.py` to build from `git archive HEAD`, install outside the repository, import the required surfaces, and exercise every public CLI help path.
+  - For CPU-only validation, install `torch==2.5.1` from `https://download.pytorch.org/whl/cpu`, then use `python -m pip install -e '.[dev,control,viz]'`. Run `python scripts/verify_clean_wheel.py` to build from `git archive HEAD`, install outside the repository, import the required surfaces, and exercise every public CLI help path.
   - Verified in: pyproject.toml, README.md, scripts/verify_clean_wheel.py, bench/runners/run_suite.py.
 
   ### 1.2 5-minute smoke run (verified commands)
